@@ -31,10 +31,16 @@ import 'package:shopkeeper/features/auth/data/repositories/auth_repository_impl.
     as _i375;
 import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.dart'
     as _i696;
+import 'package:shopkeeper/features/auth/domain/usecases/forgot_password_usecase.dart'
+    as _i751;
 import 'package:shopkeeper/features/auth/domain/usecases/login_usecase.dart'
     as _i917;
 import 'package:shopkeeper/features/auth/domain/usecases/logout_usecase.dart'
     as _i894;
+import 'package:shopkeeper/features/auth/domain/usecases/register_shop_usecase.dart'
+    as _i325;
+import 'package:shopkeeper/features/auth/domain/usecases/register_usecase.dart'
+    as _i221;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart'
     as _i287;
 import 'package:shopkeeper/features/dashboard/data/datasources/i_dashboard_datasource.dart'
@@ -71,6 +77,16 @@ import 'package:shopkeeper/features/notifications/presentation/providers/notific
     as _i995;
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart'
     as _i379;
+import 'package:shopkeeper/features/products/data/datasources/i_product_local_datasource.dart'
+    as _i987;
+import 'package:shopkeeper/features/products/data/datasources/i_product_remote_datasource.dart'
+    as _i773;
+import 'package:shopkeeper/features/products/data/datasources/mock_product_local_datasource.dart'
+    as _i285;
+import 'package:shopkeeper/features/products/data/datasources/mock_product_remote_datasource.dart'
+    as _i637;
+import 'package:shopkeeper/features/products/data/repositories/product_repository_impl.dart'
+    as _i367;
 import 'package:shopkeeper/features/products/domain/repositories/i_product_repository.dart'
     as _i289;
 import 'package:shopkeeper/features/products/domain/usecases/deactivate_product_usecase.dart'
@@ -111,6 +127,8 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i379.OnboardingProvider>(() => _i379.OnboardingProvider());
     gh.factory<_i902.CartProvider>(() => _i902.CartProvider());
+    gh.lazySingleton<_i987.IProductLocalDataSource>(
+        () => _i285.MockProductLocalDataSource());
     gh.lazySingleton<_i583.IDashboardLocalDataSource>(
         () => _i206.MockDashboardLocalDataSource());
     gh.lazySingleton<_i326.GetCustomersUseCase>(
@@ -137,6 +155,13 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i811.LoadHistoryUseCase(gh<_i331.IChatRepository>()));
     gh.lazySingleton<_i521.SendMessageUseCase>(
         () => _i521.SendMessageUseCase(gh<_i331.IChatRepository>()));
+    gh.lazySingleton<_i773.IProductRemoteDataSource>(
+        () => _i637.MockProductRemoteDataSource());
+    gh.lazySingleton<_i289.IProductRepository>(
+        () => _i367.ProductRepositoryImpl(
+              gh<_i773.IProductRemoteDataSource>(),
+              gh<_i987.IProductLocalDataSource>(),
+            ));
     gh.lazySingleton<_i587.IAuthRemoteDataSource>(
         () => _i274.MockAuthRemoteDataSource());
     gh.factory<_i995.NotificationProvider>(() => _i995.NotificationProvider(
@@ -189,16 +214,25 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i329.GetSaleDetailUseCase>(),
           gh<_i478.RecordSaleUseCase>(),
         ));
+    gh.lazySingleton<_i751.ForgotPasswordUseCase>(
+        () => _i751.ForgotPasswordUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i917.LoginUseCase>(
         () => _i917.LoginUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i894.LogoutUseCase>(
         () => _i894.LogoutUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i325.RegisterShopUseCase>(
+        () => _i325.RegisterShopUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i221.RegisterUseCase>(
+        () => _i221.RegisterUseCase(gh<_i696.IAuthRepository>()));
+    gh.factory<_i70.DashboardProvider>(
+        () => _i70.DashboardProvider(gh<_i262.GetDashboardStatsUseCase>()));
     gh.factory<_i287.AuthProvider>(() => _i287.AuthProvider(
           gh<_i917.LoginUseCase>(),
           gh<_i894.LogoutUseCase>(),
+          gh<_i221.RegisterUseCase>(),
+          gh<_i325.RegisterShopUseCase>(),
+          gh<_i751.ForgotPasswordUseCase>(),
         ));
-    gh.factory<_i70.DashboardProvider>(
-        () => _i70.DashboardProvider(gh<_i262.GetDashboardStatsUseCase>()));
     return this;
   }
 }

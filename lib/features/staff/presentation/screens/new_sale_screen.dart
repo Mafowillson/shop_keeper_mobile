@@ -20,7 +20,12 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
     {'id': '3', 'name': 'Fanta Orange 500ml', 'price': 1500, 'stock': 3},
     {'id': '4', 'name': 'Lay\'s Chips 50g', 'price': 2000, 'stock': 60},
     {'id': '5', 'name': 'Doritos 50g', 'price': 2000, 'stock': 25},
-    {'id': '6', 'name': 'Dettol Disinfectant 500ml', 'price': 3500, 'stock': 15},
+    {
+      'id': '6',
+      'name': 'Dettol Disinfectant 500ml',
+      'price': 3500,
+      'stock': 15
+    },
     {'id': '7', 'name': 'Milk 1L', 'price': 2500, 'stock': 8},
   ];
 
@@ -40,11 +45,14 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
 
   List<Map<String, dynamic>> get filteredProducts {
     return availableProducts
-        .where((p) => p['name'].toLowerCase().contains(_searchController.text.toLowerCase()))
+        .where((p) => p['name']
+            .toLowerCase()
+            .contains(_searchController.text.toLowerCase()))
         .toList();
   }
 
-  double get cartTotal => cart.fold(0, (sum, item) => sum + (item['price'] * item['quantity']));
+  double get cartTotal =>
+      cart.fold(0, (sum, item) => sum + (item['price'] * item['quantity']));
 
   void _addToCart(Map<String, dynamic> product) {
     final existingItem = cart.firstWhere(
@@ -110,7 +118,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -136,26 +145,34 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                             children: [
                               Text(
                                 product['name'],
-                                style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                                style: AppTextStyles.bodyM
+                                    .copyWith(fontWeight: FontWeight.w600),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'FCFA ${product['price']}',
-                                    style: AppTextStyles.bodyM.copyWith(
-                                      color: AppColors.staffPrimary,
-                                      fontWeight: FontWeight.w600,
+                                  Expanded(
+                                    child: Text(
+                                      'FCFA ${product['price']}',
+                                      style: AppTextStyles.bodyM.copyWith(
+                                        color: AppColors.staffPrimary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  Text(
-                                    'Stock: ${product['stock']}',
-                                    style: AppTextStyles.bodyM.copyWith(
-                                      color: Colors.grey[600],
-                                      fontSize: 11,
+                                  Flexible(
+                                    child: Text(
+                                      'Stock: ${product['stock']}',
+                                      style: AppTextStyles.bodyM.copyWith(
+                                        color: Colors.grey[600],
+                                        fontSize: 11,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
@@ -181,7 +198,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: const BoxDecoration(
                     color: AppColors.staffPrimary,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(8)),
                   ),
                   child: Text(
                     'Cart (${cart.length} items)',
@@ -199,7 +217,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                               const SizedBox(height: 12),
                               Text(
                                 'Cart is empty',
-                                style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
+                                style: AppTextStyles.bodyM
+                                    .copyWith(color: Colors.grey[600]),
                               ),
                             ],
                           ),
@@ -222,17 +241,20 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                                 children: [
                                   Text(
                                     item['name'],
-                                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.bodyM
+                                        .copyWith(fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 6),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'FCFA ${item['price']}',
-                                        style: AppTextStyles.bodyM.copyWith(fontSize: 12),
+                                        style: AppTextStyles.bodyM
+                                            .copyWith(fontSize: 12),
                                       ),
                                       Text(
                                         'FCFA ${item['price'] * item['quantity']}',
@@ -250,15 +272,15 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                                         icon: const Icon(Icons.remove),
                                         iconSize: 18,
                                         padding: EdgeInsets.zero,
-                                        onPressed: () =>
-                                            _updateQuantity(item['id'], item['quantity'] - 1),
+                                        onPressed: () => _updateQuantity(
+                                            item['id'], item['quantity'] - 1),
                                       ),
                                       Expanded(
                                         child: Center(
                                           child: Text(
                                             '${item['quantity']}',
-                                            style: AppTextStyles.bodyM
-                                                .copyWith(fontWeight: FontWeight.w600),
+                                            style: AppTextStyles.bodyM.copyWith(
+                                                fontWeight: FontWeight.w600),
                                           ),
                                         ),
                                       ),
@@ -266,15 +288,16 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                                         icon: const Icon(Icons.add),
                                         iconSize: 18,
                                         padding: EdgeInsets.zero,
-                                        onPressed: () =>
-                                            _updateQuantity(item['id'], item['quantity'] + 1),
+                                        onPressed: () => _updateQuantity(
+                                            item['id'], item['quantity'] + 1),
                                       ),
                                       IconButton(
                                         icon: const Icon(Icons.close),
                                         iconSize: 18,
                                         padding: EdgeInsets.zero,
                                         color: Colors.red,
-                                        onPressed: () => _removeFromCart(item['id']),
+                                        onPressed: () =>
+                                            _removeFromCart(item['id']),
                                       ),
                                     ],
                                   ),
@@ -297,7 +320,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                         children: [
                           Text('Subtotal:', style: AppTextStyles.bodyM),
                           Text('FCFA ${cartTotal.toStringAsFixed(0)}',
-                              style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600)),
+                              style: AppTextStyles.bodyM
+                                  .copyWith(fontWeight: FontWeight.w600)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -307,13 +331,14 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                           Text('Total:', style: AppTextStyles.headingM),
                           Text('FCFA ${cartTotal.toStringAsFixed(0)}',
                               style: AppTextStyles.headingM.copyWith(
-                                  color: AppColors.staffPrimary, fontWeight: FontWeight.w700)),
+                                  color: AppColors.staffPrimary,
+                                  fontWeight: FontWeight.w700)),
                         ],
                       ),
                       const SizedBox(height: 12),
                       AppButton.primary(
                         label: 'Proceed to Payment',
-                        onPressed:() => cart.isEmpty
+                        onPressed: () => cart.isEmpty
                             ? null
                             : () => context.push('/staff/sale/payment'),
                       ),

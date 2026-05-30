@@ -4,6 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:shopkeeper/features/ai_chat/presentation/screens/ai_chat_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/login_screen.dart';
+import 'package:shopkeeper/features/auth/presentation/screens/register_screen.dart';
+import 'package:shopkeeper/features/auth/presentation/screens/register_shop_screen.dart';
+import 'package:shopkeeper/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/owner_profile_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/splash_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/staff_profile_screen.dart';
@@ -30,21 +33,43 @@ class AppRouter {
       final authProvider = context.read<AuthProvider>();
       final onboardingProvider = context.read<OnboardingProvider>();
       final isLoggedIn = authProvider.currentUser != null;
-      final isGoingToLogin = state.matchedLocation == '/login' || state.matchedLocation == '/splash';
-      final isGoingToOnboarding = state.matchedLocation == '/onboarding';
+      final location = state.matchedLocation;
+      
+      final isGoingToPublic = location == '/login' ||
+          location == '/splash' ||
+          location == '/register' ||
+          location == '/forgot-password';
+      final isGoingToOnboarding = location == '/onboarding';
+      final isGoingToRegisterShop = location == '/register-shop';
       final hasSeenOnboarding = onboardingProvider.hasSeenOnboarding;
 
-      // If user hasn't seen onboarding and not already on onboarding screen, redirect to onboarding
+      // 1. Onboarding redirection
       if (!hasSeenOnboarding && !isGoingToOnboarding && !isLoggedIn) {
         return '/onboarding';
       }
 
-      if (!isLoggedIn && !isGoingToLogin && !isGoingToOnboarding) {
+      // 2. Anonymous redirection
+      if (!isLoggedIn && !isGoingToPublic && !isGoingToOnboarding) {
         return '/splash';
       }
 
-      if (isLoggedIn && (isGoingToLogin || isGoingToOnboarding)) {
-        return authProvider.currentUser!.role.toString().contains('owner') ? '/owner/dashboard' : '/staff/home';
+      // 3. Authenticated redirection
+      if (isLoggedIn) {
+        final user = authProvider.currentUser!;
+        final isOwner = user.role.toString().contains('owner');
+        
+        // If owner has no registered shop, force shop onboarding
+        if (isOwner && (user.shopId.isEmpty || user.shopId == 'pending')) {
+          if (!isGoingToRegisterShop) {
+            return '/register-shop';
+          }
+          return null; // Stay on register-shop
+        }
+
+        // If going to login/register or onboarding while fully registered, go to home
+        if (isGoingToPublic || isGoingToOnboarding || isGoingToRegisterShop) {
+          return isOwner ? '/owner/dashboard' : '/staff/home';
+        }
       }
 
       return null;
@@ -61,6 +86,18 @@ class AppRouter {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/register-shop',
+        builder: (context, state) => const RegisterShopScreen(),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => OwnerShell(location: state.uri.toString(), child: child),

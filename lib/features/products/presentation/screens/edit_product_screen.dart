@@ -117,11 +117,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
       shopId: _shopId,
       name: _nameController.text.trim(),
       category: _selectedCategory,
-      retailPrice: double.parse(_retailPriceController.text.replaceAll(',', '').trim()),
-      cartonPrice: double.parse(_cartonPriceController.text.replaceAll(',', '').trim()),
-      cartonQty: int.parse(_cartonQtyController.text.replaceAll(',', '').trim()),
+      retailPrice:
+          double.parse(_retailPriceController.text.replaceAll(',', '').trim()),
+      cartonPrice:
+          double.parse(_cartonPriceController.text.replaceAll(',', '').trim()),
+      cartonQty:
+          int.parse(_cartonQtyController.text.replaceAll(',', '').trim()),
       stockQty: int.parse(_stockQtyController.text.replaceAll(',', '').trim()),
-      lowStockThreshold: int.parse(_thresholdController.text.replaceAll(',', '').trim()),
+      lowStockThreshold:
+          int.parse(_thresholdController.text.replaceAll(',', '').trim()),
       isActive: true,
     );
 
@@ -186,187 +190,196 @@ class _EditProductScreenState extends State<EditProductScreen> {
       ),
       body: Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 220,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: AppColors.ownerPrimary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
+          Positioned.fill(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(0, 0, 0, 0.08),
-                          blurRadius: 24,
-                          offset: Offset(0, 12),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: AppColors.accentLight,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.inventory_2,
-                            color: AppColors.accent,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: AppTextStyles.displayS.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Create or update your product details with stock, pricing and category information.',
-                                style: AppTextStyles.bodyM.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    height: 180,
+                    decoration: const BoxDecoration(
+                      color: AppColors.ownerPrimary,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(AppStrings.productDetails, 'Essential product information'),
-                        const SizedBox(height: 16),
-                        AppTextField(
-                          label: 'Product name',
-                          hintText: 'e.g. Fresh Milk 1L',
-                          controller: _nameController,
-                          validator: _requiredValidator,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildCategoryField(),
-                        const SizedBox(height: 16),
-                        AppTextField(
-                          label: 'Description',
-                          hintText: 'Optional description',
-                          controller: _descriptionController,
-                          maxLines: 3,
-                          minLines: 3,
-                        ),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader(AppStrings.pricing, 'Retail and carton pricing'),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                label: AppStrings.retailPrice,
-                                hintText: 'e.g. 2500',
-                                controller: _retailPriceController,
-                                keyboardType: TextInputType.number,
-                                validator: _numericValidator,
-                              ),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromRGBO(0, 0, 0, 0.08),
+                                  blurRadius: 24,
+                                  offset: Offset(0, 12),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: AppTextField(
-                                label: AppStrings.cartonPrice,
-                                hintText: 'e.g. 23000',
-                                controller: _cartonPriceController,
-                                keyboardType: TextInputType.number,
-                                validator: _numericValidator,
-                              ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accentLight,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Icon(
+                                    Icons.inventory_2,
+                                    color: AppColors.accent,
+                                    size: 28,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: AppTextStyles.displayS.copyWith(
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Create or update your product details with stock, pricing and category information.',
+                                        style: AppTextStyles.bodyM.copyWith(
+                                          color: AppColors.textSecondary,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppTextField(
-                                label: AppStrings.cartonQty,
-                                hintText: 'e.g. 12',
-                                controller: _cartonQtyController,
-                                keyboardType: TextInputType.number,
-                                validator: _numericValidator,
-                              ),
+                          ),
+                          const SizedBox(height: 50),
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildSectionHeader(AppStrings.productDetails,
+                                    'Essential product information'),
+                                const SizedBox(height: 16),
+                                AppTextField(
+                                  label: 'Product name',
+                                  hintText: 'e.g. Fresh Milk 1L',
+                                  controller: _nameController,
+                                  validator: _requiredValidator,
+                                ),
+                                const SizedBox(height: 16),
+                                _buildCategoryField(),
+                                const SizedBox(height: 16),
+                                AppTextField(
+                                  label: 'Description',
+                                  hintText: 'Optional description',
+                                  controller: _descriptionController,
+                                  maxLines: 3,
+                                  minLines: 3,
+                                ),
+                                const SizedBox(height: 24),
+                                _buildSectionHeader(AppStrings.pricing,
+                                    'Retail and carton pricing'),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppTextField(
+                                        label: AppStrings.retailPrice,
+                                        hintText: 'e.g. 2500',
+                                        controller: _retailPriceController,
+                                        keyboardType: TextInputType.number,
+                                        validator: _numericValidator,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: AppTextField(
+                                        label: AppStrings.cartonPrice,
+                                        hintText: 'e.g. 23000',
+                                        controller: _cartonPriceController,
+                                        keyboardType: TextInputType.number,
+                                        validator: _numericValidator,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppTextField(
+                                        label: AppStrings.cartonQty,
+                                        hintText: 'e.g. 12',
+                                        controller: _cartonQtyController,
+                                        keyboardType: TextInputType.number,
+                                        validator: _numericValidator,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: AppTextField(
+                                        label: AppStrings.stockQty,
+                                        hintText: 'e.g. 32',
+                                        controller: _stockQtyController,
+                                        keyboardType: TextInputType.number,
+                                        validator: _numericValidator,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                _buildSectionHeader(AppStrings.stockManagement,
+                                    'Keep inventory safe and visible'),
+                                const SizedBox(height: 16),
+                                AppTextField(
+                                  label: AppStrings.lowStockThreshold,
+                                  hintText: 'e.g. 10',
+                                  controller: _thresholdController,
+                                  keyboardType: TextInputType.number,
+                                  validator: _numericValidator,
+                                ),
+                                const SizedBox(height: 30),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: AppButton.outlined(
+                                        label: AppStrings.cancel,
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: AppButton.primary(
+                                        label: AppStrings.save,
+                                        onPressed: _saveProduct,
+                                        isLoading: _isSaving,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: AppTextField(
-                                label: AppStrings.stockQty,
-                                hintText: 'e.g. 32',
-                                controller: _stockQtyController,
-                                keyboardType: TextInputType.number,
-                                validator: _numericValidator,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader(AppStrings.stockManagement, 'Keep inventory safe and visible'),
-                        const SizedBox(height: 16),
-                        AppTextField(
-                          label: AppStrings.lowStockThreshold,
-                          hintText: 'e.g. 10',
-                          controller: _thresholdController,
-                          keyboardType: TextInputType.number,
-                          validator: _numericValidator,
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppButton.outlined(
-                                label: AppStrings.cancel,
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: AppButton.primary(
-                                label: AppStrings.save,
-                                onPressed: _saveProduct,
-                                isLoading: _isSaving,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -391,9 +404,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: AppTextStyles.headingM.copyWith(color: AppColors.textPrimary)),
+        Text(title,
+            style:
+                AppTextStyles.headingM.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 6),
-        Text(subtitle, style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+        Text(subtitle,
+            style:
+                AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
       ],
     );
   }
@@ -402,7 +419,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Category', style: AppTextStyles.headingS.copyWith(color: AppColors.textPrimary)),
+        Text('Category',
+            style:
+                AppTextStyles.headingS.copyWith(color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
