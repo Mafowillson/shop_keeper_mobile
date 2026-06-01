@@ -1,72 +1,33 @@
 import 'package:shopkeeper/features/sales/domain/entities/sale_item.dart';
 
 class SaleItemModel {
-  final String id;
-  final String saleId;
   final String productId;
+  final String unit;
   final int quantity;
   final double unitPrice;
-  final double subtotal;
+  final double totalPrice;
 
   const SaleItemModel({
-    required this.id,
-    required this.saleId,
     required this.productId,
+    required this.unit,
     required this.quantity,
     required this.unitPrice,
-    required this.subtotal,
+    required this.totalPrice,
   });
 
   factory SaleItemModel.fromJson(Map<String, dynamic> json) => SaleItemModel(
-    id: json['id'],
-    saleId: json['sale_id'],
-    productId: json['product_id'],
-    quantity: json['quantity'],
-    unitPrice: (json['unit_price'] as num).toDouble(),
-    subtotal: (json['subtotal'] as num).toDouble(),
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'sale_id': saleId,
-    'product_id': productId,
-    'quantity': quantity,
-    'unit_price': unitPrice,
-    'subtotal': subtotal,
-  };
-
-  factory SaleItemModel.fromEntity(SaleItem entity) => SaleItemModel(
-    id: entity.id,
-    saleId: entity.saleId,
-    productId: entity.productId,
-    quantity: entity.quantity,
-    unitPrice: entity.unitPrice,
-    subtotal: entity.subtotal,
-  );
+        productId: json['product_id'] as String? ?? '',
+        unit: json['unit'] as String? ?? '',
+        quantity: json['quantity'] as int? ?? 0,
+        unitPrice: (json['unit_price'] as num?)?.toDouble() ?? 0.0,
+        totalPrice: (json['total_price'] as num?)?.toDouble() ?? 0.0,
+      );
 
   SaleItem toEntity() => SaleItem(
-    id: id,
-    saleId: saleId,
-    productId: productId,
-    quantity: quantity,
-    unitPrice: unitPrice,
-    subtotal: subtotal,
-  );
-
-  SaleItemModel copyWith({
-    String? id,
-    String? saleId,
-    String? productId,
-    int? quantity,
-    double? unitPrice,
-    double? subtotal,
-  }) =>
-      SaleItemModel(
-        id: id ?? this.id,
-        saleId: saleId ?? this.saleId,
-        productId: productId ?? this.productId,
-        quantity: quantity ?? this.quantity,
-        unitPrice: unitPrice ?? this.unitPrice,
-        subtotal: subtotal ?? this.subtotal,
+        productId: productId,
+        unit: unit,
+        quantity: quantity,
+        unitPrice: unitPrice,
+        totalPrice: totalPrice,
       );
 }

@@ -1,17 +1,11 @@
 import 'package:shopkeeper/core/enums/debt_type.dart';
 import 'package:shopkeeper/core/enums/message_role.dart';
-import 'package:shopkeeper/core/enums/notification_type.dart';
-import 'package:shopkeeper/core/enums/risk_category.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
+import 'package:shopkeeper/core/enums/risk_category.dart';
 import 'package:shopkeeper/features/ai_chat/domain/entities/chat_message.dart';
 import 'package:shopkeeper/features/debts/domain/entities/customer.dart';
 import 'package:shopkeeper/features/debts/domain/entities/debt_record.dart';
-import 'package:shopkeeper/features/notifications/domain/entities/app_notification.dart';
-import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
-import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
-import 'package:shopkeeper/features/sales/domain/entities/sale_item.dart';
-import 'package:shopkeeper/features/dashboard/domain/entities/dashboard_stats.dart';
 
 class MockData {
   static final List<User> users = [
@@ -23,8 +17,6 @@ class MockData {
       role: UserRole.owner,
       isActive: true,
     ),
-    // New owner who registered but hasn't set up their shop yet.
-    // Logging in with this account triggers the /register-shop redirect.
     const User(
       id: 'u004',
       shopId: 'pending',
@@ -48,139 +40,6 @@ class MockData {
       email: 'jean@shopkeeper.cm',
       role: UserRole.staff,
       isActive: true,
-    ),
-  ];
-
-  static final List<Product> products = [
-    const Product(
-      id: 'p001',
-      shopId: 'shop_001',
-      name: 'Coca Cola 33cl',
-      category: 'Beverages',
-      retailPrice: 350,
-      cartonPrice: 3800,
-      cartonQty: 24,
-      stockQty: 48,
-      lowStockThreshold: 10,
-      isActive: true,
-      daysUntilStockout: 8,
-    ),
-    const Product(
-      id: 'p002',
-      shopId: 'shop_001',
-      name: 'Mineral Water 1.5L',
-      category: 'Beverages',
-      retailPrice: 300,
-      cartonPrice: 2800,
-      cartonQty: 12,
-      stockQty: 4,
-      lowStockThreshold: 10,
-      isActive: true,
-      daysUntilStockout: 2,
-    ),
-    const Product(
-      id: 'p003',
-      shopId: 'shop_001',
-      name: 'Nescafe Sachets x50',
-      category: 'Snacks',
-      retailPrice: 150,
-      cartonPrice: 1500,
-      cartonQty: 50,
-      stockQty: 22,
-      lowStockThreshold: 5,
-      isActive: true,
-      daysUntilStockout: 15,
-    ),
-    const Product(
-      id: 'p004',
-      shopId: 'shop_001',
-      name: 'Fanta Orange 33cl',
-      category: 'Beverages',
-      retailPrice: 350,
-      cartonPrice: 3800,
-      cartonQty: 24,
-      stockQty: 0,
-      lowStockThreshold: 10,
-      isActive: true,
-      daysUntilStockout: 0,
-    ),
-    const Product(
-      id: 'p005',
-      shopId: 'shop_001',
-      name: 'Maggi Cubes x100',
-      category: 'Condiments',
-      retailPrice: 500,
-      cartonPrice: 4500,
-      cartonQty: 20,
-      stockQty: 35,
-      lowStockThreshold: 8,
-      isActive: true,
-      daysUntilStockout: 20,
-    ),
-    const Product(
-      id: 'p006',
-      shopId: 'shop_001',
-      name: 'Indomie Noodles',
-      category: 'Snacks',
-      retailPrice: 200,
-      cartonPrice: 2200,
-      cartonQty: 40,
-      stockQty: 60,
-      lowStockThreshold: 10,
-      isActive: true,
-      daysUntilStockout: 25,
-    ),
-    const Product(
-      id: 'p007',
-      shopId: 'shop_001',
-      name: 'Sunlight Soap Bar',
-      category: 'Cleaning',
-      retailPrice: 250,
-      cartonPrice: 2400,
-      cartonQty: 24,
-      stockQty: 7,
-      lowStockThreshold: 8,
-      isActive: true,
-      daysUntilStockout: 4,
-    ),
-    const Product(
-      id: 'p008',
-      shopId: 'shop_001',
-      name: 'Omo Washing Powder',
-      category: 'Cleaning',
-      retailPrice: 500,
-      cartonPrice: 5200,
-      cartonQty: 24,
-      stockQty: 15,
-      lowStockThreshold: 5,
-      isActive: true,
-      daysUntilStockout: 18,
-    ),
-    const Product(
-      id: 'p009',
-      shopId: 'shop_001',
-      name: 'Peak Milk Tin',
-      category: 'Dairy',
-      retailPrice: 1200,
-      cartonPrice: 13000,
-      cartonQty: 12,
-      stockQty: 9,
-      lowStockThreshold: 4,
-      isActive: true,
-      daysUntilStockout: 12,
-    ),
-    const Product(
-      id: 'p010',
-      shopId: 'shop_001',
-      name: 'Ovaltine Sachet x20',
-      category: 'Beverages',
-      retailPrice: 100,
-      cartonPrice: 900,
-      cartonQty: 30,
-      stockQty: 45,
-      lowStockThreshold: 10,
-      isActive: true,
-      daysUntilStockout: 30,
     ),
   ];
 
@@ -232,126 +91,6 @@ class MockData {
     ),
   ];
 
-  static final List<Sale> sales = [
-    Sale(
-      id: 's001',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(minutes: 30)),
-      totalAmount: 12500,
-      isCredit: false,
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's002',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 2)),
-      totalAmount: 8750,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-    Sale(
-      id: 's003',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 4)),
-      totalAmount: 15000,
-      isCredit: true,
-      customerId: 'c001',
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's004',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 6)),
-      totalAmount: 5200,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-    Sale(
-      id: 's005',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 8)),
-      totalAmount: 9800,
-      isCredit: true,
-      customerId: 'c002',
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's006',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 10)),
-      totalAmount: 7500,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-    Sale(
-      id: 's007',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 12)),
-      totalAmount: 11200,
-      isCredit: false,
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's008',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 14)),
-      totalAmount: 6300,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-    Sale(
-      id: 's009',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 16)),
-      totalAmount: 13400,
-      isCredit: false,
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's010',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 18)),
-      totalAmount: 4900,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-    Sale(
-      id: 's011',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 20)),
-      totalAmount: 10500,
-      isCredit: false,
-      staffId: 'u002',
-    ),
-    Sale(
-      id: 's012',
-      shopId: 'shop_001',
-      saleDate: DateTime.now().subtract(const Duration(hours: 22)),
-      totalAmount: 8400,
-      isCredit: false,
-      staffId: 'u003',
-    ),
-  ];
-
-  static final List<SaleItem> saleItems = [
-    const SaleItem(
-      id: 'si001',
-      saleId: 's001',
-      productId: 'p001',
-      quantity: 5,
-      unitPrice: 350,
-      subtotal: 1750,
-    ),
-    const SaleItem(
-      id: 'si002',
-      saleId: 's001',
-      productId: 'p006',
-      quantity: 10,
-      unitPrice: 200,
-      subtotal: 2000,
-    ),
-  ];
-
   static final List<DebtRecord> jeanPierreDebts = [
     DebtRecord(
       id: 'dr001',
@@ -391,87 +130,6 @@ class MockData {
     ),
   ];
 
-  static final List<AppNotification> notifications = [
-    AppNotification(
-      id: 'n001',
-      shopId: 'shop_001',
-      type: NotificationType.lowStock,
-      title: 'Low Stock Alert',
-      body: 'Mineral Water 1.5L is running low (4 units left)',
-      isRead: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      relatedId: 'p002',
-    ),
-    AppNotification(
-      id: 'n002',
-      shopId: 'shop_001',
-      type: NotificationType.largeSale,
-      title: 'Large Sale Recorded',
-      body: 'Peak Milk Tin sale: 15,000 FCFA (12 units)',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-      relatedId: 's005',
-    ),
-    AppNotification(
-      id: 'n003',
-      shopId: 'shop_001',
-      type: NotificationType.lowStock,
-      body: 'Sunlight Soap Bar stock below threshold (7 units)',
-      title: 'Low Stock Alert',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-      relatedId: 'p007',
-    ),
-    AppNotification(
-      id: 'n004',
-      shopId: 'shop_001',
-      type: NotificationType.debtPayment,
-      title: 'Debt Payment Received',
-      body: 'Jean-Pierre Foka paid 5,000 FCFA',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 7)),
-      relatedId: 'c001',
-    ),
-    AppNotification(
-      id: 'n005',
-      shopId: 'shop_001',
-      type: NotificationType.staffLogin,
-      title: 'Staff Login',
-      body: 'Marie Ngono logged in',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 9)),
-      relatedId: 'u002',
-    ),
-    AppNotification(
-      id: 'n006',
-      shopId: 'shop_001',
-      type: NotificationType.weeklyInsight,
-      title: 'Weekly Insight',
-      body: 'This week: 187,500 FCFA revenue, up 14% from last week',
-      isRead: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 11)),
-    ),
-    AppNotification(
-      id: 'n007',
-      shopId: 'shop_001',
-      type: NotificationType.largeSale,
-      title: 'Large Sale Recorded',
-      body: 'Indomie Noodles bulk sale: 8,000 FCFA (40 units)',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 13)),
-      relatedId: 's007',
-    ),
-    AppNotification(
-      id: 'n008',
-      shopId: 'shop_001',
-      type: NotificationType.anomaly,
-      title: 'Unusual Activity',
-      body: 'Stock discrepancy detected in Beverages category',
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(hours: 15)),
-    ),
-  ];
-
   static final List<ChatMessage> chatMessages = [
     ChatMessage(
       id: 'm1',
@@ -482,7 +140,8 @@ class MockData {
     ChatMessage(
       id: 'm2',
       role: MessageRole.assistant,
-      text: 'This week you made 187,500 FCFA from 43 transactions, up 14% from last week. Beverages led at 60% of revenue.',
+      text:
+          'This week you made 187,500 FCFA from 43 transactions, up 14% from last week. Beverages led at 60% of revenue.',
       timestamp: DateTime.now().subtract(const Duration(minutes: 4)),
     ),
     ChatMessage(
@@ -494,45 +153,9 @@ class MockData {
     ChatMessage(
       id: 'm4',
       role: MessageRole.assistant,
-      text: 'Paul Tchamba has the highest balance at 40,300 FCFA with no purchase in 14 days. Jean-Pierre Foka owes 25,000 FCFA and is flagged High Risk.',
+      text:
+          'Paul Tchamba has the highest balance at 40,300 FCFA with no purchase in 14 days. Jean-Pierre Foka owes 25,000 FCFA and is flagged High Risk.',
       timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
     ),
   ];
-
-  static final DashboardStats dashboardStats = DashboardStats(
-    todaySales: 45600,
-    transactionCount: 23,
-    lowStockCount: 3,
-    totalDebts: 87500,
-    activityFeed: [
-      ActivityFeed(
-        id: 'a1',
-        title: 'New sale recorded',
-        subtitle: 'Jean-Pierre Foka purchased items worth 12,500 FCFA',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        type: 'sale',
-      ),
-      ActivityFeed(
-        id: 'a2',
-        title: 'Payment received',
-        subtitle: 'Amina Bello paid 5,000 FCFA towards debt',
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-        type: 'payment',
-      ),
-      ActivityFeed(
-        id: 'a3',
-        title: 'Low stock alert',
-        subtitle: 'Coca Cola 33cl is running low (3 cartons remaining)',
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        type: 'alert',
-      ),
-      ActivityFeed(
-        id: 'a4',
-        title: 'New customer added',
-        subtitle: 'Marie Ngono was added as a new customer',
-        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
-        type: 'customer',
-      ),
-    ],
-  );
 }

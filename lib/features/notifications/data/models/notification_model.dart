@@ -23,17 +23,28 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) => NotificationModel(
-    id: json['id'],
-    shopId: json['shop_id'],
-    type: NotificationType.values.firstWhere(
-      (e) => e.toString() == 'NotificationType.${json['type']}',
-    ),
-    title: json['title'],
-    body: json['body'],
-    isRead: json['is_read'],
-    createdAt: DateTime.parse(json['created_at']),
-    relatedId: json['related_id'],
+    id: json['id'] as String,
+    shopId: json['shop_id'] as String,
+    type: _typeFromString(json['type'] as String? ?? ''),
+    title: json['title'] as String,
+    body: json['body'] as String,
+    isRead: json['read'] as bool? ?? false,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    relatedId: null,
   );
+
+  static NotificationType _typeFromString(String s) {
+    switch (s) {
+      case 'low_stock':       return NotificationType.lowStock;
+      case 'large_sale':      return NotificationType.largeSale;
+      case 'debt_payment':    return NotificationType.debtPayment;
+      case 'staff_login':     return NotificationType.staffLogin;
+      case 'product_added':   return NotificationType.productAdded;
+      case 'product_updated': return NotificationType.productUpdated;
+      case 'product_deleted': return NotificationType.productDeleted;
+      default:                return NotificationType.lowStock;
+    }
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,

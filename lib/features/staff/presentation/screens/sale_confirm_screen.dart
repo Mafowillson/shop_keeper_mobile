@@ -1,213 +1,230 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
+import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
+import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
+import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
+import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
 
-class SaleConfirmScreen extends StatelessWidget {
+class SaleConfirmScreen extends StatefulWidget {
   const SaleConfirmScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final items = [
-      {'name': 'Coca Cola 500ml', 'qty': 2, 'price': 1500, 'total': 3000},
-      {'name': 'Lay\'s Chips 50g', 'qty': 1, 'price': 2000, 'total': 2000},
-      {'name': 'Milk 1L', 'qty': 3, 'price': 2500, 'total': 7500},
-    ];
+  State<SaleConfirmScreen> createState() => _SaleConfirmScreenState();
+}
 
-    final subtotal = items.fold<double>(0, (sum, item) => sum + (item['total'] as int));
-    final tax = (subtotal * 0.05).toStringAsFixed(0);
-    final total = (subtotal + double.parse(tax)).toStringAsFixed(0);
+class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
+  Sale? _completedSale;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _submit());
+  }
+
+  Future<void> _submit() async {
+    setState(() => _isSubmitting = true);
+
+    final cart = context.read<CartProvider>();
+    final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+
+    final sale = await context.read<SalesProvider>().recordSale(
+          shopId: shopId,
+          cartItems: List.from(cart.items),
+          paidAmount: cart.paidAmount,
+          isCredit: cart.isCredit,
+          customerId: cart.customerId,
+        );
+
+    if (!mounted) return;
+
+    if (sale != null) {
+      cart.clear();
+      setState(() {
+        _completedSale = sale;
+        _isSubmitting = false;
+      });
+    } else {
+      setState(() => _isSubmitting = false);
+      final err =
+          context.read<SalesProvider>().errorMessage ?? 'Sale failed';
+      SnackBarHelper.showError(context, err);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isSubmitting) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.staffPrimary,
+          foregroundColor: Colors.white,
+          title: Text('Processing…',
+              style: AppTextStyles.headingL.copyWith(color: Colors.white)),
+        ),
+        body: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: AppColors.staffPrimary),
+              SizedBox(height: 16),
+              Text('Recording sale…'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_completedSale == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.staffPrimary,
+          foregroundColor: Colors.white,
+          title: Text('Sale',
+              style: AppTextStyles.headingL.copyWith(color: Colors.white)),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline,
+                    color: AppColors.danger, size: 64),
+                const SizedBox(height: 16),
+                Text(
+                  context.read<SalesProvider>().errorMessage ??
+                      'Sale could not be recorded.',
+                  style: AppTextStyles.bodyM
+                      .copyWith(color: AppColors.danger),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                AppButton.outlined(
+                    label: 'Try Again', onPressed: _submit, width: 180),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final sale = _completedSale!;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Sale Confirmation'),
+        automaticallyImplyLeading: false,
+        title: Text('Sale Recorded',
+            style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.staffPrimary,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Success Icon
+            // Success banner
             Container(
-              width: 80,
-              height: 80,
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.success.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(40),
+                color: AppColors.successLight,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: AppColors.success.withValues(alpha: 0.3)),
               ),
-              child: const Icon(
-                Icons.check_circle,
-                size: 50,
-                color: AppColors.success,
+              child: Column(
+                children: [
+                  const Icon(Icons.check_circle_rounded,
+                      color: AppColors.success, size: 56),
+                  const SizedBox(height: 12),
+                  Text('Payment Successful!',
+                      style: AppTextStyles.headingL
+                          .copyWith(color: AppColors.success)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Sale #${sale.id.substring(0, 8).toUpperCase()}',
+                    style: AppTextStyles.bodyM
+                        .copyWith(color: AppColors.textSecondary),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Success Message
-            Text(
-              'Payment Successful!',
-              style: AppTextStyles.displayM.copyWith(color: AppColors.success),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sale #2024001 has been recorded',
-              style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Receipt
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Receipt Header
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'SHOPKEEPER',
-                          style: AppTextStyles.headingL.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Receipt #2024001',
-                          style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '2024-05-10 14:35:22',
-                          style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 24),
-
-                  // Items
-                  Column(
-                    children: items.map((item) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item['name']! as String,
-                                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${item['qty']} x FCFA ${item['price']}',
-                                    style: AppTextStyles.bodyM.copyWith(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'FCFA ${item['total']}',
-                              style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const Divider(height: 24),
-
-                  // Totals
-                  _buildReceiptRow('Subtotal', 'FCFA ${subtotal.toStringAsFixed(0)}'),
-                  const SizedBox(height: 8),
-                  _buildReceiptRow('Tax (5%)', 'FCFA $tax'),
+                  Text('Receipt', style: AppTextStyles.headingM),
                   const SizedBox(height: 12),
-                  _buildReceiptRow(
-                    'Total',
-                    'FCFA $total',
-                    isBold: true,
-                    color: AppColors.staffPrimary,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildReceiptRow(
-                    'Payment Method',
-                    'Cash',
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(height: 8),
-                  _buildReceiptRow(
-                    'Change',
-                    'FCFA 500',
-                    color: AppColors.success,
-                  ),
-                  const Divider(height: 24),
-
-                  // Footer
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          'Thank you for your purchase!',
-                          style: AppTextStyles.bodyM.copyWith(
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
+                  const Divider(),
+                  ...sale.items.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Product',
+                                  style: AppTextStyles.bodyM.copyWith(
+                                      fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                  '${item.quantity}× ${item.unit}  •  FCFA ${item.unitPrice.toStringAsFixed(0)}',
+                                  style: AppTextStyles.bodyS,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Staff: Marie Kamga',
-                          style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-                        ),
-                      ],
+                          Text(
+                            'FCFA ${item.totalPrice.toStringAsFixed(0)}',
+                            style: AppTextStyles.bodyM
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 6),
+                  _Row('Total',
+                      'FCFA ${sale.totalAmount.toStringAsFixed(0)}'),
+                  const SizedBox(height: 4),
+                  _Row(
+                    sale.isCredit ? 'Owed (credit)' : 'Paid',
+                    sale.isCredit
+                        ? 'FCFA ${sale.dueAmount.toStringAsFixed(0)}'
+                        : 'FCFA ${sale.paidAmount.toStringAsFixed(0)}',
+                    color: sale.isCredit
+                        ? AppColors.danger
+                        : AppColors.success,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.print),
-                    label: const Text('Print'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.share),
-                    label: const Text('Share'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
             AppButton.primary(
               label: 'New Sale',
               onPressed: () => context.go('/staff/home'),
@@ -217,30 +234,28 @@ class SaleConfirmScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildReceiptRow(
-    String label,
-    String value, {
-    bool isBold = false,
-    Color? color,
-  }) {
+class _Row extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? color;
+
+  const _Row(this.label, this.value, {this.color});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyM.copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-            color: Colors.grey[700],
-          ),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.bodyM.copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
-            color: color ?? Colors.grey[700],
-          ),
-        ),
+        Text(label,
+            style: AppTextStyles.bodyM
+                .copyWith(color: AppColors.textSecondary)),
+        Text(value,
+            style: AppTextStyles.bodyM.copyWith(
+              fontWeight: FontWeight.w700,
+              color: color ?? AppColors.textPrimary,
+            )),
       ],
     );
   }

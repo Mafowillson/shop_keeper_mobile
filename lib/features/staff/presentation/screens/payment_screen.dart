@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
+import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -12,259 +14,310 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  String _selectedPaymentMethod = 'Cash';
+  bool _isCredit = false;
   late TextEditingController _amountController;
-  late TextEditingController _referenceController;
-
-  final double saleTotal = 12500;
 
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(text: saleTotal.toStringAsFixed(0));
-    _referenceController = TextEditingController();
+    final total = context.read<CartProvider>().total;
+    _amountController =
+        TextEditingController(text: total.toStringAsFixed(0));
   }
 
   @override
   void dispose() {
     _amountController.dispose();
-    _referenceController.dispose();
     super.dispose();
+  }
+
+  bool get _canProceed {
+    final entered = double.tryParse(_amountController.text) ?? 0;
+    if (_isCredit) return true;
+    return entered > 0;
+  }
+
+  void _proceed(double total) {
+    final entered = double.tryParse(_amountController.text) ?? 0;
+    final paid = _isCredit ? 0.0 : entered;
+
+    context.read<CartProvider>().setPayment(
+          paidAmount: paid,
+          isCredit: _isCredit,
+        );
+    context.push('/staff/sale/confirm');
   }
 
   @override
   Widget build(BuildContext context) {
-    final amountEntered = double.tryParse(_amountController.text) ?? 0;
-    final change = amountEntered - saleTotal;
+    return Consumer<CartProvider>(
+      builder: (_, cart, __) {
+        final total = cart.total;
+        final entered = double.tryParse(_amountController.text) ?? 0;
+        final change = _isCredit ? 0.0 : (entered - total);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Payment'),
-        backgroundColor: AppColors.staffPrimary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Sale Summary
-            _buildSaleSummary(),
-            const SizedBox(height: 24),
-
-            // Payment Method Selection
-            Text(
-              'Payment Method',
-              style: AppTextStyles.headingM,
-            ),
-            const SizedBox(height: 12),
-            _buildPaymentMethods(),
-            const SizedBox(height: 24),
-
-            // Amount Section
-            Text(
-              'Amount',
-              style: AppTextStyles.headingM,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Enter amount',
-                prefixText: 'FCFA ',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 16),
-
-            // Reference Number (for card/mobile money)
-            if (_selectedPaymentMethod != 'Cash')
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Reference Number',
-                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            title: Text('Payment',
+                style:
+                    AppTextStyles.headingL.copyWith(color: Colors.white)),
+            backgroundColor: AppColors.staffPrimary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Total card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.staffPrimary, Color(0xFF1A5C48)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _referenceController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter transaction reference',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Sale Total',
+                          style: AppTextStyles.bodyM
+                              .copyWith(color: Colors.white70)),
+                      const SizedBox(height: 6),
+                      Text(
+                        'FCFA ${total.toStringAsFixed(0)}',
+                        style: AppTextStyles.displayM
+                            .copyWith(color: Colors.white),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
+                        style: AppTextStyles.bodyS
+                            .copyWith(color: Colors.white60),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Payment type toggle
+                Text('Payment type', style: AppTextStyles.headingM),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _TypeChip(
+                      label: 'Cash',
+                      icon: Icons.money,
+                      color: AppColors.success,
+                      selected: !_isCredit,
+                      onTap: () => setState(() {
+                        _isCredit = false;
+                        _amountController.text = total.toStringAsFixed(0);
+                      }),
+                    ),
+                    const SizedBox(width: 12),
+                    _TypeChip(
+                      label: 'Credit',
+                      icon: Icons.account_balance_wallet_outlined,
+                      color: AppColors.danger,
+                      selected: _isCredit,
+                      onTap: () => setState(() {
+                        _isCredit = true;
+                        _amountController.text = '0';
+                      }),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                if (!_isCredit) ...[
+                  Text('Amount paid', style: AppTextStyles.headingM),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    style: AppTextStyles.headingL,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      prefixText: 'FCFA ',
+                      prefixStyle: AppTextStyles.headingM
+                          .copyWith(color: AppColors.textSecondary),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide:
+                            const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                            color: AppColors.staffPrimary, width: 2),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Change summary
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      children: [
+                        _SummaryRow('Total', total),
+                        const Divider(height: 20),
+                        _SummaryRow('Paid', entered),
+                        const Divider(height: 20),
+                        _SummaryRow(
+                          'Change',
+                          change,
+                          color: change >= 0
+                              ? AppColors.success
+                              : AppColors.danger,
+                          bold: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.dangerLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: AppColors.danger.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline,
+                            color: AppColors.danger, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'This sale will be recorded as credit. Full amount is owed by the customer.',
+                            style: AppTextStyles.bodyS
+                                .copyWith(color: AppColors.danger),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
                 ],
-              ),
 
-            // Payment Summary
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!),
-              ),
-              child: Column(
-                children: [
-                  _buildSummaryRow('Sale Total', 'FCFA ${saleTotal.toStringAsFixed(0)}'),
-                  const SizedBox(height: 12),
-                  _buildSummaryRow('Amount Paid', 'FCFA ${amountEntered.toStringAsFixed(0)}'),
-                  const Divider(height: 24),
-                  _buildSummaryRow(
-                    'Change',
-                    'FCFA ${change.toStringAsFixed(0)}',
-                    color: change >= 0 ? AppColors.success : AppColors.danger,
-                    isBold: true,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton.outlined(
+                        label: 'Back',
+                        onPressed: () => Navigator.pop(context),
+                      ),
                     ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: AppButton.primary(
-                    label: 'Complete Payment',
-                    onPressed: () => amountEntered >= saleTotal
-                        ? () => context.push('/staff/sale/confirm')
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSaleSummary() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.staffPrimary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.staffPrimary.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Sale Summary',
-            style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'FCFA ${saleTotal.toStringAsFixed(0)}',
-            style: AppTextStyles.displayM.copyWith(color: AppColors.staffPrimary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '3 items • 5 minutes ago',
-            style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethods() {
-    final methods = [
-      {'name': 'Cash', 'icon': Icons.money, 'color': AppColors.success},
-      {'name': 'Card', 'icon': Icons.credit_card, 'color': AppColors.accent},
-      {'name': 'Mobile Money', 'icon': Icons.phone_android, 'color': AppColors.warning},
-      {'name': 'Credit', 'icon': Icons.account_balance_wallet, 'color': AppColors.danger},
-    ];
-
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      children: methods.map((method) {
-        final isSelected = _selectedPaymentMethod == method['name'];
-        return GestureDetector(
-          onTap: () => setState(() => _selectedPaymentMethod = method['name'] as String),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected ? (method['color'] as Color).withOpacity(0.1) : Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isSelected
-                    ? (method['color'] as Color)
-                    : Colors.grey[200]!,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  method['icon'] as IconData,
-                  size: 32,
-                  color: method['color'] as Color,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  method['name'] as String,
-                  style: AppTextStyles.bodyM.copyWith(
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected ? (method['color'] as Color) : Colors.black87,
-                  ),
-                  textAlign: TextAlign.center,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppButton.primary(
+                        label: 'Confirm',
+                        onPressed: _canProceed ? () => _proceed(total) : null,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         );
-      }).toList(),
+      },
     );
   }
+}
 
-  Widget _buildSummaryRow(
-    String label,
-    String value, {
-    Color? color,
-    bool isBold = false,
-  }) {
+class _TypeChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TypeChip({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: selected ? color.withValues(alpha: 0.1) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? color : AppColors.border,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 28),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: AppTextStyles.headingS.copyWith(
+                    color: selected ? color : AppColors.textPrimary),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color? color;
+  final bool bold;
+
+  const _SummaryRow(this.label, this.amount,
+      {this.color, this.bold = false});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: AppTextStyles.bodyM.copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-            color: Colors.grey[700],
+            color: AppColors.textSecondary,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
           ),
         ),
         Text(
-          value,
+          'FCFA ${amount.toStringAsFixed(0)}',
           style: AppTextStyles.bodyM.copyWith(
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
-            color: color ?? Colors.grey[700],
+            color: color ?? AppColors.textPrimary,
+            fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
           ),
         ),
       ],

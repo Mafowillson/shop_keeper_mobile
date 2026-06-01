@@ -10,5 +10,10 @@ class GetProductsUseCase {
 
   const GetProductsUseCase(this._repository);
 
-  TaskEither<Failure, List<Product>> call() => _repository.getProducts();
+  TaskEither<Failure, List<Product>> call({
+    required String shopId,
+    String? search,
+    String? category,
+  }) =>
+      _repository.getProducts(shopId: shopId, search: search, category: category);
 }

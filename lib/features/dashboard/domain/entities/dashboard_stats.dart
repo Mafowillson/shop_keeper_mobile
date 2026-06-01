@@ -6,6 +6,7 @@ class DashboardStats {
   final int transactionCount;
   final int lowStockCount;
   final double totalDebts;
+  final List<double> weeklyRevenue;
   final List<ActivityFeed> activityFeed;
 
   const DashboardStats({
@@ -13,23 +14,9 @@ class DashboardStats {
     required this.transactionCount,
     required this.lowStockCount,
     required this.totalDebts,
+    required this.weeklyRevenue,
     required this.activityFeed,
   });
-
-  DashboardStats copyWith({
-    double? todaySales,
-    int? transactionCount,
-    int? lowStockCount,
-    double? totalDebts,
-    List<ActivityFeed>? activityFeed,
-  }) =>
-      DashboardStats(
-        todaySales: todaySales ?? this.todaySales,
-        transactionCount: transactionCount ?? this.transactionCount,
-        lowStockCount: lowStockCount ?? this.lowStockCount,
-        totalDebts: totalDebts ?? this.totalDebts,
-        activityFeed: activityFeed ?? this.activityFeed,
-      );
 }
 
 @immutable

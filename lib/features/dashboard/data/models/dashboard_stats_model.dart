@@ -5,6 +5,7 @@ class DashboardStatsModel {
   final int transactionCount;
   final int lowStockCount;
   final double totalDebts;
+  final List<double> weeklyRevenue;
   final List<ActivityFeedModel> activityFeed;
 
   const DashboardStatsModel({
@@ -12,58 +13,36 @@ class DashboardStatsModel {
     required this.transactionCount,
     required this.lowStockCount,
     required this.totalDebts,
+    required this.weeklyRevenue,
     required this.activityFeed,
   });
 
-  factory DashboardStatsModel.fromJson(Map<String, dynamic> json) => DashboardStatsModel(
-    todaySales: (json['today_sales'] as num).toDouble(),
-    transactionCount: json['transaction_count'],
-    lowStockCount: json['low_stock_count'],
-    totalDebts: (json['total_debts'] as num).toDouble(),
-    activityFeed: (json['activity_feed'] as List)
-        .map((e) => ActivityFeedModel.fromJson(e))
-        .toList(),
-  );
+  factory DashboardStatsModel.fromJson(Map<String, dynamic> json) {
+    final rawWeekly = json['weekly_revenue'];
+    final weekly = rawWeekly is List
+        ? rawWeekly.map((e) => (e as num).toDouble()).toList()
+        : List<double>.filled(7, 0);
 
-  Map<String, dynamic> toJson() => {
-    'today_sales': todaySales,
-    'transaction_count': transactionCount,
-    'low_stock_count': lowStockCount,
-    'total_debts': totalDebts,
-    'activity_feed': activityFeed.map((e) => e.toJson()).toList(),
-  };
-
-  factory DashboardStatsModel.fromEntity(DashboardStats entity) => DashboardStatsModel(
-    todaySales: entity.todaySales,
-    transactionCount: entity.transactionCount,
-    lowStockCount: entity.lowStockCount,
-    totalDebts: entity.totalDebts,
-    activityFeed: entity.activityFeed
-        .map((e) => ActivityFeedModel.fromEntity(e))
-        .toList(),
-  );
+    return DashboardStatsModel(
+      todaySales: (json['today_sales'] as num?)?.toDouble() ?? 0,
+      transactionCount: (json['transaction_count'] as num?)?.toInt() ?? 0,
+      lowStockCount: (json['low_stock_count'] as num?)?.toInt() ?? 0,
+      totalDebts: (json['total_debts'] as num?)?.toDouble() ?? 0,
+      weeklyRevenue: weekly,
+      activityFeed: (json['activity_feed'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>()
+          .map(ActivityFeedModel.fromJson)
+          .toList(),
+    );
+  }
 
   DashboardStats toEntity() => DashboardStats(
-    todaySales: todaySales,
-    transactionCount: transactionCount,
-    lowStockCount: lowStockCount,
-    totalDebts: totalDebts,
-    activityFeed: activityFeed.map((e) => e.toEntity()).toList(),
-  );
-
-  DashboardStatsModel copyWith({
-    double? todaySales,
-    int? transactionCount,
-    int? lowStockCount,
-    double? totalDebts,
-    List<ActivityFeedModel>? activityFeed,
-  }) =>
-      DashboardStatsModel(
-        todaySales: todaySales ?? this.todaySales,
-        transactionCount: transactionCount ?? this.transactionCount,
-        lowStockCount: lowStockCount ?? this.lowStockCount,
-        totalDebts: totalDebts ?? this.totalDebts,
-        activityFeed: activityFeed ?? this.activityFeed,
+        todaySales: todaySales,
+        transactionCount: transactionCount,
+        lowStockCount: lowStockCount,
+        totalDebts: totalDebts,
+        weeklyRevenue: weeklyRevenue,
+        activityFeed: activityFeed.map((e) => e.toEntity()).toList(),
       );
 }
 
@@ -82,35 +61,20 @@ class ActivityFeedModel {
     required this.type,
   });
 
-  factory ActivityFeedModel.fromJson(Map<String, dynamic> json) => ActivityFeedModel(
-    id: json['id'],
-    title: json['title'],
-    subtitle: json['subtitle'],
-    timestamp: DateTime.parse(json['timestamp']),
-    type: json['type'],
-  );
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'subtitle': subtitle,
-    'timestamp': timestamp.toIso8601String(),
-    'type': type,
-  };
-
-  factory ActivityFeedModel.fromEntity(ActivityFeed entity) => ActivityFeedModel(
-    id: entity.id,
-    title: entity.title,
-    subtitle: entity.subtitle,
-    timestamp: entity.timestamp,
-    type: entity.type,
-  );
+  factory ActivityFeedModel.fromJson(Map<String, dynamic> json) =>
+      ActivityFeedModel(
+        id: json['id'] as String,
+        title: json['title'] as String,
+        subtitle: json['subtitle'] as String,
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        type: json['type'] as String,
+      );
 
   ActivityFeed toEntity() => ActivityFeed(
-    id: id,
-    title: title,
-    subtitle: subtitle,
-    timestamp: timestamp,
-    type: type,
-  );
+        id: id,
+        title: title,
+        subtitle: subtitle,
+        timestamp: timestamp,
+        type: type,
+      );
 }

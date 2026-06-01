@@ -8,25 +8,12 @@ import 'package:shopkeeper/features/dashboard/domain/repositories/i_dashboard_re
 @LazySingleton(as: IDashboardRepository)
 class DashboardRepositoryImpl implements IDashboardRepository {
   final IDashboardRemoteDataSource _remote;
-  final IDashboardLocalDataSource _local;
 
-  const DashboardRepositoryImpl(this._remote, this._local);
+  const DashboardRepositoryImpl(this._remote);
 
   @override
   TaskEither<Failure, DashboardStats> getStats() => TaskEither.tryCatch(
-    () async {
-      try {
-        // Try to get cached data first
-        final cached = await _local.getCachedStats();
-        return cached.toEntity();
-      } catch (_) {
-        // If no cache, fetch from remote
-        final remote = await _remote.getStats();
-        // Cache the result
-        await _local.cacheStats(remote);
-        return remote.toEntity();
-      }
-    },
-    (e, _) => ServerFailure('Failed to get dashboard stats: $e'),
-  );
+        () async => (await _remote.getStats()).toEntity(),
+        (e, _) => ServerFailure('Failed to load dashboard: $e'),
+      );
 }

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
+import 'package:shopkeeper/core/services/fcm_service.dart';
 
 import 'injection.config.dart';
 
@@ -23,6 +24,9 @@ void configureDependencies() {
   );
   getIt.registerLazySingleton<DioClient>(
     () => DioClient(getIt<TokenStorage>()),
+  );
+  getIt.registerLazySingleton<FcmService>(
+    () => FcmService(getIt<DioClient>()),
   );
 
   // injectable-generated registrations (feature-layer classes).
