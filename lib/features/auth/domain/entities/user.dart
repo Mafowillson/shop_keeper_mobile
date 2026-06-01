@@ -9,6 +9,7 @@ class User {
   final String email;
   final UserRole role;
   final bool isActive;
+  final bool emailVerified;
 
   const User({
     required this.id,
@@ -17,6 +18,7 @@ class User {
     required this.email,
     required this.role,
     required this.isActive,
+    this.emailVerified = false,
   });
 
   User copyWith({
@@ -26,6 +28,7 @@ class User {
     String? email,
     UserRole? role,
     bool? isActive,
+    bool? emailVerified,
   }) =>
       User(
         id: id ?? this.id,
@@ -34,5 +37,6 @@ class User {
         email: email ?? this.email,
         role: role ?? this.role,
         isActive: isActive ?? this.isActive,
+        emailVerified: emailVerified ?? this.emailVerified,
       );
 }

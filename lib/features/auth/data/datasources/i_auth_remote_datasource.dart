@@ -3,15 +3,25 @@ import 'package:shopkeeper/features/auth/data/models/user_model.dart';
 
 abstract class IAuthRemoteDataSource {
   Future<UserModel> login(String email, String password, UserRole role);
+  Future<UserModel> register({required String name, required String email, required String password});
+  Future<String> registerShop({required String shopName});
+  Future<UserModel> refreshSession();
   Future<void> logout();
-  Future<UserModel> register({
-    required String name,
-    required String email,
-    required String password,
-  });
-  Future<UserModel> registerShop({
-    required String shopName,
-    required String ownerId,
-  });
+
+  /// Sends a password-reset OTP to [email]. Always succeeds on the server
+  /// regardless of whether the email is registered (enumeration prevention).
   Future<void> forgotPassword(String email);
+
+  /// Validates the OTP [code] and sets [newPassword] as the new password.
+  Future<void> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  });
+
+  /// Submits the email-verification OTP. Returns updated user with emailVerified=true.
+  Future<UserModel> verifyEmail(String code);
+
+  /// Requests a new email-verification OTP.
+  Future<void> resendVerificationCode();
 }

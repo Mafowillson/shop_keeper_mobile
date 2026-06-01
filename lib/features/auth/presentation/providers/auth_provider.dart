@@ -7,14 +7,22 @@ import 'package:shopkeeper/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/register_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/register_shop_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/resend_verification_usecase.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
-  final LoginUseCase _loginUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final RegisterUseCase _registerUseCase;
-  final RegisterShopUseCase _registerShopUseCase;
-  final ForgotPasswordUseCase _forgotPasswordUseCase;
+  final LoginUseCase _login;
+  final LogoutUseCase _logout;
+  final RegisterUseCase _register;
+  final RegisterShopUseCase _registerShop;
+  final ForgotPasswordUseCase _forgotPassword;
+  final ResetPasswordUseCase _resetPassword;
+  final RestoreSessionUseCase _restoreSession;
+  final VerifyEmailUseCase _verifyEmail;
+  final ResendVerificationUseCase _resendVerification;
 
   User? _currentUser;
   bool _isLoading = false;
@@ -22,11 +30,15 @@ class AuthProvider extends ChangeNotifier {
   bool _disposed = false;
 
   AuthProvider(
-    this._loginUseCase,
-    this._logoutUseCase,
-    this._registerUseCase,
-    this._registerShopUseCase,
-    this._forgotPasswordUseCase,
+    this._login,
+    this._logout,
+    this._register,
+    this._registerShop,
+    this._forgotPassword,
+    this._resetPassword,
+    this._restoreSession,
+    this._verifyEmail,
+    this._resendVerification,
   );
 
   User? get currentUser => _currentUser;
@@ -36,63 +48,54 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login(String email, String password, UserRole role) async {
     _setLoading(true);
     _errorMessage = null;
-
-    final result = await _loginUseCase(email, password, role).run();
-
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        _currentUser = null;
-      },
-      (user) {
-        _currentUser = user;
-        _errorMessage = null;
-      },
-    );
-
-    _setLoading(false);
+    try {
+      debugPrint('[Auth] login → $email ${role.name}');
+      final result = await _login(email, password, role).run();
+      result.fold(
+        (f) { _errorMessage = f.message; _currentUser = null; },
+        (u) { _currentUser = u; },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] login uncaught: $e\n$st');
+      _errorMessage = 'Login failed: $e';
+      _currentUser = null;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<void> logout() async {
     _setLoading(true);
-
-    final result = await _logoutUseCase().run();
-
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-      },
-      (_) {
-        _currentUser = null;
-        _errorMessage = null;
-      },
-    );
-
-    _setLoading(false);
+    try {
+      final result = await _logout().run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (_) { _currentUser = null; _errorMessage = null; },
+      );
+    } catch (e) {
+      debugPrint('[Auth] logout uncaught: $e');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<void> register(String name, String email, String password) async {
     _setLoading(true);
     _errorMessage = null;
-
-    final result = await _registerUseCase(
-      name: name,
-      email: email,
-      password: password,
-    ).run();
-
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        _currentUser = null;
-      },
-      (user) {
-        _currentUser = user;
-        _errorMessage = null;
-      },
-    );
-
-    _setLoading(false);
+    try {
+      final result =
+          await _register(name: name, email: email, password: password).run();
+      result.fold(
+        (f) { _errorMessage = f.message; _currentUser = null; },
+        (u) { _currentUser = u; },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] register uncaught: $e\n$st');
+      _errorMessage = 'Registration failed: $e';
+      _currentUser = null;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<void> registerShop(String shopName) async {
@@ -103,44 +106,118 @@ class AuthProvider extends ChangeNotifier {
     }
     _setLoading(true);
     _errorMessage = null;
-
-    final result = await _registerShopUseCase(
-      shopName: shopName,
-      ownerId: _currentUser!.id,
-    ).run();
-
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-      },
-      (user) {
-        _currentUser = user;
-        _errorMessage = null;
-      },
-    );
-
-    _setLoading(false);
+    try {
+      final result =
+          await _registerShop(shopName: shopName, ownerId: _currentUser!.id)
+              .run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (u) { _currentUser = u; _errorMessage = null; },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] registerShop uncaught: $e\n$st');
+      _errorMessage = 'Shop registration failed: $e';
+    } finally {
+      _setLoading(false);
+    }
   }
 
+  /// Sends a reset code to [email]. Returns true on success.
   Future<bool> forgotPassword(String email) async {
     _setLoading(true);
     _errorMessage = null;
-
-    final result = await _forgotPasswordUseCase(email).run();
-
     bool success = false;
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        success = false;
-      },
-      (_) {
-        _errorMessage = null;
-        success = true;
-      },
-    );
+    try {
+      final result = await _forgotPassword(email).run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (_) => success = true,
+      );
+    } catch (e) {
+      _errorMessage = 'Request failed: $e';
+    } finally {
+      _setLoading(false);
+    }
+    return success;
+  }
 
-    _setLoading(false);
+  /// Validates the OTP [code] and sets [newPassword]. Returns true on success.
+  Future<bool> resetPassword({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+    bool success = false;
+    try {
+      final result = await _resetPassword(
+              email: email, code: code, newPassword: newPassword)
+          .run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (_) => success = true,
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] resetPassword uncaught: $e\n$st');
+      _errorMessage = 'Reset failed: $e';
+    } finally {
+      _setLoading(false);
+    }
+    return success;
+  }
+
+  Future<bool> tryRestoreSession() async {
+    _setLoading(true);
+    bool restored = false;
+    try {
+      final result = await _restoreSession().run();
+      result.fold(
+        (_) { _currentUser = null; },
+        (u) { _currentUser = u; restored = true; },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] restore uncaught: $e\n$st');
+    } finally {
+      _setLoading(false);
+    }
+    return restored;
+  }
+
+  Future<bool> verifyEmail(String code) async {
+    _setLoading(true);
+    _errorMessage = null;
+    bool success = false;
+    try {
+      final result = await _verifyEmail(code).run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (u) { _currentUser = u; success = true; },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] verifyEmail uncaught: $e\n$st');
+      _errorMessage = 'Verification failed: $e';
+    } finally {
+      _setLoading(false);
+    }
+    return success;
+  }
+
+  Future<bool> resendVerificationCode() async {
+    _setLoading(true);
+    _errorMessage = null;
+    bool success = false;
+    try {
+      final result = await _resendVerification().run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (_) => success = true,
+      );
+    } catch (e) {
+      _errorMessage = 'Resend failed: $e';
+    } finally {
+      _setLoading(false);
+    }
     return success;
   }
 

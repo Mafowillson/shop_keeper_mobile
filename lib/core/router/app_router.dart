@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:shopkeeper/features/ai_chat/presentation/screens/ai_chat_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/login_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/register_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/register_shop_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:shopkeeper/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:shopkeeper/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/owner_profile_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/splash_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/staff_profile_screen.dart';
@@ -26,54 +27,59 @@ import 'package:shopkeeper/features/staff/presentation/screens/new_sale_screen.d
 import 'package:shopkeeper/features/staff/presentation/screens/payment_screen.dart';
 import 'package:shopkeeper/features/onboarding/presentation/screens/onboarding_page_view.dart';
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'package:shopkeeper/features/staff/presentation/screens/create_staff_screen.dart';
 
 class AppRouter {
-  static final router = GoRouter(
-    redirect: (context, state) {
-      final authProvider = context.read<AuthProvider>();
-      final onboardingProvider = context.read<OnboardingProvider>();
-      final isLoggedIn = authProvider.currentUser != null;
-      final location = state.matchedLocation;
-      
-      final isGoingToPublic = location == '/login' ||
-          location == '/splash' ||
-          location == '/register' ||
-          location == '/forgot-password';
-      final isGoingToOnboarding = location == '/onboarding';
-      final isGoingToRegisterShop = location == '/register-shop';
-      final hasSeenOnboarding = onboardingProvider.hasSeenOnboarding;
+  static GoRouter create({
+    required AuthProvider authProvider,
+    required OnboardingProvider onboardingProvider,
+  }) =>
+      GoRouter(
+        // Re-run the redirect whenever auth or onboarding state changes.
+        refreshListenable: Listenable.merge([authProvider, onboardingProvider]),
+        redirect: (context, state) {
+          final isLoggedIn = authProvider.currentUser != null;
+          final location = state.matchedLocation;
 
-      // 1. Onboarding redirection
-      if (!hasSeenOnboarding && !isGoingToOnboarding && !isLoggedIn) {
-        return '/onboarding';
-      }
+          final isGoingToPublic = location == '/login' ||
+              location == '/splash' ||
+              location == '/register' ||
+              location == '/forgot-password';
+          final isGoingToOnboarding = location == '/onboarding';
+          final isGoingToVerifyEmail = location == '/verify-email';
+          final isGoingToRegisterShop = location == '/register-shop';
 
-      // 2. Anonymous redirection
-      if (!isLoggedIn && !isGoingToPublic && !isGoingToOnboarding) {
-        return '/splash';
-      }
-
-      // 3. Authenticated redirection
-      if (isLoggedIn) {
-        final user = authProvider.currentUser!;
-        final isOwner = user.role.toString().contains('owner');
-        
-        // If owner has no registered shop, force shop onboarding
-        if (isOwner && (user.shopId.isEmpty || user.shopId == 'pending')) {
-          if (!isGoingToRegisterShop) {
-            return '/register-shop';
+          // 1. Unauthenticated users can only access public/onboarding screens.
+          if (!isLoggedIn && !isGoingToPublic && !isGoingToOnboarding) {
+            return '/splash';
           }
-          return null; // Stay on register-shop
-        }
 
-        // If going to login/register or onboarding while fully registered, go to home
-        if (isGoingToPublic || isGoingToOnboarding || isGoingToRegisterShop) {
-          return isOwner ? '/owner/dashboard' : '/staff/home';
-        }
-      }
+          // 2. Authenticated routing.
+          if (isLoggedIn) {
+            final user = authProvider.currentUser!;
+            final isOwner = user.role.name == 'owner';
 
-      return null;
-    },
+            // Step A — Owner must verify email before anything else.
+            if (isOwner && !user.emailVerified) {
+              return isGoingToVerifyEmail ? null : '/verify-email';
+            }
+
+            // Step B — Owner must register a shop before accessing the app.
+            if (isOwner && user.shopId.isEmpty) {
+              return isGoingToRegisterShop ? null : '/register-shop';
+            }
+
+            // Step C — Fully set-up user landing on a public/setup screen → home.
+            if (isGoingToPublic ||
+                isGoingToOnboarding ||
+                isGoingToVerifyEmail ||
+                isGoingToRegisterShop) {
+              return isOwner ? '/owner/dashboard' : '/staff/home';
+            }
+          }
+
+          return null;
+        },
     routes: [
       GoRoute(
         path: '/splash',
@@ -98,6 +104,16 @@ class AppRouter {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => const VerifyEmailScreen(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) => ResetPasswordScreen(
+          email: state.extra as String? ?? '',
+        ),
       ),
       ShellRoute(
         builder: (context, state, child) => OwnerShell(location: state.uri.toString(), child: child),
@@ -173,6 +189,10 @@ class AppRouter {
       GoRoute(
         path: '/owner/chat',
         builder: (context, state) => const AiChatScreen(),
+      ),
+      GoRoute(
+        path: '/owner/staff/create',
+        builder: (context, state) => const CreateStaffScreen(),
       ),
       GoRoute(
         path: '/staff/prices',

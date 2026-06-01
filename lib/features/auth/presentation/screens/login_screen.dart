@@ -19,34 +19,55 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _emailController;
-  late TextEditingController _passwordController;
+  late TextEditingController _credentialController;
+  UserRole _selectedRole = UserRole.owner;
+  // Tracks which button triggered the current loading state.
+  UserRole? _loadingRole;
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController(text: 'owner@shopkeeper.cm');
-    _passwordController = TextEditingController(text: 'password');
+    _emailController = TextEditingController();
+    _credentialController = TextEditingController();
   }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
+    _credentialController.dispose();
     super.dispose();
   }
 
-  void _handleLogin(UserRole role) async {
-    final authProvider = context.read<AuthProvider>();
-    await authProvider.login(_emailController.text, _passwordController.text, role);
+  // Staff authenticate with their phone number; owners use a password.
+  bool get _isStaff => _selectedRole == UserRole.staff;
+  String get _credentialLabel => _isStaff ? 'Phone Number' : AppStrings.password;
+  TextInputType get _credentialKeyboard =>
+      _isStaff ? TextInputType.phone : TextInputType.visiblePassword;
 
-    if (mounted) {
-      if (authProvider.errorMessage != null) {
-        SnackBarHelper.showError(context, authProvider.errorMessage!);
-      } else {
-        final destination = role == UserRole.owner ? '/owner/dashboard' : '/staff/home';
-        context.go(destination);
-      }
+  Future<void> _handleLogin(UserRole role) async {
+    setState(() {
+      _selectedRole = role;
+      _loadingRole = role;
+    });
+
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.login(
+      _emailController.text.trim(),
+      _credentialController.text.trim(),
+      role,
+    );
+
+    if (!mounted) return;
+    setState(() => _loadingRole = null);
+
+    if (authProvider.errorMessage != null) {
+      SnackBarHelper.showError(context, authProvider.errorMessage!);
+      return;
     }
+
+    final user = authProvider.currentUser!;
+    final isOwner = user.role == UserRole.owner;
+    context.go(isOwner ? '/owner/dashboard' : '/staff/home');
   }
 
   @override
@@ -88,10 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context, authProvider, _) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        AppStrings.welcomeBack,
-                        style: AppTextStyles.headingL,
-                      ),
+                      Text(AppStrings.welcomeBack, style: AppTextStyles.headingL),
                       const SizedBox(height: 24),
                       AppTextField(
                         label: AppStrings.email,
@@ -99,16 +117,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
+                      // Label and keyboard type adapt to the selected role.
                       AppTextField(
-                        label: AppStrings.password,
-                        controller: _passwordController,
-                        obscureText: true,
+                        label: _credentialLabel,
+                        controller: _credentialController,
+                        obscureText: !_isStaff,
+                        keyboardType: _credentialKeyboard,
                       ),
                       const SizedBox(height: 12),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {},
+                          onPressed: () => context.go('/forgot-password'),
                           child: Text(
                             AppStrings.forgotPassword,
                             style: AppTextStyles.bodyM.copyWith(
@@ -120,14 +140,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       AppButton.primary(
                         label: AppStrings.continueAsOwner,
-                        isLoading: authProvider.isLoading,
-                        onPressed: () => _handleLogin(UserRole.owner),
+                        isLoading: _loadingRole == UserRole.owner,
+                        onPressed: authProvider.isLoading
+                            ? null
+                            : () => _handleLogin(UserRole.owner),
                       ),
                       const SizedBox(height: 12),
                       AppButton.outlined(
                         label: AppStrings.continueAsStaff,
-                        isLoading: authProvider.isLoading,
-                        onPressed: () => _handleLogin(UserRole.staff),
+                        isLoading: _loadingRole == UserRole.staff,
+                        onPressed: authProvider.isLoading
+                            ? null
+                            : () => _handleLogin(UserRole.staff),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'New here? ',
+                            style: AppTextStyles.bodyM.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => context.go('/register'),
+                            child: Text(
+                              'Create an account',
+                              style: AppTextStyles.bodyM.copyWith(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

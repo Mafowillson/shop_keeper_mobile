@@ -4,7 +4,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 
 class AppButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isLoading;
   final AppButtonVariant variant;
   final double? width;
@@ -22,7 +22,7 @@ class AppButton extends StatelessWidget {
 
   const AppButton.primary({
     required String label,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     bool isLoading = false,
     double? width,
     Key? key,
@@ -37,7 +37,7 @@ class AppButton extends StatelessWidget {
 
   const AppButton.outlined({
     required String label,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     bool isLoading = false,
     double? width,
     Key? key,
@@ -52,7 +52,7 @@ class AppButton extends StatelessWidget {
 
   const AppButton.danger({
     required String label,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     bool isLoading = false,
     double? width,
     Key? key,
@@ -67,7 +67,7 @@ class AppButton extends StatelessWidget {
 
   const AppButton.accent({
     required String label,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
     bool isLoading = false,
     double? width,
     Key? key,

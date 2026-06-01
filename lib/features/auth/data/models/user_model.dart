@@ -8,6 +8,7 @@ class UserModel {
   final String email;
   final UserRole role;
   final bool isActive;
+  final bool emailVerified;
 
   const UserModel({
     required this.id,
@@ -16,43 +17,84 @@ class UserModel {
     required this.email,
     required this.role,
     required this.isActive,
+    this.emailVerified = false,
   });
 
+  // ── Backend response parsers ────────────────────────────────────────────
+
+  factory UserModel.fromOwnerLoginResponse(Map<String, dynamic> json) {
+    final u = json['user'] as Map<String, dynamic>;
+    return UserModel(
+      id: u['id'] as String,
+      shopId: u['shop_id'] as String? ?? '',
+      name: u['name'] as String? ?? '',
+      email: u['email'] as String,
+      role: UserRole.owner,
+      isActive: true,
+      emailVerified: u['email_verified'] as bool? ?? false,
+    );
+  }
+
+  factory UserModel.fromStaffLoginResponse(Map<String, dynamic> json) {
+    final s = json['staff'] as Map<String, dynamic>;
+    return UserModel(
+      id: s['id'] as String,
+      shopId: s['shop_id'] as String? ?? '',
+      name: s['name'] as String? ?? '',
+      email: s['email'] as String,
+      role: UserRole.staff,
+      isActive: s['is_active'] as bool? ?? true,
+      // Staff accounts are created by the owner — no email verification needed.
+      emailVerified: true,
+    );
+  }
+
+  // ── Hive persistence (plain JSON string) ────────────────────────────────
+
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-    id: json['id'],
-    shopId: json['shop_id'],
-    name: json['name'],
-    email: json['email'],
-    role: UserRole.values.firstWhere((e) => e.toString() == 'UserRole.${json['role']}'),
-    isActive: json['is_active'],
-  );
+        id: json['id'] as String,
+        shopId: json['shop_id'] as String? ?? '',
+        name: json['name'] as String? ?? '',
+        email: json['email'] as String,
+        role: UserRole.values.firstWhere(
+          (e) => e.name == json['role'],
+          orElse: () => UserRole.owner,
+        ),
+        isActive: json['is_active'] as bool? ?? true,
+        emailVerified: json['email_verified'] as bool? ?? false,
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'shop_id': shopId,
-    'name': name,
-    'email': email,
-    'role': role.toString().split('.').last,
-    'is_active': isActive,
-  };
+        'id': id,
+        'shop_id': shopId,
+        'name': name,
+        'email': email,
+        'role': role.name,
+        'is_active': isActive,
+        'email_verified': emailVerified,
+      };
+
+  // ── Entity conversion ────────────────────────────────────────────────────
 
   factory UserModel.fromEntity(User entity) => UserModel(
-    id: entity.id,
-    shopId: entity.shopId,
-    name: entity.name,
-    email: entity.email,
-    role: entity.role,
-    isActive: entity.isActive,
-  );
+        id: entity.id,
+        shopId: entity.shopId,
+        name: entity.name,
+        email: entity.email,
+        role: entity.role,
+        isActive: entity.isActive,
+        emailVerified: entity.emailVerified,
+      );
 
   User toEntity() => User(
-    id: id,
-    shopId: shopId,
-    name: name,
-    email: email,
-    role: role,
-    isActive: isActive,
-  );
+        id: id,
+        shopId: shopId,
+        name: name,
+        email: email,
+        role: role,
+        isActive: isActive,
+        emailVerified: emailVerified,
+      );
 
   UserModel copyWith({
     String? id,
@@ -61,6 +103,7 @@ class UserModel {
     String? email,
     UserRole? role,
     bool? isActive,
+    bool? emailVerified,
   }) =>
       UserModel(
         id: id ?? this.id,
@@ -69,5 +112,6 @@ class UserModel {
         email: email ?? this.email,
         role: role ?? this.role,
         isActive: isActive ?? this.isActive,
+        emailVerified: emailVerified ?? this.emailVerified,
       );
 }

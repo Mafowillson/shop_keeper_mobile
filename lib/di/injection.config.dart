@@ -11,6 +11,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shopkeeper/core/network/dio_client.dart' as _i101;
+import 'package:shopkeeper/core/network/token_storage.dart' as _i102;
 import 'package:shopkeeper/features/ai_chat/domain/repositories/i_chat_repository.dart'
     as _i331;
 import 'package:shopkeeper/features/ai_chat/domain/usecases/load_history_usecase.dart'
@@ -19,14 +21,14 @@ import 'package:shopkeeper/features/ai_chat/domain/usecases/send_message_usecase
     as _i521;
 import 'package:shopkeeper/features/ai_chat/presentation/providers/chat_provider.dart'
     as _i197;
+import 'package:shopkeeper/features/auth/data/datasources/auth_local_datasource.dart'
+    as _i543;
+import 'package:shopkeeper/features/auth/data/datasources/auth_remote_datasource.dart'
+    as _i274;
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_local_datasource.dart'
     as _i439;
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_remote_datasource.dart'
     as _i587;
-import 'package:shopkeeper/features/auth/data/datasources/mock_auth_local_datasource.dart'
-    as _i543;
-import 'package:shopkeeper/features/auth/data/datasources/mock_auth_remote_datasource.dart'
-    as _i274;
 import 'package:shopkeeper/features/auth/data/repositories/auth_repository_impl.dart'
     as _i375;
 import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.dart'
@@ -41,6 +43,14 @@ import 'package:shopkeeper/features/auth/domain/usecases/register_shop_usecase.d
     as _i325;
 import 'package:shopkeeper/features/auth/domain/usecases/register_usecase.dart'
     as _i221;
+import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart'
+    as _i103;
+import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart'
+    as _i104;
+import 'package:shopkeeper/features/auth/domain/usecases/resend_verification_usecase.dart'
+    as _i105;
+import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.dart'
+    as _i106;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart'
     as _i287;
 import 'package:shopkeeper/features/dashboard/data/datasources/i_dashboard_datasource.dart'
@@ -75,6 +85,7 @@ import 'package:shopkeeper/features/notifications/domain/usecases/mark_read_usec
     as _i609;
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart'
     as _i995;
+import 'package:shared_preferences/shared_preferences.dart' as _sp;
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart'
     as _i379;
 import 'package:shopkeeper/features/products/data/datasources/i_product_local_datasource.dart'
@@ -125,7 +136,8 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
-    gh.factory<_i379.OnboardingProvider>(() => _i379.OnboardingProvider());
+    gh.factory<_i379.OnboardingProvider>(
+        () => _i379.OnboardingProvider(gh<_sp.SharedPreferences>()));
     gh.factory<_i902.CartProvider>(() => _i902.CartProvider());
     gh.lazySingleton<_i987.IProductLocalDataSource>(
         () => _i285.MockProductLocalDataSource());
@@ -149,8 +161,15 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i262.GetSalesUseCase(gh<_i363.ISaleRepository>()));
     gh.lazySingleton<_i583.IDashboardRemoteDataSource>(
         () => _i206.MockDashboardRemoteDataSource());
+    // ── Auth datasources (real HTTP + Hive implementations) ──────────────
     gh.lazySingleton<_i439.IAuthLocalDataSource>(
-        () => _i543.MockAuthLocalDataSource());
+        () => _i543.AuthLocalDataSource());
+    gh.lazySingleton<_i587.IAuthRemoteDataSource>(
+        () => _i274.AuthRemoteDataSource(
+              gh<_i101.DioClient>(),
+              gh<_i102.TokenStorage>(),
+            ));
+    // ── Auth use cases ────────────────────────────────────────────────────
     gh.lazySingleton<_i811.LoadHistoryUseCase>(
         () => _i811.LoadHistoryUseCase(gh<_i331.IChatRepository>()));
     gh.lazySingleton<_i521.SendMessageUseCase>(
@@ -162,8 +181,6 @@ extension GetItInjectableX on _i174.GetIt {
               gh<_i773.IProductRemoteDataSource>(),
               gh<_i987.IProductLocalDataSource>(),
             ));
-    gh.lazySingleton<_i587.IAuthRemoteDataSource>(
-        () => _i274.MockAuthRemoteDataSource());
     gh.factory<_i995.NotificationProvider>(() => _i995.NotificationProvider(
           gh<_i217.GetNotificationsUseCase>(),
           gh<_i609.MarkReadUseCase>(),
@@ -224,6 +241,14 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i325.RegisterShopUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i221.RegisterUseCase>(
         () => _i221.RegisterUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i103.RestoreSessionUseCase>(
+        () => _i103.RestoreSessionUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i104.VerifyEmailUseCase>(
+        () => _i104.VerifyEmailUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i105.ResendVerificationUseCase>(
+        () => _i105.ResendVerificationUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i106.ResetPasswordUseCase>(
+        () => _i106.ResetPasswordUseCase(gh<_i696.IAuthRepository>()));
     gh.factory<_i70.DashboardProvider>(
         () => _i70.DashboardProvider(gh<_i262.GetDashboardStatsUseCase>()));
     gh.factory<_i287.AuthProvider>(() => _i287.AuthProvider(
@@ -232,6 +257,10 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i221.RegisterUseCase>(),
           gh<_i325.RegisterShopUseCase>(),
           gh<_i751.ForgotPasswordUseCase>(),
+          gh<_i106.ResetPasswordUseCase>(),
+          gh<_i103.RestoreSessionUseCase>(),
+          gh<_i104.VerifyEmailUseCase>(),
+          gh<_i105.ResendVerificationUseCase>(),
         ));
     return this;
   }

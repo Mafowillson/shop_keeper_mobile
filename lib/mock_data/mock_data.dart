@@ -23,6 +23,16 @@ class MockData {
       role: UserRole.owner,
       isActive: true,
     ),
+    // New owner who registered but hasn't set up their shop yet.
+    // Logging in with this account triggers the /register-shop redirect.
+    const User(
+      id: 'u004',
+      shopId: 'pending',
+      name: 'New Owner',
+      email: 'newowner@shopkeeper.cm',
+      role: UserRole.owner,
+      isActive: true,
+    ),
     const User(
       id: 'u002',
       shopId: 'shop_001',

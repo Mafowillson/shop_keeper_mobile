@@ -1,8 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_local_datasource.dart';
 import 'package:shopkeeper/features/auth/data/models/user_model.dart';
 
-@LazySingleton(as: IAuthLocalDataSource)
+// Not registered with injectable — real AuthLocalDataSource is used instead.
 class MockAuthLocalDataSource implements IAuthLocalDataSource {
   UserModel? _cachedUser;
 
