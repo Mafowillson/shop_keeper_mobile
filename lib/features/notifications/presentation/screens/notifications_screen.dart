@@ -42,39 +42,62 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   NotificationType? _filterToType(String filter) {
     switch (filter) {
-      case 'Stock':   return NotificationType.lowStock;
-      case 'Sale':    return NotificationType.largeSale;
-      case 'Payment': return NotificationType.debtPayment;
-      case 'Staff':   return NotificationType.staffLogin;
-      default:        return null;
+      case 'Stock':
+        return NotificationType.lowStock;
+      case 'Sale':
+        return NotificationType.largeSale;
+      case 'Payment':
+        return NotificationType.debtPayment;
+      case 'Staff':
+        return NotificationType.staffLogin;
+      default:
+        return null;
     }
   }
 
   static IconData _iconFor(NotificationType type) {
     switch (type) {
-      case NotificationType.lowStock:       return Icons.inventory_2_outlined;
-      case NotificationType.largeSale:      return Icons.trending_up_rounded;
-      case NotificationType.debtPayment:    return Icons.check_circle_outline;
-      case NotificationType.staffLogin:     return Icons.person_outline;
-      case NotificationType.weeklyInsight:  return Icons.insights_outlined;
-      case NotificationType.anomaly:        return Icons.warning_amber_outlined;
-      case NotificationType.productAdded:   return Icons.add_box_outlined;
-      case NotificationType.productUpdated: return Icons.edit_outlined;
-      case NotificationType.productDeleted: return Icons.delete_outline;
+      case NotificationType.lowStock:
+        return Icons.inventory_2_outlined;
+      case NotificationType.largeSale:
+        return Icons.trending_up_rounded;
+      case NotificationType.debtPayment:
+        return Icons.check_circle_outline;
+      case NotificationType.staffLogin:
+        return Icons.person_outline;
+      case NotificationType.weeklyInsight:
+        return Icons.insights_outlined;
+      case NotificationType.anomaly:
+        return Icons.warning_amber_outlined;
+      case NotificationType.productAdded:
+        return Icons.add_box_outlined;
+      case NotificationType.productUpdated:
+        return Icons.edit_outlined;
+      case NotificationType.productDeleted:
+        return Icons.delete_outline;
     }
   }
 
   static Color _colorFor(NotificationType type) {
     switch (type) {
-      case NotificationType.lowStock:       return AppColors.warning;
-      case NotificationType.largeSale:      return AppColors.success;
-      case NotificationType.debtPayment:    return AppColors.success;
-      case NotificationType.staffLogin:     return AppColors.accent;
-      case NotificationType.weeklyInsight:  return AppColors.accent;
-      case NotificationType.anomaly:        return AppColors.danger;
-      case NotificationType.productAdded:   return AppColors.accent;
-      case NotificationType.productUpdated: return AppColors.warning;
-      case NotificationType.productDeleted: return AppColors.danger;
+      case NotificationType.lowStock:
+        return AppColors.warning;
+      case NotificationType.largeSale:
+        return AppColors.success;
+      case NotificationType.debtPayment:
+        return AppColors.success;
+      case NotificationType.staffLogin:
+        return AppColors.accent;
+      case NotificationType.weeklyInsight:
+        return AppColors.accent;
+      case NotificationType.anomaly:
+        return AppColors.danger;
+      case NotificationType.productAdded:
+        return AppColors.accent;
+      case NotificationType.productUpdated:
+        return AppColors.warning;
+      case NotificationType.productDeleted:
+        return AppColors.danger;
     }
   }
 
@@ -96,9 +119,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               slivers: [
                 _NotificationsHeader(
                   unreadCount: provider.unreadCount,
-                  onMarkAllRead: provider.unreadCount > 0
-                      ? provider.markAllAsRead
-                      : null,
+                  onMarkAllRead:
+                      provider.unreadCount > 0 ? provider.markAllAsRead : null,
                 ),
                 if (provider.isLoading && provider.notifications.isEmpty)
                   const SliverFillRemaining(
@@ -111,15 +133,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   SliverToBoxAdapter(
                     child: _FilterBar(
                       selected: _selectedFilter,
-                      onSelect: (f) =>
-                          setState(() => _selectedFilter = f),
+                      onSelect: (f) => setState(() => _selectedFilter = f),
                     ),
                   ),
                   if (provider.errorMessage != null)
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                         child: _ErrorBanner(provider.errorMessage!),
                       ),
                     ),
@@ -139,8 +159,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             color: _colorFor(items[i].type),
                             onTap: items[i].isRead
                                 ? null
-                                : () =>
-                                    provider.markAsRead(items[i].id),
+                                : () => provider.markAsRead(items[i].id),
                           ),
                           childCount: items.length,
                         ),
@@ -176,8 +195,7 @@ class _NotificationsHeader extends StatelessWidget {
               onPressed: onMarkAllRead,
               child: Text(
                 'Mark all read',
-                style: AppTextStyles.labelL
-                    .copyWith(color: Colors.white),
+                style: AppTextStyles.labelL.copyWith(color: Colors.white),
               ),
             ),
           const SizedBox(width: 8),
@@ -187,10 +205,7 @@ class _NotificationsHeader extends StatelessWidget {
           background: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.ownerPrimaryDark,
-                  AppColors.ownerPrimary
-                ],
+                colors: [AppColors.ownerPrimaryDark, AppColors.ownerPrimary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -204,8 +219,8 @@ class _NotificationsHeader extends StatelessWidget {
                   children: [
                     Text(
                       'Notifications',
-                      style: AppTextStyles.headingL
-                          .copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.headingL.copyWith(color: Colors.white),
                     ),
                     if (unreadCount > 0) ...[
                       const SizedBox(width: 10),
@@ -227,11 +242,8 @@ class _NotificationsHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  unreadCount == 0
-                      ? 'All caught up'
-                      : '$unreadCount unread',
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: Colors.white60),
+                  unreadCount == 0 ? 'All caught up' : '$unreadCount unread',
+                  style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
                 ),
               ],
             ),
@@ -245,8 +257,7 @@ class _NotificationsHeader extends StatelessWidget {
 class _FilterBar extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onSelect;
-  const _FilterBar(
-      {required this.selected, required this.onSelect});
+  const _FilterBar({required this.selected, required this.onSelect});
 
   static const _filters = [
     'All',
@@ -262,8 +273,7 @@ class _FilterBar extends StatelessWidget {
         color: Colors.white,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: _filters.map((f) {
               final isActive = f == selected;
@@ -273,8 +283,8 @@ class _FilterBar extends StatelessWidget {
                   onTap: () => onSelect(f),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
                       color: isActive
                           ? AppColors.ownerPrimary
@@ -284,9 +294,8 @@ class _FilterBar extends StatelessWidget {
                     child: Text(
                       f,
                       style: AppTextStyles.labelL.copyWith(
-                        color: isActive
-                            ? Colors.white
-                            : AppColors.textSecondary,
+                        color:
+                            isActive ? Colors.white : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -346,14 +355,12 @@ class _NotificationTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(
-                      alpha: isRead ? 0.06 : 0.12),
+                  color: color.withValues(alpha: isRead ? 0.06 : 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  color: color.withValues(
-                      alpha: isRead ? 0.45 : 1.0),
+                  color: color.withValues(alpha: isRead ? 0.45 : 1.0),
                   size: 20,
                 ),
               ),
@@ -372,9 +379,8 @@ class _NotificationTile extends StatelessWidget {
                               color: isRead
                                   ? AppColors.textSecondary
                                   : AppColors.textPrimary,
-                              fontWeight: isRead
-                                  ? FontWeight.w500
-                                  : FontWeight.w700,
+                              fontWeight:
+                                  isRead ? FontWeight.w500 : FontWeight.w700,
                             ),
                           ),
                         ),
@@ -401,8 +407,7 @@ class _NotificationTile extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Tap to dismiss',
-                        style: AppTextStyles.labelS
-                            .copyWith(color: color),
+                        style: AppTextStyles.labelS.copyWith(color: color),
                       ),
                     ],
                   ],
@@ -440,8 +445,7 @@ class _EmptyState extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: AppColors.ownerPrimary
-                      .withValues(alpha: 0.06),
+                  color: AppColors.ownerPrimary.withValues(alpha: 0.06),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -475,24 +479,20 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 message,
-                style: AppTextStyles.bodyS
-                    .copyWith(color: AppColors.danger),
+                style: AppTextStyles.bodyS.copyWith(color: AppColors.danger),
               ),
             ),
           ],
@@ -527,14 +527,11 @@ class _StaffNotificationsScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.staffPrimary
-                        .withValues(alpha: 0.08),
+                    color: AppColors.staffPrimary.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                      Icons.notifications_active_outlined,
-                      color: AppColors.staffPrimary,
-                      size: 40),
+                  child: const Icon(Icons.notifications_active_outlined,
+                      color: AppColors.staffPrimary, size: 40),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -557,22 +554,20 @@ class _StaffNotificationsScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.border),
                   ),
-                  child: Column(
+                  child: const Column(
                     children: [
                       _AlertTypeRow(
                         icon: Icons.add_box_outlined,
                         color: AppColors.accent,
                         label: 'New product added',
                       ),
-                      const Divider(
-                          height: 20, color: AppColors.border),
+                      Divider(height: 20, color: AppColors.border),
                       _AlertTypeRow(
                         icon: Icons.edit_outlined,
                         color: AppColors.warning,
                         label: 'Product price updated',
                       ),
-                      const Divider(
-                          height: 20, color: AppColors.border),
+                      Divider(height: 20, color: AppColors.border),
                       _AlertTypeRow(
                         icon: Icons.delete_outline,
                         color: AppColors.danger,
@@ -614,8 +609,7 @@ class _AlertTypeRow extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             label,
-            style: AppTextStyles.bodyM
-                .copyWith(fontWeight: FontWeight.w500),
+            style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w500),
           ),
         ],
       );

@@ -114,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -126,12 +126,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 16),
                     Text(
                       AppStrings.appName,
-                      style: AppTextStyles.displayL.copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Grow your retail business efficiently',
-                      style: AppTextStyles.bodyM.copyWith(color: Colors.white70),
+                      style:
+                          AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
@@ -141,7 +143,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               offset: const Offset(0, -24),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -180,7 +183,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           hintText: 'e.g. John Doe',
                           controller: _nameController,
                           validator: _requiredValidator,
-                          prefixIcon: const Icon(Icons.person_outline, size: 22),
+                          prefixIcon:
+                              const Icon(Icons.person_outline, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
@@ -189,7 +193,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           validator: _emailValidator,
-                          prefixIcon: const Icon(Icons.email_outlined, size: 22),
+                          prefixIcon:
+                              const Icon(Icons.email_outlined, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
@@ -226,7 +231,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           children: [
                             Text(
                               'Already have an account? ',
-                              style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+                              style: AppTextStyles.bodyM
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                             GestureDetector(
                               onTap: () => context.go('/login'),

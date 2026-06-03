@@ -48,7 +48,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.forgotPassword(_emailController.text.trim());
+    final success =
+        await authProvider.forgotPassword(_emailController.text.trim());
 
     if (mounted) {
       if (success) {
@@ -58,7 +59,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } else {
         SnackBarHelper.showError(
           context,
-          authProvider.errorMessage ?? 'Password reset failed. Please try again.',
+          authProvider.errorMessage ??
+              'Password reset failed. Please try again.',
         );
       }
     }
@@ -91,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -103,12 +105,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: 16),
                     Text(
                       AppStrings.appName,
-                      style: AppTextStyles.displayL.copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Recover your password securely',
-                      style: AppTextStyles.bodyM.copyWith(color: Colors.white70),
+                      style:
+                          AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
@@ -118,7 +122,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               offset: const Offset(0, -24),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -185,7 +190,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.arrow_back, size: 16, color: AppColors.ownerPrimary),
+                const Icon(Icons.arrow_back,
+                    size: 16, color: AppColors.ownerPrimary),
                 const SizedBox(width: 6),
                 GestureDetector(
                   onTap: () => context.go('/login'),

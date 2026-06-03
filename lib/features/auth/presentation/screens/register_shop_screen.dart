@@ -85,7 +85,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -97,12 +97,14 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Welcome to ${AppStrings.appName}',
-                      style: AppTextStyles.displayL.copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Let\'s set up your business details',
-                      style: AppTextStyles.bodyM.copyWith(color: Colors.white70),
+                      style:
+                          AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
                   ],
                 ),
@@ -112,7 +114,8 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
               offset: const Offset(0, -24),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -151,14 +154,16 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                           hintText: 'e.g. Willson\'s Boutique',
                           controller: _shopNameController,
                           validator: _requiredValidator,
-                          prefixIcon: const Icon(Icons.storefront_outlined, size: 22),
+                          prefixIcon:
+                              const Icon(Icons.storefront_outlined, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
                           label: 'Shop Location / Address (Optional)',
                           hintText: 'e.g. Bamenda, Cameroon',
                           controller: _locationController,
-                          prefixIcon: const Icon(Icons.location_on_outlined, size: 22),
+                          prefixIcon:
+                              const Icon(Icons.location_on_outlined, size: 22),
                         ),
                         const SizedBox(height: 36),
                         AppButton.primary(
