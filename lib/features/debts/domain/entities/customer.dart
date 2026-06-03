@@ -8,8 +8,7 @@ class Customer {
   final String name;
   final String phone;
   final double totalDebt;
-  final RiskCategory riskCategory;
-  final int lastPurchaseDaysAgo;
+  final DateTime createdAt;
 
   const Customer({
     required this.id,
@@ -17,9 +16,16 @@ class Customer {
     required this.name,
     required this.phone,
     required this.totalDebt,
-    required this.riskCategory,
-    required this.lastPurchaseDaysAgo,
+    required this.createdAt,
   });
+
+  /// Computed from totalDebt — no backend field needed.
+  RiskCategory get riskCategory {
+    if (totalDebt > 30000) return RiskCategory.high;
+    if (totalDebt > 10000) return RiskCategory.medium;
+    if (totalDebt > 0) return RiskCategory.low;
+    return RiskCategory.newCustomer;
+  }
 
   String get initials {
     final parts = name.trim().split(' ');
@@ -35,8 +41,7 @@ class Customer {
     String? name,
     String? phone,
     double? totalDebt,
-    RiskCategory? riskCategory,
-    int? lastPurchaseDaysAgo,
+    DateTime? createdAt,
   }) =>
       Customer(
         id: id ?? this.id,
@@ -44,7 +49,6 @@ class Customer {
         name: name ?? this.name,
         phone: phone ?? this.phone,
         totalDebt: totalDebt ?? this.totalDebt,
-        riskCategory: riskCategory ?? this.riskCategory,
-        lastPurchaseDaysAgo: lastPurchaseDaysAgo ?? this.lastPurchaseDaysAgo,
+        createdAt: createdAt ?? this.createdAt,
       );
 }

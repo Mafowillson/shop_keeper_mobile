@@ -21,11 +21,13 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
         final res = await _dio.post('/auth/login',
             data: {'email': email, 'password': password});
         await _saveTokens(res.data);
+        await _tokenStorage.saveRole('owner');
         return UserModel.fromOwnerLoginResponse(res.data);
       } else {
         final res = await _dio.post('/auth/staff/login',
             data: {'email': email, 'phone_number': password});
         await _saveTokens(res.data);
+        await _tokenStorage.saveRole('staff');
         return UserModel.fromStaffLoginResponse(res.data);
       }
     } on DioException catch (e) {
@@ -43,6 +45,7 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
       final res = await _dio.post('/auth/register',
           data: {'name': name, 'email': email, 'password': password});
       await _saveTokens(res.data);
+      await _tokenStorage.saveRole('owner');
       return UserModel.fromOwnerLoginResponse(res.data);
     } on DioException catch (e) {
       throw _toException(e);
@@ -128,6 +131,38 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
   Future<void> resendVerificationCode() async {
     try {
       await _dio.post('/auth/resend-verification');
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
+  @override
+  Future<({String name, String description})> fetchStaffShopInfo() async {
+    try {
+      final res = await _dio.get('/staff/my-shop');
+      return (
+        name: res.data['shop_name'] as String? ?? '',
+        description: res.data['shop_description'] as String? ?? '',
+      );
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
+  @override
+  Future<({String name, String description})> fetchShopInfo() async {
+    try {
+      final res = await _dio.get(
+        '/shops',
+        queryParameters: {'page': 1, 'page_size': 1},
+      );
+      final shops = res.data['shops'] as List<dynamic>? ?? [];
+      if (shops.isEmpty) return (name: '', description: '');
+      final shop = shops.first as Map<String, dynamic>;
+      return (
+        name: shop['name'] as String? ?? '',
+        description: shop['description'] as String? ?? '',
+      );
     } on DioException catch (e) {
       throw _toException(e);
     }

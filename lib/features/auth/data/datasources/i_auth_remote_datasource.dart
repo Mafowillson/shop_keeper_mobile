@@ -24,4 +24,10 @@ abstract class IAuthRemoteDataSource {
 
   /// Requests a new email-verification OTP.
   Future<void> resendVerificationCode();
+
+  /// Fetches the owner's first shop and returns its name and description.
+  Future<({String name, String description})> fetchShopInfo();
+
+  /// Fetches the shop info for the currently authenticated staff member.
+  Future<({String name, String description})> fetchStaffShopInfo();
 }

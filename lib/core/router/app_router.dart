@@ -28,6 +28,11 @@ import 'package:shopkeeper/features/staff/presentation/screens/payment_screen.da
 import 'package:shopkeeper/features/onboarding/presentation/screens/onboarding_page_view.dart';
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart';
 import 'package:shopkeeper/features/staff/presentation/screens/create_staff_screen.dart';
+import 'package:shopkeeper/features/staff/presentation/screens/manage_staff_screen.dart';
+import 'package:shopkeeper/features/settings/presentation/screens/contact_support_screen.dart';
+import 'package:shopkeeper/features/settings/presentation/screens/privacy_policy_screen.dart';
+import 'package:shopkeeper/features/settings/presentation/screens/settings_screen.dart';
+import 'package:shopkeeper/features/settings/presentation/screens/terms_of_service_screen.dart';
 
 class AppRouter {
   static GoRouter create({
@@ -193,6 +198,26 @@ class AppRouter {
       GoRoute(
         path: '/owner/staff/create',
         builder: (context, state) => const CreateStaffScreen(),
+      ),
+      GoRoute(
+        path: '/owner/staff/manage',
+        builder: (context, state) => const ManageStaffScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/support',
+        builder: (context, state) => const ContactSupportScreen(),
+      ),
+      GoRoute(
+        path: '/settings/privacy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: '/settings/terms',
+        builder: (context, state) => const TermsOfServiceScreen(),
       ),
       GoRoute(
         path: '/staff/prices',

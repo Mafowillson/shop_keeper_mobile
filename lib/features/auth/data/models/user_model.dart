@@ -9,6 +9,8 @@ class UserModel {
   final UserRole role;
   final bool isActive;
   final bool emailVerified;
+  final String shopName;
+  final String shopDescription;
 
   const UserModel({
     required this.id,
@@ -18,12 +20,15 @@ class UserModel {
     required this.role,
     required this.isActive,
     this.emailVerified = false,
+    this.shopName = '',
+    this.shopDescription = '',
   });
 
   // ── Backend response parsers ────────────────────────────────────────────
 
   factory UserModel.fromOwnerLoginResponse(Map<String, dynamic> json) {
     final u = json['user'] as Map<String, dynamic>;
+    final shop = json['shop'] as Map<String, dynamic>?;
     return UserModel(
       id: u['id'] as String,
       shopId: u['shop_id'] as String? ?? '',
@@ -32,6 +37,8 @@ class UserModel {
       role: UserRole.owner,
       isActive: true,
       emailVerified: u['email_verified'] as bool? ?? false,
+      shopName: shop?['name'] as String? ?? '',
+      shopDescription: shop?['description'] as String? ?? '',
     );
   }
 
@@ -44,12 +51,13 @@ class UserModel {
       email: s['email'] as String,
       role: UserRole.staff,
       isActive: s['is_active'] as bool? ?? true,
-      // Staff accounts are created by the owner — no email verification needed.
       emailVerified: true,
+      shopName: json['shop_name'] as String? ?? '',
+      shopDescription: json['shop_description'] as String? ?? '',
     );
   }
 
-  // ── Hive persistence (plain JSON string) ────────────────────────────────
+  // ── Hive persistence ────────────────────────────────────────────────────
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json['id'] as String,
@@ -62,6 +70,8 @@ class UserModel {
         ),
         isActive: json['is_active'] as bool? ?? true,
         emailVerified: json['email_verified'] as bool? ?? false,
+        shopName: json['shop_name'] as String? ?? '',
+        shopDescription: json['shop_description'] as String? ?? '',
       );
 
   Map<String, dynamic> toJson() => {
@@ -72,6 +82,8 @@ class UserModel {
         'role': role.name,
         'is_active': isActive,
         'email_verified': emailVerified,
+        'shop_name': shopName,
+        'shop_description': shopDescription,
       };
 
   // ── Entity conversion ────────────────────────────────────────────────────
@@ -84,6 +96,8 @@ class UserModel {
         role: entity.role,
         isActive: entity.isActive,
         emailVerified: entity.emailVerified,
+        shopName: entity.shopName,
+        shopDescription: entity.shopDescription,
       );
 
   User toEntity() => User(
@@ -94,6 +108,8 @@ class UserModel {
         role: role,
         isActive: isActive,
         emailVerified: emailVerified,
+        shopName: shopName,
+        shopDescription: shopDescription,
       );
 
   UserModel copyWith({
@@ -104,6 +120,8 @@ class UserModel {
     UserRole? role,
     bool? isActive,
     bool? emailVerified,
+    String? shopName,
+    String? shopDescription,
   }) =>
       UserModel(
         id: id ?? this.id,
@@ -113,5 +131,7 @@ class UserModel {
         role: role ?? this.role,
         isActive: isActive ?? this.isActive,
         emailVerified: emailVerified ?? this.emailVerified,
+        shopName: shopName ?? this.shopName,
+        shopDescription: shopDescription ?? this.shopDescription,
       );
 }

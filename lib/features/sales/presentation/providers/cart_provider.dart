@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shopkeeper/core/enums/price_type.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/sales/domain/entities/cart_item.dart';
 
@@ -27,18 +26,18 @@ class CartProvider extends ChangeNotifier {
 
   // ── Cart management ───────────────────────────────────────────────────────
 
-  void addToCart(Product product, {PriceType priceType = PriceType.retail}) {
+  void addToCart(Product product, {required UnitDefinition unit}) {
     final idx = _items.indexWhere(
-      (i) => i.product.id == product.id && i.priceType == priceType,
+      (i) => i.product.id == product.id && i.unit.name == unit.name,
     );
     if (idx >= 0) {
       _items[idx] = _items[idx].copyWith(quantity: _items[idx].quantity + 1);
     } else {
       _items.add(CartItem(
-        id: '${product.id}_${priceType.name}',
+        id: '${product.id}_${unit.name}',
         product: product,
         quantity: 1,
-        priceType: priceType,
+        unit: unit,
       ));
     }
     notifyListeners();

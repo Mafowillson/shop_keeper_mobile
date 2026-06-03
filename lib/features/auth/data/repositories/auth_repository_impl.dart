@@ -62,7 +62,7 @@ class AuthRepositoryImpl implements IAuthRepository {
           final shopId = await _remote.registerShop(shopName: shopName);
           final cached = await _local.getCachedUser();
           if (cached == null) throw Exception('No authenticated user found');
-          final updated = cached.copyWith(shopId: shopId);
+          final updated = cached.copyWith(shopId: shopId, shopName: shopName);
           await _local.cacheUser(updated);
           return updated.toEntity();
         },
@@ -110,6 +110,12 @@ class AuthRepositoryImpl implements IAuthRepository {
               shopId: refreshed.shopId.isNotEmpty
                   ? refreshed.shopId
                   : cached.shopId,
+              shopName: cached.shopName.isNotEmpty
+                  ? cached.shopName
+                  : refreshed.shopName,
+              shopDescription: cached.shopDescription.isNotEmpty
+                  ? cached.shopDescription
+                  : refreshed.shopDescription,
             );
             await _local.cacheUser(merged);
             return merged.toEntity();
@@ -137,5 +143,23 @@ class AuthRepositoryImpl implements IAuthRepository {
           return unit;
         },
         (e, _) => AuthFailure('Resend failed: $e'),
+      );
+
+  @override
+  TaskEither<Failure, User> fetchShopInfo() => TaskEither.tryCatch(
+        () async {
+          final cached = await _local.getCachedUser();
+          if (cached == null) throw Exception('No authenticated user found');
+          final info = cached.role == UserRole.staff
+              ? await _remote.fetchStaffShopInfo()
+              : await _remote.fetchShopInfo();
+          final updated = cached.copyWith(
+            shopName: info.name,
+            shopDescription: info.description,
+          );
+          await _local.cacheUser(updated);
+          return updated.toEntity();
+        },
+        (e, _) => AuthFailure('Failed to load shop info: $e'),
       );
 }

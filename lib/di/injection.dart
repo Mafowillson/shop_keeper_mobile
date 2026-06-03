@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
 import 'package:shopkeeper/core/services/fcm_service.dart';
+import 'package:shopkeeper/features/settings/presentation/providers/settings_provider.dart';
 
 import 'injection.config.dart';
 
@@ -16,8 +17,6 @@ void configureDependencies() {
   getIt.registerLazySingleton<TokenStorage>(
     () => TokenStorage(
       const FlutterSecureStorage(
-        // EncryptedSharedPreferences works on all Android devices and does not
-        // require a screen lock / KeyStore, unlike the default Android backend.
         aOptions: AndroidOptions(encryptedSharedPreferences: true),
       ),
     ),
@@ -27,6 +26,9 @@ void configureDependencies() {
   );
   getIt.registerLazySingleton<FcmService>(
     () => FcmService(getIt<DioClient>()),
+  );
+  getIt.registerLazySingleton<SettingsProvider>(
+    () => SettingsProvider(getIt<DioClient>()),
   );
 
   // injectable-generated registrations (feature-layer classes).

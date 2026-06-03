@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
-import 'package:shopkeeper/core/enums/risk_category.dart';
+import 'package:shopkeeper/core/enums/debt_type.dart';
+import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/risk_badge.dart';
+import 'package:shopkeeper/features/debts/domain/entities/debt_record.dart';
+import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
 
 class CustomerDetailScreen extends StatefulWidget {
   final String customerId;
@@ -15,458 +20,327 @@ class CustomerDetailScreen extends StatefulWidget {
 }
 
 class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
-  late TextEditingController _paymentController;
-
-  // Mock customer data
-  final Map<String, dynamic> customerData = {
-    'id': '1',
-    'name': 'John Doe',
-    'phone': '+237 6XX XXX XXX',
-    'email': 'john@example.com',
-    'address': 'Douala, Cameroon',
-    'debt': 45000,
-    'risk': 'High',
-    'totalPurchases': 12,
-    'totalSpent': 125000,
-    'joinDate': '2023-06-15',
-    'lastPurchase': '2024-05-08',
-    'paymentHistory': [
-      {'date': '2024-05-01', 'amount': 10000, 'status': 'Paid', 'method': 'Cash'},
-      {'date': '2024-04-24', 'amount': 15000, 'status': 'Paid', 'method': 'Cash'},
-      {'date': '2024-04-10', 'amount': 8000, 'status': 'Paid', 'method': 'Cash'},
-      {'date': '2024-03-28', 'amount': 12000, 'status': 'Paid', 'method': 'Cash'},
-    ],
-    'purchases': [
-      {'date': '2024-05-08', 'items': 3, 'amount': 8500, 'status': 'Completed'},
-      {'date': '2024-05-01', 'items': 2, 'amount': 5200, 'status': 'Completed'},
-      {'date': '2024-04-24', 'items': 4, 'amount': 12300, 'status': 'Completed'},
-    ]
-  };
+  final _paymentController = TextEditingController();
+  final _noteController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _paymentController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DebtProvider>().loadCustomerDetail(widget.customerId);
+    });
   }
 
   @override
   void dispose() {
     _paymentController.dispose();
+    _noteController.dispose();
     super.dispose();
+  }
+
+  Future<void> _recordPayment() async {
+    final amount = double.tryParse(_paymentController.text);
+    if (amount == null || amount <= 0) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final success = await context.read<DebtProvider>().recordPayment(
+          widget.customerId,
+          amount,
+          _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        );
+
+    if (!mounted) return;
+    if (success) {
+      _paymentController.clear();
+      _noteController.clear();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text('Payment of ${formatFCFA(amount)} recorded'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      // Reload history to show the new record.
+      context.read<DebtProvider>().loadCustomerDetail(widget.customerId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(customerData['name']),
-        backgroundColor: AppColors.ownerPrimary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    return Consumer<DebtProvider>(
+      builder: (context, provider, _) {
+        final customer = provider.selectedCustomer;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(customer?.name ?? 'Customer'),
+            backgroundColor: AppColors.ownerPrimary,
+            elevation: 0,
+          ),
+          body: provider.isLoading && customer == null
+              ? const Center(child: CircularProgressIndicator())
+              : customer == null
+                  ? Center(
+                      child: Text(
+                        provider.errorMessage ?? 'Customer not found',
+                        style: AppTextStyles.bodyM.copyWith(color: AppColors.danger),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.ownerPrimary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 56,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accent,
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  child: Center(
+                                    child: Text(customer.initials,
+                                        style: AppTextStyles.headingL
+                                            .copyWith(color: Colors.white)),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(customer.name,
+                                          style: AppTextStyles.headingL),
+                                      if (customer.phone.isNotEmpty)
+                                        Text(customer.phone,
+                                            style: AppTextStyles.bodyM
+                                                .copyWith(color: Colors.grey[600])),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          RiskBadge(customer.riskCategory),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Since ${DateFormat('MMM y').format(customer.createdAt)}',
+                                            style: AppTextStyles.bodyM.copyWith(
+                                                color: Colors.grey[600], fontSize: 11),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Debt stats
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatCard(
+                                  label: 'Outstanding Debt',
+                                  value: formatFCFA(customer.totalDebt),
+                                  color: customer.totalDebt > 0
+                                      ? AppColors.danger
+                                      : AppColors.success,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatCard(
+                                  label: 'Debt Records',
+                                  value: '${provider.debtHistory.length}',
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Record payment
+                          if (customer.totalDebt > 0) ...[
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withValues(alpha: 0.05),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: AppColors.success.withValues(alpha: 0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Record Payment', style: AppTextStyles.headingM),
+                                  const SizedBox(height: 12),
+                                  TextField(
+                                    controller: _paymentController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      hintText: 'Amount',
+                                      prefixText: 'FCFA ',
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 12),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  TextField(
+                                    controller: _noteController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Note (optional)',
+                                      border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(8)),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 12),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  AppButton.primary(
+                                    label: provider.isSaving
+                                        ? 'Recording…'
+                                        : 'Record Payment',
+                                    onPressed:
+                                        provider.isSaving ? null : _recordPayment,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // Debt history
+                          Text('Transaction History', style: AppTextStyles.headingM),
+                          const SizedBox(height: 12),
+                          if (provider.debtHistory.isEmpty)
+                            Center(
+                              child: Text('No transactions yet',
+                                  style: AppTextStyles.bodyM
+                                      .copyWith(color: Colors.grey[500])),
+                            )
+                          else
+                            ...provider.debtHistory.map(
+                                (r) => _DebtRecordTile(record: r)),
+                        ],
+                      ),
+                    ),
+        );
+      },
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+  const _StatCard({required this.label, required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Customer Header
-            _buildCustomerHeader(),
-            const SizedBox(height: 24),
-
-            // Key Stats
-            _buildKeyStats(),
-            const SizedBox(height: 24),
-
-            // Contact Information
-            _buildContactInfo(),
-            const SizedBox(height: 24),
-
-            // Record Payment Section
-            _buildPaymentSection(),
-            const SizedBox(height: 24),
-
-            // Payment History
-            Text(
-              'Payment History',
-              style: AppTextStyles.headingM,
-            ),
-            const SizedBox(height: 12),
-            _buildPaymentHistory(),
-            const SizedBox(height: 24),
-
-            // Recent Purchases
-            Text(
-              'Recent Purchases',
-              style: AppTextStyles.headingM,
-            ),
-            const SizedBox(height: 12),
-            _buildPurchaseHistory(),
+            Text(label,
+                style: AppTextStyles.bodyM
+                    .copyWith(color: Colors.grey[600], fontSize: 12)),
+            const SizedBox(height: 6),
+            Text(value,
+                style: AppTextStyles.headingS.copyWith(color: color)),
           ],
         ),
-      ),
-    );
-  }
+      );
+}
 
-  Widget _buildCustomerHeader() {
+class _DebtRecordTile extends StatelessWidget {
+  final DebtRecord record;
+  const _DebtRecordTile({required this.record});
+
+  @override
+  Widget build(BuildContext context) {
+    final isCredit = record.type == DebtType.credit;
+    final color = isCredit ? AppColors.danger : AppColors.success;
+    final sign = isCredit ? '+' : '-';
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.ownerPrimary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.ownerPrimary.withOpacity(0.3)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(30),
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Center(
-              child: Text(
-                customerData['name'][0],
-                style: AppTextStyles.displayM.copyWith(color: Colors.white),
-              ),
+            child: Icon(
+              isCredit ? Icons.arrow_upward : Icons.arrow_downward,
+              color: color,
+              size: 18,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  customerData['name'],
-                  style: AppTextStyles.headingL,
+                  isCredit ? 'Credit' : 'Payment',
+                  style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    RiskBadge(_riskCategoryFromString(customerData['risk'] as String)),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Member since ${customerData['joinDate']}',
-                        style: AppTextStyles.bodyM.copyWith(
-                          color: AppColors.success,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ],
+                if (record.note != null && record.note!.isNotEmpty)
+                  Text(record.note!,
+                      style: AppTextStyles.bodyM
+                          .copyWith(color: Colors.grey[600], fontSize: 12)),
+                Text(
+                  DateFormat('d MMM y, h:mm a').format(record.recordedAt.toLocal()),
+                  style: AppTextStyles.bodyM
+                      .copyWith(color: Colors.grey[400], fontSize: 11),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKeyStats() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            label: 'Outstanding Debt',
-            value: 'FCFA ${customerData['debt']}',
-            color: AppColors.danger,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            label: 'Total Spent',
-            value: 'FCFA ${customerData['totalSpent']}',
-            color: AppColors.success,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.bodyM.copyWith(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: AppTextStyles.bodyM.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactInfo() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Contact Information',
-            style: AppTextStyles.headingM,
-          ),
-          const SizedBox(height: 16),
-          _buildContactRow('Phone', customerData['phone']),
-          const SizedBox(height: 12),
-          _buildContactRow('Email', customerData['email']),
-          const SizedBox(height: 12),
-          _buildContactRow('Address', customerData['address']),
-          const SizedBox(height: 12),
-          _buildContactRow('Last Purchase', customerData['lastPurchase']),
-          const SizedBox(height: 12),
-          _buildContactRow('Total Purchases', '${customerData['totalPurchases']} transactions'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyM.copyWith(color: Colors.grey[600]),
-        ),
-        Text(
-          value,
-          style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.success.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.success.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Record Payment',
-            style: AppTextStyles.headingM,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _paymentController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              hintText: 'Enter payment amount',
-              prefixText: 'FCFA ',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          AppButton.primary(
-            label: 'Record Payment',
-            onPressed: () {
-              if (_paymentController.text.isNotEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Payment of FCFA ${_paymentController.text} recorded successfully',
-                    ),
-                  ),
-                );
-                _paymentController.clear();
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentHistory() {
-    return Column(
-      children: (customerData['paymentHistory'] as List).map((payment) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    payment['date'],
-                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Via ${payment['method']}',
-                    style: AppTextStyles.bodyM.copyWith(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              Text(
+                '$sign${formatFCFA(record.amount)}',
+                style: AppTextStyles.bodyM
+                    .copyWith(fontWeight: FontWeight.w700, color: color),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'FCFA ${payment['amount']}',
-                    style: AppTextStyles.bodyM.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.success,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      payment['status'],
-                      style: AppTextStyles.bodyM.copyWith(
-                        color: AppColors.success,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+              Text(
+                'Balance: ${formatFCFA(record.balanceAfter)}',
+                style: AppTextStyles.bodyM
+                    .copyWith(color: Colors.grey[500], fontSize: 11),
               ),
             ],
           ),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
-
-  Widget _buildPurchaseHistory() {
-    return Column(
-      children: (customerData['purchases'] as List).map((purchase) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Purchase on ${purchase['date']}',
-                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${purchase['items']} items',
-                    style: AppTextStyles.bodyM.copyWith(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'FCFA ${purchase['amount']}',
-                    style: AppTextStyles.bodyM.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.ownerPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      purchase['status'],
-                      style: AppTextStyles.bodyM.copyWith(
-                        color: AppColors.success,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  RiskCategory _riskCategoryFromString(String? risk) {
-    switch (risk?.toLowerCase()) {
-      case 'high':
-        return RiskCategory.high;
-      case 'medium':
-        return RiskCategory.medium;
-      case 'low':
-        return RiskCategory.low;
-      case 'new':
-      case 'new customer':
-        return RiskCategory.newCustomer;
-      default:
-        return RiskCategory.newCustomer;
-    }
-  }
-
 }
-
-

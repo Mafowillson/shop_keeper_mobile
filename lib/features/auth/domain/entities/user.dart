@@ -10,6 +10,8 @@ class User {
   final UserRole role;
   final bool isActive;
   final bool emailVerified;
+  final String shopName;
+  final String shopDescription;
 
   const User({
     required this.id,
@@ -19,6 +21,8 @@ class User {
     required this.role,
     required this.isActive,
     this.emailVerified = false,
+    this.shopName = '',
+    this.shopDescription = '',
   });
 
   User copyWith({
@@ -29,6 +33,8 @@ class User {
     UserRole? role,
     bool? isActive,
     bool? emailVerified,
+    String? shopName,
+    String? shopDescription,
   }) =>
       User(
         id: id ?? this.id,
@@ -38,5 +44,7 @@ class User {
         role: role ?? this.role,
         isActive: isActive ?? this.isActive,
         emailVerified: emailVerified ?? this.emailVerified,
+        shopName: shopName ?? this.shopName,
+        shopDescription: shopDescription ?? this.shopDescription,
       );
 }

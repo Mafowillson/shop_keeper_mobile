@@ -10,5 +10,6 @@ class GetCustomersUseCase {
 
   const GetCustomersUseCase(this._repository);
 
-  TaskEither<Failure, List<Customer>> call() => _repository.getCustomers();
+  TaskEither<Failure, List<Customer>> call({required String shopId, bool? hasDebt}) =>
+      _repository.getCustomers(shopId: shopId, hasDebt: hasDebt);
 }

@@ -6,8 +6,21 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 
-class OwnerProfileScreen extends StatelessWidget {
+class OwnerProfileScreen extends StatefulWidget {
   const OwnerProfileScreen({super.key});
+
+  @override
+  State<OwnerProfileScreen> createState() => _OwnerProfileScreenState();
+}
+
+class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().refreshShopInfo();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +57,24 @@ class OwnerProfileScreen extends StatelessWidget {
                 _InfoCard(rows: [
                   _InfoRow(
                     icon: Icons.store_outlined,
-                    label: 'Shop ID',
-                    value: _truncate(user?.shopId),
+                    label: 'Shop name',
+                    value: user?.shopName.isNotEmpty == true
+                        ? user!.shopName
+                        : 'Not set',
                   ),
                   _InfoRow(
-                    icon: Icons.fingerprint,
-                    label: 'User ID',
-                    value: _truncate(user?.id),
+                    icon: Icons.person_outline_rounded,
+                    label: 'Owner name',
+                    value: user?.name.isNotEmpty == true
+                        ? user!.name
+                        : 'Not set',
                   ),
-                  const _InfoRow(
-                    icon: Icons.lock_outline_rounded,
-                    label: 'Password',
-                    value: '••••••••',
+                  _InfoRow(
+                    icon: Icons.description_outlined,
+                    label: 'Shop description',
+                    value: user?.shopDescription.isNotEmpty == true
+                        ? user!.shopDescription
+                        : 'Not set',
                   ),
                 ]),
                 const SizedBox(height: 24),
@@ -70,11 +89,18 @@ class OwnerProfileScreen extends StatelessWidget {
                     onTap: () => context.push('/owner/staff/create'),
                   ),
                   _ActionTileData(
+                    icon: Icons.group_outlined,
+                    label: 'Manage Staff',
+                    subtitle: 'Activate or deactivate team members',
+                    color: AppColors.accent,
+                    onTap: () => context.push('/owner/staff/manage'),
+                  ),
+                  _ActionTileData(
                     icon: Icons.settings_outlined,
                     label: 'Settings',
                     subtitle: 'Manage preferences and security',
                     color: AppColors.ownerPrimary,
-                    onTap: () {},
+                    onTap: () => context.push('/settings'),
                   ),
                 ]),
                 const SizedBox(height: 16),
@@ -91,26 +117,11 @@ class OwnerProfileScreen extends StatelessWidget {
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Sign out?', style: AppTextStyles.headingM),
-        content: Text(
-          'You will need to log back in to access your account.',
-          style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Sign out'),
-          ),
-        ],
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _SignOutSheet(
+        subtitle: 'You will need to log back in to access your account.',
       ),
     );
     if (confirmed != true || !context.mounted) return;
@@ -128,11 +139,6 @@ class OwnerProfileScreen extends StatelessWidget {
         .join();
   }
 
-  static String _truncate(String? value) {
-    if (value == null || value.isEmpty) return 'N/A';
-    if (value.length <= 16) return value;
-    return '${value.substring(0, 8)}…${value.substring(value.length - 4)}';
-  }
 }
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
@@ -278,7 +284,7 @@ class _RoleBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.verified_outlined, size: 13, color: AppColors.accent),
+          const Icon(Icons.verified_outlined, size: 13, color: AppColors.accent),
           const SizedBox(width: 5),
           Text(
             'Owner',
@@ -441,6 +447,7 @@ class _InfoTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 32,
@@ -453,14 +460,22 @@ class _InfoTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              row.label,
-              style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.label,
+                  style: AppTextStyles.bodyS
+                      .copyWith(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  row.value,
+                  style:
+                      AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-          ),
-          Text(
-            row.value,
-            style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -558,6 +573,94 @@ class _ActionTile extends StatelessWidget {
             Icon(Icons.chevron_right_rounded, color: Colors.grey[350], size: 20),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ── Sign-out bottom sheet ─────────────────────────────────────────────────────
+
+class _SignOutSheet extends StatelessWidget {
+  final String subtitle;
+  const _SignOutSheet({required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.fromLTRB(
+          24, 12, 24, 24 + MediaQuery.of(context).padding.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppColors.danger.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.logout_rounded,
+                color: AppColors.danger, size: 30),
+          ),
+          const SizedBox(height: 16),
+          Text('Sign out?', style: AppTextStyles.headingL),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: AppTextStyles.bodyM
+                .copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.border),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text('Cancel',
+                      style: AppTextStyles.headingS
+                          .copyWith(color: AppColors.textPrimary)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.danger,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                  ),
+                  child: Text('Sign Out',
+                      style: AppTextStyles.headingS
+                          .copyWith(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -21,15 +21,15 @@ class DebtRecordModel {
   });
 
   factory DebtRecordModel.fromJson(Map<String, dynamic> json) => DebtRecordModel(
-    id: json['id'],
-    customerId: json['customer_id'],
-    type: DebtType.values.firstWhere(
-      (e) => e.toString() == 'DebtType.${json['type']}',
-    ),
+    id: json['id'] as String,
+    customerId: json['customer_id'] as String,
+    type: (json['type'] as String?) == 'payment'
+        ? DebtType.payment
+        : DebtType.credit,
     amount: (json['amount'] as num).toDouble(),
     balanceAfter: (json['balance_after'] as num).toDouble(),
-    note: json['note'],
-    recordedAt: DateTime.parse(json['recorded_at']),
+    note: json['note'] as String?,
+    recordedAt: DateTime.parse(json['recorded_at'] as String),
   );
 
   Map<String, dynamic> toJson() => {

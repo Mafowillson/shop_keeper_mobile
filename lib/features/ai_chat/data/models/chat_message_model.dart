@@ -16,12 +16,18 @@ class ChatMessageModel {
 
   factory ChatMessageModel.fromJson(Map<String, dynamic> json) => ChatMessageModel(
     id: json['id'],
-    role: MessageRole.values.firstWhere(
-      (e) => e.toString() == 'MessageRole.${json['role']}',
-    ),
+    role: _parseRole(json['role'] as String),
     text: json['text'],
-    timestamp: DateTime.parse(json['timestamp']),
+    timestamp: DateTime.parse(json['created_at'] ?? json['timestamp']),
   );
+
+  static MessageRole _parseRole(String raw) {
+    if (raw == 'model') return MessageRole.assistant;
+    return MessageRole.values.firstWhere(
+      (e) => e.name == raw,
+      orElse: () => MessageRole.assistant,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,

@@ -7,6 +7,12 @@ import 'package:shopkeeper/app.dart';
 import 'package:shopkeeper/core/services/fcm_service.dart';
 import 'package:shopkeeper/di/injection.dart';
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint('[FCM] background: ${message.notification?.title}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -21,7 +27,7 @@ void main() async {
 
   configureDependencies();
 
-  // Request notification permission (no-op if already granted/denied).
+  // Request notification display permission (required on Android 13+ / iOS).
   await getIt<FcmService>().requestPermission();
 
   runApp(const ShopKeeperApp());

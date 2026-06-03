@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/enums/message_role.dart';
+import 'package:shopkeeper/features/ai_chat/domain/entities/chat_message.dart';
+import 'package:shopkeeper/features/ai_chat/presentation/providers/chat_provider.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -12,33 +16,13 @@ class AiChatScreen extends StatefulWidget {
 class _AiChatScreenState extends State<AiChatScreen> {
   late TextEditingController _messageController;
   late ScrollController _scrollController;
+  final FocusNode _focusNode = FocusNode();
 
-  final List<Map<String, dynamic>> messages = [
-    {
-      'role': 'assistant',
-      'message': 'Hello! I\'m your ShopKeeper AI Assistant. I can help you with business insights, inventory analysis, and sales recommendations. What would you like to know?',
-      'timestamp': '10:30 AM'
-    },
-    {
-      'role': 'user',
-      'message': 'What are my top selling products this week?',
-      'timestamp': '10:31 AM'
-    },
-    {
-      'role': 'assistant',
-      'message': 'Based on your sales data this week:\n\n1. Coca Cola 500ml - 45 units sold (FCFA 67,500)\n2. Lay\'s Chips 50g - 38 units sold (FCFA 76,000)\n3. Dettol Disinfectant 500ml - 12 units sold (FCFA 42,000)\n\nYour beverage category is performing 23% better than last week!',
-      'timestamp': '10:31 AM'
-    },
-    {
-      'role': 'user',
-      'message': 'Should I restock any products?',
-      'timestamp': '10:32 AM'
-    },
-    {
-      'role': 'assistant',
-      'message': 'Yes, I recommend restocking:\n\n⚠️ URGENT:\n- Fanta Orange 500ml (3 units left, min: 20)\n- Milk 1L (8 units left, min: 15)\n\n📊 SOON:\n- Sprite 500ml (12 units, min: 20)\n\nBased on your sales velocity, Fanta will run out in 2-3 days.',
-      'timestamp': '10:32 AM'
-    },
+  static const _suggestions = [
+    ('📊', "Today's sales summary"),
+    ('⚠️', 'What needs restocking?'),
+    ('💰', 'Top products this week'),
+    ('📈', 'Give me business insights'),
   ];
 
   @override
@@ -47,7 +31,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     _messageController = TextEditingController();
     _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
+      context.read<ChatProvider>().loadHistory().then((_) => _scrollToBottom());
     });
   }
 
@@ -55,6 +39,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -62,141 +47,476 @@ class _AiChatScreenState extends State<AiChatScreen> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeOut,
       );
     }
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
-
-    setState(() {
-      messages.add({
-        'role': 'user',
-        'message': _messageController.text,
-        'timestamp': 'Now'
-      });
-    });
-
+  Future<void> _send(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
     _messageController.clear();
+    _focusNode.requestFocus();
+    await context.read<ChatProvider>().sendMessage(trimmed);
     _scrollToBottom();
+  }
 
-    // Simulate AI response
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        messages.add({
-          'role': 'assistant',
-          'message': 'That\'s a great question! Based on your current inventory and sales trends, I\'d recommend focusing on your high-margin products. Would you like me to provide more specific recommendations?',
-          'timestamp': 'Now'
-        });
-      });
-      _scrollToBottom();
-    });
+  void _confirmClear() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text('Start new chat', style: AppTextStyles.headingM),
+        content: Text(
+          'This will delete your entire conversation history.',
+          style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel',
+                style: AppTextStyles.labelL
+                    .copyWith(color: AppColors.textSecondary)),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.danger,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<ChatProvider>().clearHistory();
+            },
+            child: Text('Clear', style: AppTextStyles.labelL),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI Chat Assistant'),
-        backgroundColor: AppColors.ownerPrimary,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Start New Chat'),
-                  content: const Text('Clear all messages and start a new conversation?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        setState(() {
-                          messages.clear();
-                          messages.add({
-                            'role': 'assistant',
-                            'message': 'Hello! I\'m your ShopKeeper AI Assistant. How can I help you today?',
-                            'timestamp': 'Now'
-                          });
-                        });
-                      },
-                      child: const Text('Clear'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // Messages List
+          _Header(onClear: _confirmClear),
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                return _buildMessageBubble(message);
+            child: Consumer<ChatProvider>(
+              builder: (context, provider, _) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (provider.messages.isNotEmpty) _scrollToBottom();
+                });
+
+                if (provider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                        color: AppColors.ownerPrimary),
+                  );
+                }
+
+                if (provider.errorMessage != null) {
+                  return _ErrorState(
+                    message: provider.errorMessage!,
+                    onRetry: () => provider.loadHistory(),
+                  );
+                }
+
+                if (provider.messages.isEmpty) {
+                  return _EmptyState(
+                    suggestions: _suggestions,
+                    onSuggestion: (s) => _send(s),
+                  );
+                }
+
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount:
+                      provider.messages.length + (provider.isSending ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == provider.messages.length) {
+                      return const _TypingIndicator();
+                    }
+                    return _MessageBubble(message: provider.messages[index]);
+                  },
+                );
               },
             ),
           ),
+          _InputBar(
+            controller: _messageController,
+            focusNode: _focusNode,
+            onSend: _send,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-          // Input Area
+// ── Header ────────────────────────────────────────────────────────────────────
+
+class _Header extends StatelessWidget {
+  final VoidCallback onClear;
+  const _Header({required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    final top = MediaQuery.of(context).padding.top;
+    return Container(
+      padding: EdgeInsets.fromLTRB(4, top + 4, 8, 12),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.ownerPrimary, AppColors.ownerPrimaryDark],
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'Back',
+          ),
+          const SizedBox(width: 4),
           Container(
-            padding: const EdgeInsets.all(16),
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(color: Colors.grey[200]!),
-              ),
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: const Center(
+              child: Icon(Icons.auto_awesome_rounded,
+                  color: AppColors.accent, size: 22),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Ask me anything...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.attach_file),
-                        onPressed: () {},
+                Text(
+                  'ShopKeeper AI',
+                  style: AppTextStyles.headingM
+                      .copyWith(color: Colors.white, fontSize: 17),
+                ),
+                const SizedBox(height: 1),
+                Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF69F0AE),
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    maxLines: null,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Powered by Groq',
+                      style: AppTextStyles.labelM.copyWith(
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline_rounded,
+                color: Colors.white, size: 22),
+            tooltip: 'Clear chat',
+            onPressed: onClear,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final List<(String, String)> suggestions;
+  final ValueChanged<String> onSuggestion;
+  const _EmptyState({required this.suggestions, required this.onSuggestion});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.accentLight,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Center(
+              child: Icon(Icons.auto_awesome_rounded,
+                  color: AppColors.accent, size: 36),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'How can I help you today?',
+            style:
+                AppTextStyles.displayS.copyWith(color: AppColors.textPrimary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ask me about sales, inventory, or\nbusiness insights for your shop.',
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'SUGGESTED',
+            style: AppTextStyles.labelM.copyWith(
+              color: AppColors.textHint,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...suggestions.map(
+            (s) => _SuggestionTile(
+              emoji: s.$1,
+              label: s.$2,
+              onTap: () => onSuggestion(s.$2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestionTile extends StatelessWidget {
+  final String emoji;
+  final String label;
+  final VoidCallback onTap;
+  const _SuggestionTile(
+      {required this.emoji, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Text(emoji, style: const TextStyle(fontSize: 20)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.bodyM
+                        .copyWith(color: AppColors.textPrimary),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.ownerPrimary,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendMessage,
-                  ),
+                const Icon(Icons.arrow_forward_ios_rounded,
+                    size: 14, color: AppColors.textHint),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Message bubble ────────────────────────────────────────────────────────────
+
+class _MessageBubble extends StatelessWidget {
+  final ChatMessage message;
+  const _MessageBubble({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final isUser = message.role == MessageRole.user;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isUser) ...[
+            _AiAvatar(),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: isUser
+                ? _UserBubble(message: message)
+                : _AiBubble(message: message),
+          ),
+          if (isUser) const SizedBox(width: 8 + 28 + 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _UserBubble extends StatelessWidget {
+  final ChatMessage message;
+  const _UserBubble({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: const BoxDecoration(
+            color: AppColors.ownerPrimary,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(4),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(18),
+            ),
+          ),
+          child: Text(
+            message.text,
+            style: AppTextStyles.bodyM.copyWith(color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _fmt(message.timestamp),
+          style: AppTextStyles.labelS.copyWith(color: AppColors.textHint),
+        ),
+      ],
+    );
+  }
+}
+
+class _AiBubble extends StatelessWidget {
+  final ChatMessage message;
+  const _AiBubble({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(18),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(18),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            message.text,
+            style: AppTextStyles.bodyM
+                .copyWith(color: AppColors.textPrimary, height: 1.5),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _fmt(message.timestamp),
+          style: AppTextStyles.labelS.copyWith(color: AppColors.textHint),
+        ),
+      ],
+    );
+  }
+}
+
+String _fmt(DateTime dt) {
+  final h = dt.hour.toString().padLeft(2, '0');
+  final m = dt.minute.toString().padLeft(2, '0');
+  return '$h:$m';
+}
+
+class _AiAvatar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        color: AppColors.accentLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Center(
+        child:
+            Icon(Icons.auto_awesome_rounded, size: 15, color: AppColors.accent),
+      ),
+    );
+  }
+}
+
+// ── Typing indicator ──────────────────────────────────────────────────────────
+
+class _TypingIndicator extends StatelessWidget {
+  const _TypingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _AiAvatar(),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(4),
+                topRight: Radius.circular(18),
+                bottomLeft: Radius.circular(18),
+                bottomRight: Radius.circular(18),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _BouncingDot(delay: Duration.zero),
+                SizedBox(width: 4),
+                _BouncingDot(delay: Duration(milliseconds: 150)),
+                SizedBox(width: 4),
+                _BouncingDot(delay: Duration(milliseconds: 300)),
               ],
             ),
           ),
@@ -204,79 +524,221 @@ class _AiChatScreenState extends State<AiChatScreen> {
       ),
     );
   }
+}
 
-  Widget _buildMessageBubble(Map<String, dynamic> message) {
-    final isUser = message['role'] == 'user';
+class _BouncingDot extends StatefulWidget {
+  final Duration delay;
+  const _BouncingDot({required this.delay});
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+  @override
+  State<_BouncingDot> createState() => _BouncingDotState();
+}
+
+class _BouncingDotState extends State<_BouncingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _anim = Tween<double>(begin: 0, end: -6).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+    Future.delayed(widget.delay, () {
+      if (mounted) _ctrl.repeat(reverse: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, __) => Transform.translate(
+        offset: Offset(0, _anim.value),
+        child: Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(
+            color: AppColors.textHint,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Input bar ─────────────────────────────────────────────────────────────────
+
+class _InputBar extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final Future<void> Function(String) onSend;
+
+  const _InputBar({
+    required this.controller,
+    required this.focusNode,
+    required this.onSend,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final isSending = context.select<ChatProvider, bool>((p) => p.isSending);
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + bottom),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isUser)
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppColors.accent.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.auto_awesome,
-                  size: 18,
-                  color: AppColors.accent,
-                ),
-              ),
-            ),
-          if (!isUser) const SizedBox(width: 8),
-          Flexible(
+          Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              constraints: const BoxConstraints(maxHeight: 120),
               decoration: BoxDecoration(
-                color: isUser ? AppColors.ownerPrimary : Colors.grey[100],
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppColors.border),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message['message'],
-                    style: AppTextStyles.bodyM.copyWith(
-                      color: isUser ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    message['timestamp'],
-                    style: AppTextStyles.bodyM.copyWith(
-                      fontSize: 10,
-                      color: isUser ? Colors.white70 : Colors.grey[600],
-                    ),
-                  ),
-                ],
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                enabled: !isSending,
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: onSend,
+                style:
+                    AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Ask anything about your shop…',
+                  hintStyle:
+                      AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
             ),
           ),
-          if (isUser) const SizedBox(width: 8),
-          if (isUser)
+          const SizedBox(width: 10),
+          _SendButton(
+              isSending: isSending, onTap: () => onSend(controller.text)),
+        ],
+      ),
+    );
+  }
+}
+
+class _SendButton extends StatelessWidget {
+  final bool isSending;
+  final VoidCallback onTap;
+  const _SendButton({required this.isSending, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: isSending ? AppColors.border : AppColors.ownerPrimary,
+        borderRadius: BorderRadius.circular(23),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(23),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(23),
+          onTap: isSending ? null : onTap,
+          child: Center(
+            child: isSending
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.textSecondary,
+                    ),
+                  )
+                : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Error state ───────────────────────────────────────────────────────────────
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  const _ErrorState({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
-                color: AppColors.ownerPrimary.withOpacity(0.2),
+                color: AppColors.dangerLight,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Center(
-                child: Icon(
-                  Icons.person,
-                  size: 18,
-                  color: AppColors.ownerPrimary,
-                ),
+                child: Icon(Icons.wifi_off_rounded,
+                    color: AppColors.danger, size: 28),
               ),
             ),
-        ],
+            const SizedBox(height: 16),
+            Text('Something went wrong', style: AppTextStyles.headingM),
+            const SizedBox(height: 6),
+            Text(
+              message,
+              style:
+                  AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.ownerPrimary,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text('Try again', style: AppTextStyles.labelL),
+            ),
+          ],
+        ),
       ),
     );
   }

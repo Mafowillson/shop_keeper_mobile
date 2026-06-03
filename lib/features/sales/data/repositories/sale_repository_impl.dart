@@ -1,6 +1,5 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shopkeeper/core/enums/price_type.dart';
 import 'package:shopkeeper/core/errors/failures.dart';
 import 'package:shopkeeper/features/sales/data/datasources/i_sale_remote_datasource.dart';
 import 'package:shopkeeper/features/sales/domain/entities/cart_item.dart';
@@ -43,15 +42,10 @@ class SaleRepositoryImpl implements ISaleRepository {
   }) =>
       TaskEither.tryCatch(
         () async {
-          final items = cartItems.map((c) {
-            final unitName = c.priceType == PriceType.retail
-                ? (c.product.baseUnit.isNotEmpty ? c.product.baseUnit : 'piece')
-                : 'carton';
-            return {
-              'product_id': c.product.id,
-              'unit': unitName,
-              'quantity': c.quantity,
-            };
+          final items = cartItems.map((c) => {
+            'product_id': c.product.id,
+            'unit': c.unit.name,
+            'quantity': c.quantity,
           }).toList();
 
           final body = <String, dynamic>{

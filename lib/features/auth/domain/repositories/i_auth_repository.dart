@@ -24,4 +24,5 @@ abstract class IAuthRepository {
   TaskEither<Failure, User> restoreSession();
   TaskEither<Failure, User> verifyEmail(String code);
   TaskEither<Failure, Unit> resendVerificationCode();
+  TaskEither<Failure, User> fetchShopInfo();
 }

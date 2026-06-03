@@ -22,6 +22,7 @@ import 'package:shopkeeper/features/staff/data/datasources/staff_remote_datasour
 import 'package:shopkeeper/features/staff/data/repositories/staff_repository_impl.dart';
 import 'package:shopkeeper/features/staff/domain/usecases/create_staff_usecase.dart';
 import 'package:shopkeeper/features/staff/presentation/providers/staff_dashboard_provider.dart';
+import 'package:shopkeeper/features/settings/presentation/providers/settings_provider.dart';
 import 'package:shopkeeper/features/staff/presentation/providers/staff_provider.dart';
 
 class ShopKeeperApp extends StatefulWidget {
@@ -52,7 +53,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
 
     final fcm = getIt<FcmService>();
 
-    // Upload FCM token using the correct endpoint for the logged-in role.
+    // Upload FCM token on every auth state change (login, token refresh, etc.).
     _authProvider.addListener(() {
       final user = _authProvider.currentUser;
       if (user != null) {
@@ -60,7 +61,16 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       }
     });
 
-    // Route foreground messages to the right provider.
+    // Also upload immediately if the user is already logged in on cold start
+    // (the listener above won't fire if the auth state was restored silently).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = _authProvider.currentUser;
+      if (user != null) {
+        fcm.uploadTokenForRole(user.role);
+      }
+    });
+
+    // Show banner + refresh data when a message arrives in the foreground.
     fcm.setupForegroundHandler(_onForegroundMessage);
   }
 
@@ -109,6 +119,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         ChangeNotifierProvider.value(value: _notificationProvider),
         ChangeNotifierProvider(create: (_) => getIt<StaffDashboardProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<ChatProvider>()),
+        ChangeNotifierProvider(create: (_) => getIt<SettingsProvider>()),
         ChangeNotifierProvider(create: (_) => SyncProvider()),
         ChangeNotifierProvider(
           create: (_) => StaffProvider(

@@ -11,6 +11,7 @@ import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.
 import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/resend_verification_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/get_shop_info_usecase.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
@@ -23,6 +24,7 @@ class AuthProvider extends ChangeNotifier {
   final RestoreSessionUseCase _restoreSession;
   final VerifyEmailUseCase _verifyEmail;
   final ResendVerificationUseCase _resendVerification;
+  final GetShopInfoUseCase _getShopInfo;
 
   User? _currentUser;
   bool _isLoading = false;
@@ -39,6 +41,7 @@ class AuthProvider extends ChangeNotifier {
     this._restoreSession,
     this._verifyEmail,
     this._resendVerification,
+    this._getShopInfo,
   );
 
   User? get currentUser => _currentUser;
@@ -112,7 +115,10 @@ class AuthProvider extends ChangeNotifier {
               .run();
       result.fold(
         (f) => _errorMessage = f.message,
-        (u) { _currentUser = u; _errorMessage = null; },
+        (u) {
+          _currentUser = u.copyWith(shopName: shopName);
+          _errorMessage = null;
+        },
       );
     } catch (e, st) {
       debugPrint('[Auth] registerShop uncaught: $e\n$st');
@@ -219,6 +225,18 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
     }
     return success;
+  }
+
+  Future<void> refreshShopInfo() async {
+    if (_currentUser == null || _currentUser!.shopId.isEmpty) return;
+    try {
+      final result = await _getShopInfo().run();
+      result.fold(
+        (_) {},
+        (u) { _currentUser = u; },
+      );
+    } catch (_) {}
+    _notify();
   }
 
   void resetAuth() {

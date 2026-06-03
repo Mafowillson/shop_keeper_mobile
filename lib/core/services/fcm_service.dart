@@ -23,20 +23,24 @@ class FcmService {
     debugPrint('[FCM] permission: ${settings.authorizationStatus}');
   }
 
-  /// Uploads the FCM token to the correct backend endpoint for [role].
-  /// Call this after the user has authenticated (JWT must be in the header).
+  /// Uploads the current FCM token to the backend for the authenticated role.
+  /// Safe to call on every login and on app restart.
   Future<void> uploadTokenForRole(UserRole role) async {
     try {
       final token = await FirebaseMessaging.instance.getToken();
-      if (token == null) return;
-      debugPrint('[FCM] token: $token');
+      if (token == null) {
+        debugPrint('[FCM] token is null — skipping upload');
+        return;
+      }
+      debugPrint('[FCM] uploading token for role: $role');
 
-      final endpoint = role == UserRole.owner
-          ? '/owner/fcm-token'
-          : '/staff/fcm-token';
+      final endpoint =
+          role == UserRole.owner ? '/owner/fcm-token' : '/staff/fcm-token';
 
       await _dio.post(endpoint, data: {'token': token});
+      debugPrint('[FCM] token uploaded successfully');
 
+      // Re-upload whenever Firebase rotates the token.
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
         try {
           await _dio.post(endpoint, data: {'token': newToken});
@@ -50,8 +54,7 @@ class FcmService {
     }
   }
 
-  /// Listens for foreground messages and calls [onMessage] with the raw
-  /// [RemoteMessage] so callers can inspect the type and refresh the right data.
+  /// Registers [onMessage] as the foreground message handler.
   void setupForegroundHandler(void Function(RemoteMessage) onMessage) {
     FirebaseMessaging.onMessage.listen((message) {
       debugPrint('[FCM] foreground: ${message.notification?.title}');

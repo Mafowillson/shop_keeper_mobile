@@ -14,8 +14,16 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:shopkeeper/core/network/dio_client.dart' as _i36;
 import 'package:shopkeeper/core/network/token_storage.dart' as _i26;
+import 'package:shopkeeper/features/ai_chat/data/datasources/chat_remote_datasource_impl.dart'
+    as _i69;
+import 'package:shopkeeper/features/ai_chat/data/datasources/i_chat_remote_datasource.dart'
+    as _i448;
+import 'package:shopkeeper/features/ai_chat/data/repositories/chat_repository_impl.dart'
+    as _i659;
 import 'package:shopkeeper/features/ai_chat/domain/repositories/i_chat_repository.dart'
     as _i331;
+import 'package:shopkeeper/features/ai_chat/domain/usecases/clear_history_usecase.dart'
+    as _i420;
 import 'package:shopkeeper/features/ai_chat/domain/usecases/load_history_usecase.dart'
     as _i811;
 import 'package:shopkeeper/features/ai_chat/domain/usecases/send_message_usecase.dart'
@@ -36,6 +44,8 @@ import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.d
     as _i696;
 import 'package:shopkeeper/features/auth/domain/usecases/forgot_password_usecase.dart'
     as _i751;
+import 'package:shopkeeper/features/auth/domain/usecases/get_shop_info_usecase.dart'
+    as _i723;
 import 'package:shopkeeper/features/auth/domain/usecases/login_usecase.dart'
     as _i917;
 import 'package:shopkeeper/features/auth/domain/usecases/logout_usecase.dart'
@@ -66,8 +76,18 @@ import 'package:shopkeeper/features/dashboard/domain/usecases/get_dashboard_stat
     as _i262;
 import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart'
     as _i70;
+import 'package:shopkeeper/features/debts/data/datasources/debt_remote_datasource_impl.dart'
+    as _i235;
+import 'package:shopkeeper/features/debts/data/datasources/i_debt_remote_datasource.dart'
+    as _i179;
+import 'package:shopkeeper/features/debts/data/repositories/debt_repository_impl.dart'
+    as _i143;
 import 'package:shopkeeper/features/debts/domain/repositories/i_debt_repository.dart'
     as _i965;
+import 'package:shopkeeper/features/debts/domain/usecases/create_customer_usecase.dart'
+    as _i91;
+import 'package:shopkeeper/features/debts/domain/usecases/get_customer_by_id_usecase.dart'
+    as _i910;
 import 'package:shopkeeper/features/debts/domain/usecases/get_customers_usecase.dart'
     as _i326;
 import 'package:shopkeeper/features/debts/domain/usecases/get_debt_history_usecase.dart'
@@ -155,6 +175,8 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.factory<_i902.CartProvider>(() => _i902.CartProvider());
+    gh.lazySingleton<_i448.IChatRemoteDataSource>(
+        () => _i69.ChatRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i862.IStaffDashboardDataSource>(
         () => _i862.StaffDashboardDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i439.IAuthLocalDataSource>(
@@ -165,26 +187,14 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i586.DashboardRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i289.IProductRepository>(() =>
         _i367.ProductRepositoryImpl(gh<_i773.IProductRemoteDataSource>()));
-    gh.lazySingleton<_i326.GetCustomersUseCase>(
-        () => _i326.GetCustomersUseCase(gh<_i965.IDebtRepository>()));
-    gh.lazySingleton<_i968.GetDebtHistoryUseCase>(
-        () => _i968.GetDebtHistoryUseCase(gh<_i965.IDebtRepository>()));
-    gh.lazySingleton<_i229.RecordPaymentUseCase>(
-        () => _i229.RecordPaymentUseCase(gh<_i965.IDebtRepository>()));
     gh.lazySingleton<_i553.INotificationRemoteDataSource>(
         () => _i192.NotificationRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i36.ISaleRemoteDataSource>(
         () => _i609.SaleRemoteDataSourceImpl(gh<_i36.DioClient>()));
-    gh.lazySingleton<_i811.LoadHistoryUseCase>(
-        () => _i811.LoadHistoryUseCase(gh<_i331.IChatRepository>()));
-    gh.lazySingleton<_i521.SendMessageUseCase>(
-        () => _i521.SendMessageUseCase(gh<_i331.IChatRepository>()));
     gh.lazySingleton<_i22.IDashboardRepository>(() =>
         _i855.DashboardRepositoryImpl(gh<_i583.IDashboardRemoteDataSource>()));
-    gh.factory<_i197.ChatProvider>(() => _i197.ChatProvider(
-          gh<_i521.SendMessageUseCase>(),
-          gh<_i811.LoadHistoryUseCase>(),
-        ));
+    gh.lazySingleton<_i179.IDebtRemoteDataSource>(
+        () => _i235.DebtRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i363.ISaleRepository>(
         () => _i937.SaleRepositoryImpl(gh<_i36.ISaleRemoteDataSource>()));
     gh.lazySingleton<_i678.DeactivateProductUseCase>(
@@ -217,14 +227,11 @@ extension GetItInjectableX on _i174.GetIt {
             ));
     gh.lazySingleton<_i478.RecordSaleUseCase>(
         () => _i478.RecordSaleUseCase(gh<_i363.ISaleRepository>()));
+    gh.lazySingleton<_i331.IChatRepository>(
+        () => _i659.ChatRepositoryImpl(gh<_i448.IChatRemoteDataSource>()));
     gh.lazySingleton<_i159.INotificationRepository>(() =>
         _i683.NotificationRepositoryImpl(
             gh<_i553.INotificationRemoteDataSource>()));
-    gh.factory<_i635.DebtProvider>(() => _i635.DebtProvider(
-          gh<_i326.GetCustomersUseCase>(),
-          gh<_i968.GetDebtHistoryUseCase>(),
-          gh<_i229.RecordPaymentUseCase>(),
-        ));
     gh.lazySingleton<_i217.GetNotificationsUseCase>(() =>
         _i217.GetNotificationsUseCase(gh<_i159.INotificationRepository>()));
     gh.lazySingleton<_i62.MarkAllReadUseCase>(
@@ -239,6 +246,14 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i587.IAuthRemoteDataSource>(),
           gh<_i439.IAuthLocalDataSource>(),
         ));
+    gh.lazySingleton<_i420.ClearHistoryUseCase>(
+        () => _i420.ClearHistoryUseCase(gh<_i331.IChatRepository>()));
+    gh.lazySingleton<_i811.LoadHistoryUseCase>(
+        () => _i811.LoadHistoryUseCase(gh<_i331.IChatRepository>()));
+    gh.lazySingleton<_i521.SendMessageUseCase>(
+        () => _i521.SendMessageUseCase(gh<_i331.IChatRepository>()));
+    gh.lazySingleton<_i965.IDebtRepository>(
+        () => _i143.DebtRepositoryImpl(gh<_i179.IDebtRemoteDataSource>()));
     gh.factory<_i70.DashboardProvider>(
         () => _i70.DashboardProvider(gh<_i262.GetDashboardStatsUseCase>()));
     gh.factory<_i995.NotificationProvider>(() => _i995.NotificationProvider(
@@ -253,8 +268,15 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i329.GetSaleDetailUseCase>(),
           gh<_i478.RecordSaleUseCase>(),
         ));
+    gh.factory<_i197.ChatProvider>(() => _i197.ChatProvider(
+          gh<_i521.SendMessageUseCase>(),
+          gh<_i811.LoadHistoryUseCase>(),
+          gh<_i420.ClearHistoryUseCase>(),
+        ));
     gh.lazySingleton<_i751.ForgotPasswordUseCase>(
         () => _i751.ForgotPasswordUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i723.GetShopInfoUseCase>(
+        () => _i723.GetShopInfoUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i917.LoginUseCase>(
         () => _i917.LoginUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i894.LogoutUseCase>(
@@ -271,6 +293,16 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i579.RestoreSessionUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i414.VerifyEmailUseCase>(
         () => _i414.VerifyEmailUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i91.CreateCustomerUseCase>(
+        () => _i91.CreateCustomerUseCase(gh<_i965.IDebtRepository>()));
+    gh.lazySingleton<_i910.GetCustomerByIdUseCase>(
+        () => _i910.GetCustomerByIdUseCase(gh<_i965.IDebtRepository>()));
+    gh.lazySingleton<_i326.GetCustomersUseCase>(
+        () => _i326.GetCustomersUseCase(gh<_i965.IDebtRepository>()));
+    gh.lazySingleton<_i968.GetDebtHistoryUseCase>(
+        () => _i968.GetDebtHistoryUseCase(gh<_i965.IDebtRepository>()));
+    gh.lazySingleton<_i229.RecordPaymentUseCase>(
+        () => _i229.RecordPaymentUseCase(gh<_i965.IDebtRepository>()));
     gh.factory<_i287.AuthProvider>(() => _i287.AuthProvider(
           gh<_i917.LoginUseCase>(),
           gh<_i894.LogoutUseCase>(),
@@ -281,9 +313,17 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i579.RestoreSessionUseCase>(),
           gh<_i414.VerifyEmailUseCase>(),
           gh<_i1025.ResendVerificationUseCase>(),
+          gh<_i723.GetShopInfoUseCase>(),
         ));
     gh.factory<_i50.StaffDashboardProvider>(() =>
         _i50.StaffDashboardProvider(gh<_i454.GetStaffDashboardUseCase>()));
+    gh.factory<_i635.DebtProvider>(() => _i635.DebtProvider(
+          gh<_i326.GetCustomersUseCase>(),
+          gh<_i910.GetCustomerByIdUseCase>(),
+          gh<_i91.CreateCustomerUseCase>(),
+          gh<_i968.GetDebtHistoryUseCase>(),
+          gh<_i229.RecordPaymentUseCase>(),
+        ));
     return this;
   }
 }

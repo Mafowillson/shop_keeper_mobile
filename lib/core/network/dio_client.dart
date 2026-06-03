@@ -76,8 +76,11 @@ class _AuthInterceptor extends Interceptor {
         ),
       );
 
+      final role = await _tokenStorage.getRole() ?? 'owner';
+      final refreshEndpoint =
+          role == 'staff' ? '/auth/staff/refresh' : '/auth/refresh';
       final refreshResponse = await refreshDio.post(
-        '/auth/refresh',
+        refreshEndpoint,
         data: {'refresh_token': refreshToken},
       );
 

@@ -31,7 +31,12 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
     setState(() => _isSubmitting = true);
 
     final cart = context.read<CartProvider>();
-    final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+    final authShopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+    // Prefer the authenticated shopId; fall back to the shopId on the first
+    // cart item's product (products carry their shopId from the API).
+    final shopId = authShopId.isNotEmpty
+        ? authShopId
+        : cart.items.firstOrNull?.product.shopId ?? '';
 
     final sale = await context.read<SalesProvider>().recordSale(
           shopId: shopId,
