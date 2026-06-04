@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -75,18 +76,25 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
   }
 
   void _onForegroundMessage(RemoteMessage message) {
+    // Show a visible banner — Android suppresses FCM banners when the app is open.
+    getIt<FcmService>().showForegroundNotification(message);
+
     final typeStr = message.data['type'] as String? ?? '';
     final type = _notifTypeFromString(typeStr);
+
+    final user = _authProvider.currentUser;
+    final isStaff = user?.role == UserRole.staff;
 
     if (type == NotificationType.productAdded ||
         type == NotificationType.productUpdated ||
         type == NotificationType.productDeleted) {
-      final user = _authProvider.currentUser;
       if (user != null && user.shopId.isNotEmpty) {
         _productProvider.loadProducts(user.shopId);
       }
+      // Refresh staff notification inbox badge for product events.
+      if (isStaff) _notificationProvider.loadNotifications(isStaff: true);
     } else {
-      _notificationProvider.loadNotifications();
+      _notificationProvider.loadNotifications(isStaff: isStaff);
     }
   }
 

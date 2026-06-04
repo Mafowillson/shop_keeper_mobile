@@ -11,9 +11,10 @@ class NotificationRemoteDataSourceImpl implements INotificationRemoteDataSource 
   NotificationRemoteDataSourceImpl(DioClient dioClient) : _dio = dioClient.client;
 
   @override
-  Future<List<NotificationModel>> getNotifications() async {
+  Future<List<NotificationModel>> getNotifications({bool isStaff = false}) async {
     try {
-      final res = await _dio.get('/notifications');
+      final endpoint = isStaff ? '/staff/notifications' : '/notifications';
+      final res = await _dio.get(endpoint);
       final list = res.data['notifications'] as List<dynamic>? ?? [];
       return list.cast<Map<String, dynamic>>().map(NotificationModel.fromJson).toList();
     } on DioException catch (e) {
@@ -22,18 +23,20 @@ class NotificationRemoteDataSourceImpl implements INotificationRemoteDataSource 
   }
 
   @override
-  Future<void> markAsRead(String id) async {
+  Future<void> markAsRead(String id, {bool isStaff = false}) async {
     try {
-      await _dio.patch('/notifications/$id/read');
+      final base = isStaff ? '/staff/notifications' : '/notifications';
+      await _dio.patch('$base/$id/read');
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }
   }
 
   @override
-  Future<void> markAllAsRead() async {
+  Future<void> markAllAsRead({bool isStaff = false}) async {
     try {
-      await _dio.patch('/notifications/read-all');
+      final base = isStaff ? '/staff/notifications' : '/notifications';
+      await _dio.patch('$base/read-all');
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }

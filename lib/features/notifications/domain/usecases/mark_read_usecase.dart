@@ -9,5 +9,6 @@ class MarkReadUseCase {
 
   const MarkReadUseCase(this._repository);
 
-  TaskEither<Failure, Unit> call(String id) => _repository.markAsRead(id);
+  TaskEither<Failure, Unit> call(String id, {bool isStaff = false}) =>
+      _repository.markAsRead(id, isStaff: isStaff);
 }

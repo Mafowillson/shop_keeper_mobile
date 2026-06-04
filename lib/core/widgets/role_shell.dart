@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
+import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+
+// ── Owner shell ───────────────────────────────────────────────────────────────
 
 class OwnerShell extends StatefulWidget {
   final Widget child;
@@ -19,15 +23,16 @@ class _OwnerShellState extends State<OwnerShell> {
   void initState() {
     super.initState();
     _selectedIndex = _getSelectedIndex(widget.location);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().loadNotifications(isStaff: false);
+    });
   }
 
   @override
   void didUpdateWidget(covariant OwnerShell oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.location != oldWidget.location) {
-      setState(() {
-        _selectedIndex = _getSelectedIndex(widget.location);
-      });
+      setState(() => _selectedIndex = _getSelectedIndex(widget.location));
     }
   }
 
@@ -41,18 +46,17 @@ class _OwnerShellState extends State<OwnerShell> {
     switch (index) {
       case 0:
         context.go('/owner/dashboard');
-        break;
       case 1:
         context.go('/owner/notifications');
-        break;
       case 2:
         context.go('/owner/profile');
-        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final unread = context.watch<NotificationProvider>().unreadCount;
+
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
@@ -61,16 +65,21 @@ class _OwnerShellState extends State<OwnerShell> {
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.ownerPrimary,
         unselectedItemColor: AppColors.textSecondary,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: _BadgeIcon(
+              icon: Icons.notifications_outlined,
+              activeIcon: Icons.notifications,
+              count: unread,
+              isSelected: _selectedIndex == 1,
+            ),
             label: 'Notifications',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
@@ -79,6 +88,8 @@ class _OwnerShellState extends State<OwnerShell> {
     );
   }
 }
+
+// ── Staff shell ───────────────────────────────────────────────────────────────
 
 class StaffShell extends StatefulWidget {
   final Widget child;
@@ -97,15 +108,16 @@ class _StaffShellState extends State<StaffShell> {
   void initState() {
     super.initState();
     _selectedIndex = _getSelectedIndex(widget.location);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NotificationProvider>().loadNotifications(isStaff: true);
+    });
   }
 
   @override
   void didUpdateWidget(covariant StaffShell oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.location != oldWidget.location) {
-      setState(() {
-        _selectedIndex = _getSelectedIndex(widget.location);
-      });
+      setState(() => _selectedIndex = _getSelectedIndex(widget.location));
     }
   }
 
@@ -119,18 +131,17 @@ class _StaffShellState extends State<StaffShell> {
     switch (index) {
       case 0:
         context.go('/staff/home');
-        break;
       case 1:
         context.go('/staff/notifications');
-        break;
       case 2:
         context.go('/staff/profile');
-        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final unread = context.watch<NotificationProvider>().unreadCount;
+
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
@@ -139,21 +150,76 @@ class _StaffShellState extends State<StaffShell> {
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.staffPrimary,
         unselectedItemColor: AppColors.textSecondary,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: _BadgeIcon(
+              icon: Icons.notifications_outlined,
+              activeIcon: Icons.notifications,
+              count: unread,
+              isSelected: _selectedIndex == 1,
+            ),
             label: 'Notifications',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Badge icon widget ─────────────────────────────────────────────────────────
+
+class _BadgeIcon extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final int count;
+  final bool isSelected;
+
+  const _BadgeIcon({
+    required this.icon,
+    required this.activeIcon,
+    required this.count,
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(isSelected ? activeIcon : icon),
+        if (count > 0)
+          Positioned(
+            right: -8,
+            top: -6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.danger,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+              child: Text(
+                count > 99 ? '99+' : '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  height: 1,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

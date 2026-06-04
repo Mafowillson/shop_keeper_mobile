@@ -21,37 +21,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   bool get _isOwner =>
       context.read<AuthProvider>().currentUser?.role == UserRole.owner;
 
+  bool get _isStaff => !_isOwner;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_isOwner) {
-        context.read<NotificationProvider>().loadNotifications();
-      }
+      context.read<NotificationProvider>().loadNotifications(isStaff: _isStaff);
     });
   }
 
+  List<String> get _filters => _isOwner
+      ? const ['All', 'Unread', 'Stock', 'Sale', 'Payment', 'Staff']
+      : const ['All', 'Unread', 'Added', 'Updated', 'Deleted'];
+
   List<AppNotification> _filtered(List<AppNotification> all) {
     if (_selectedFilter == 'All') return all;
-    if (_selectedFilter == 'Unread') {
-      return all.where((n) => !n.isRead).toList();
-    }
+    if (_selectedFilter == 'Unread') return all.where((n) => !n.isRead).toList();
     final type = _filterToType(_selectedFilter);
     return type == null ? all : all.where((n) => n.type == type).toList();
   }
 
   NotificationType? _filterToType(String filter) {
     switch (filter) {
-      case 'Stock':
-        return NotificationType.lowStock;
-      case 'Sale':
-        return NotificationType.largeSale;
-      case 'Payment':
-        return NotificationType.debtPayment;
-      case 'Staff':
-        return NotificationType.staffLogin;
-      default:
-        return null;
+      case 'Stock':   return NotificationType.lowStock;
+      case 'Sale':    return NotificationType.largeSale;
+      case 'Payment': return NotificationType.debtPayment;
+      case 'Staff':   return NotificationType.staffLogin;
+      case 'Added':   return NotificationType.productAdded;
+      case 'Updated': return NotificationType.productUpdated;
+      case 'Deleted': return NotificationType.productDeleted;
+      default:        return null;
     }
   }
 
@@ -103,7 +103,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isOwner) return const _StaffNotificationsScreen();
+    final primaryColor =
+        _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
 
     return Consumer<NotificationProvider>(
       builder: (context, provider, _) {
@@ -112,27 +113,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: RefreshIndicator(
-            onRefresh: provider.loadNotifications,
-            color: AppColors.ownerPrimary,
+            onRefresh: () =>
+                provider.loadNotifications(isStaff: _isStaff),
+            color: primaryColor,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 _NotificationsHeader(
                   unreadCount: provider.unreadCount,
+                  primaryColor: primaryColor,
                   onMarkAllRead:
                       provider.unreadCount > 0 ? provider.markAllAsRead : null,
                 ),
                 if (provider.isLoading && provider.notifications.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.ownerPrimary),
+                      child: CircularProgressIndicator(color: primaryColor),
                     ),
                   )
                 else ...[
                   SliverToBoxAdapter(
                     child: _FilterBar(
                       selected: _selectedFilter,
+                      filters: _filters,
+                      primaryColor: primaryColor,
                       onSelect: (f) => setState(() => _selectedFilter = f),
                     ),
                   ),
@@ -179,16 +183,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
 class _NotificationsHeader extends StatelessWidget {
   final int unreadCount;
+  final Color primaryColor;
   final VoidCallback? onMarkAllRead;
   const _NotificationsHeader(
-      {required this.unreadCount, required this.onMarkAllRead});
+      {required this.unreadCount,
+      required this.primaryColor,
+      required this.onMarkAllRead});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
         pinned: true,
         expandedHeight: 110,
         elevation: 0,
-        backgroundColor: AppColors.ownerPrimary,
+        backgroundColor: primaryColor,
         actions: [
           if (onMarkAllRead != null)
             TextButton(
@@ -203,9 +210,9 @@ class _NotificationsHeader extends StatelessWidget {
         flexibleSpace: FlexibleSpaceBar(
           collapseMode: CollapseMode.pin,
           background: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.ownerPrimaryDark, AppColors.ownerPrimary],
+                colors: [primaryColor.withValues(alpha: 0.85), primaryColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -256,17 +263,15 @@ class _NotificationsHeader extends StatelessWidget {
 
 class _FilterBar extends StatelessWidget {
   final String selected;
+  final List<String> filters;
+  final Color primaryColor;
   final ValueChanged<String> onSelect;
-  const _FilterBar({required this.selected, required this.onSelect});
-
-  static const _filters = [
-    'All',
-    'Unread',
-    'Stock',
-    'Sale',
-    'Payment',
-    'Staff'
-  ];
+  const _FilterBar({
+    required this.selected,
+    required this.filters,
+    required this.primaryColor,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) => Container(
@@ -275,7 +280,7 @@ class _FilterBar extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
-            children: _filters.map((f) {
+            children: filters.map((f) {
               final isActive = f == selected;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -286,9 +291,7 @@ class _FilterBar extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? AppColors.ownerPrimary
-                          : AppColors.background,
+                      color: isActive ? primaryColor : AppColors.background,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -500,117 +503,3 @@ class _ErrorBanner extends StatelessWidget {
       );
 }
 
-// ── Staff notifications screen ─────────────────────────────────────────────────
-// Staff receive push-only alerts (product added/updated/deleted). There is no
-// server-side inbox for staff — notifications arrive via FCM and are handled
-// by the OS notification tray.
-
-class _StaffNotificationsScreen extends StatelessWidget {
-  const _StaffNotificationsScreen();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Notifications'),
-          backgroundColor: AppColors.staffPrimary,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        backgroundColor: AppColors.background,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.staffPrimary.withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.notifications_active_outlined,
-                      color: AppColors.staffPrimary, size: 40),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Push notifications enabled',
-                  style: AppTextStyles.headingM,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'You receive alerts directly on your device when the owner updates products — prices, new items, or removals.',
-                  style: AppTextStyles.bodyM
-                      .copyWith(color: AppColors.textSecondary),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Column(
-                    children: [
-                      _AlertTypeRow(
-                        icon: Icons.add_box_outlined,
-                        color: AppColors.accent,
-                        label: 'New product added',
-                      ),
-                      Divider(height: 20, color: AppColors.border),
-                      _AlertTypeRow(
-                        icon: Icons.edit_outlined,
-                        color: AppColors.warning,
-                        label: 'Product price updated',
-                      ),
-                      Divider(height: 20, color: AppColors.border),
-                      _AlertTypeRow(
-                        icon: Icons.delete_outline,
-                        color: AppColors.danger,
-                        label: 'Product removed',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-}
-
-class _AlertTypeRow extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-
-  const _AlertTypeRow({
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w500),
-          ),
-        ],
-      );
-}

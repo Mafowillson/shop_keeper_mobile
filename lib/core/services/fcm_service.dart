@@ -1,13 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
-
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('[FCM] background message: ${message.messageId}');
-}
+import 'package:shopkeeper/main.dart' show localNotifications, shopkeeperChannel;
 
 class FcmService {
   final Dio _dio;
@@ -38,9 +35,8 @@ class FcmService {
           role == UserRole.owner ? '/owner/fcm-token' : '/staff/fcm-token';
 
       await _dio.post(endpoint, data: {'token': token});
-      debugPrint('[FCM] token uploaded successfully');
+      debugPrint('[FCM] token uploaded');
 
-      // Re-upload whenever Firebase rotates the token.
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
         try {
           await _dio.post(endpoint, data: {'token': newToken});
@@ -54,7 +50,29 @@ class FcmService {
     }
   }
 
-  /// Registers [onMessage] as the foreground message handler.
+  /// Shows a visible banner when a message arrives while the app is open.
+  /// Android does not auto-display notification banners in the foreground.
+  void showForegroundNotification(RemoteMessage message) {
+    final notification = message.notification;
+    if (notification == null) return;
+
+    localNotifications.show(
+      message.hashCode,
+      notification.title,
+      notification.body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          shopkeeperChannel.id,
+          shopkeeperChannel.name,
+          channelDescription: shopkeeperChannel.description,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+      ),
+    );
+  }
+
   void setupForegroundHandler(void Function(RemoteMessage) onMessage) {
     FirebaseMessaging.onMessage.listen((message) {
       debugPrint('[FCM] foreground: ${message.notification?.title}');

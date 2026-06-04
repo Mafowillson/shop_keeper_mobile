@@ -11,6 +11,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -36,4 +37,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Group is "com.android.tools", artifact is "desugar_jdk_libs".
+    // Previous failures used "com.android.tools.desugar_jdk_libs:desugar_jdk_libs"
+    // which mapped to the wrong Maven path (artifact name appeared twice in the URL).
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 }

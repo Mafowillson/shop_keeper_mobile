@@ -20,18 +20,20 @@ class NotificationProvider extends ChangeNotifier {
   List<AppNotification> _notifications = [];
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isStaff = false;
 
   List<AppNotification> get notifications => _notifications;
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  Future<void> loadNotifications() async {
+  Future<void> loadNotifications({bool isStaff = false}) async {
+    _isStaff = isStaff;
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    final result = await _getNotifications().run();
+    final result = await _getNotifications(isStaff: isStaff).run();
 
     result.fold(
       (failure) => _errorMessage = failure.message,
@@ -43,7 +45,7 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<void> markAsRead(String id) async {
-    final result = await _markRead(id).run();
+    final result = await _markRead(id, isStaff: _isStaff).run();
     result.fold(
       (failure) => _errorMessage = failure.message,
       (_) {
@@ -56,13 +58,11 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<void> markAllAsRead() async {
-    final result = await _markAllRead().run();
+    final result = await _markAllRead(isStaff: _isStaff).run();
     result.fold(
       (failure) => _errorMessage = failure.message,
       (_) {
-        _notifications = _notifications
-            .map((n) => n.copyWith(isRead: true))
-            .toList();
+        _notifications = _notifications.map((n) => n.copyWith(isRead: true)).toList();
       },
     );
     notifyListeners();
