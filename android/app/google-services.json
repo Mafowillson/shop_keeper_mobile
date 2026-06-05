@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:405979821207:android:6f2ff56e18d1632a9a25d2",
+        "mobilesdk_app_id": "1:405979821207:android:54d63949ef1ad10e9a25d2",
         "android_client_info": {
-          "package_name": "com.example.shop_keeper"
+          "package_name": "cm.shopkeeper.app"
         }
       },
       "oauth_client": [],
