@@ -8,6 +8,7 @@ import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/dashboard/domain/entities/dashboard_stats.dart';
 import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class OwnerDashboardScreen extends StatefulWidget {
   const OwnerDashboardScreen({super.key});
@@ -27,6 +28,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final ownerName = context.select<AuthProvider, String>(
       (p) => p.currentUser?.name ?? 'Owner',
     );
@@ -44,6 +46,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 _DashboardHeader(
                   ownerName: ownerName,
                   onRefresh: () => provider.loadStats(),
+                  l10n: l10n,
                 ),
                 if (provider.isLoading && provider.stats == null)
                   const SliverFillRemaining(
@@ -61,28 +64,33 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                           _ErrorBanner(provider.errorMessage!),
                           const SizedBox(height: 16),
                         ],
-                        _MetricsRow(stats: provider.stats),
+                        _MetricsRow(stats: provider.stats, l10n: l10n),
                         const SizedBox(height: 12),
                         _AlertsRow(
                           stats: provider.stats,
                           onStockTap: () => context.push('/owner/products'),
                           onDebtTap: () => context.push('/owner/debts'),
+                          l10n: l10n,
                         ),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Revenue — Last 7 Days'),
+                        _SectionLabel(l10n.revenueLastSevenDays),
                         const SizedBox(height: 10),
                         _WeeklyChartCard(
                           weekly: provider.stats?.weeklyRevenue ??
                               List.filled(7, 0.0),
+                          l10n: l10n,
                         ),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Quick Actions'),
+                        _SectionLabel(l10n.quickActions),
                         const SizedBox(height: 10),
-                        _QuickActionsGrid(),
+                        _QuickActionsGrid(l10n: l10n),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Recent Activity'),
+                        _SectionLabel(l10n.recentActivity),
                         const SizedBox(height: 10),
-                        _ActivityList(feed: provider.stats?.activityFeed ?? []),
+                        _ActivityList(
+                          feed: provider.stats?.activityFeed ?? [],
+                          l10n: l10n,
+                        ),
                       ]),
                     ),
                   ),
@@ -95,13 +103,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-
 class _DashboardHeader extends StatelessWidget {
   final String ownerName;
   final VoidCallback onRefresh;
+  final AppLocalizations l10n;
   const _DashboardHeader(
-      {required this.ownerName, required this.onRefresh});
+      {required this.ownerName, required this.onRefresh, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +143,7 @@ class _DashboardHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'Hello, $firstName',
+                l10n.helloName(firstName),
                 style: AppTextStyles.headingL.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 2),
@@ -152,8 +159,6 @@ class _DashboardHeader extends StatelessWidget {
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 class _SectionLabel extends StatelessWidget {
   final String text;
   const _SectionLabel(this.text);
@@ -161,8 +166,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style:
-            AppTextStyles.headingS.copyWith(color: AppColors.textSecondary),
+        style: AppTextStyles.headingS.copyWith(color: AppColors.textSecondary),
       );
 }
 
@@ -172,34 +176,29 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border:
-              Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(message,
-                  style:
-                      AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
             ),
           ],
         ),
       );
 }
 
-// ── Key metrics ───────────────────────────────────────────────────────────────
-
 class _MetricsRow extends StatelessWidget {
   final DashboardStats? stats;
-  const _MetricsRow({required this.stats});
+  final AppLocalizations l10n;
+  const _MetricsRow({required this.stats, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -207,7 +206,7 @@ class _MetricsRow extends StatelessWidget {
           Expanded(
             flex: 3,
             child: _MetricTile(
-              label: "Today's Revenue",
+              label: l10n.todaysRevenue,
               value: formatFCFA(stats?.todaySales ?? 0),
               icon: Icons.payments_outlined,
               color: AppColors.ownerPrimary,
@@ -218,7 +217,7 @@ class _MetricsRow extends StatelessWidget {
           Expanded(
             flex: 2,
             child: _MetricTile(
-              label: 'Transactions',
+              label: l10n.transactions,
               value: '${stats?.transactionCount ?? 0}',
               icon: Icons.receipt_long_outlined,
               color: AppColors.accent,
@@ -282,24 +281,24 @@ class _MetricTile extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: AppTextStyles.labelM
-                  .copyWith(color: AppColors.textSecondary),
+              style:
+                  AppTextStyles.labelM.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
       );
 }
 
-// ── Alert chips ───────────────────────────────────────────────────────────────
-
 class _AlertsRow extends StatelessWidget {
   final DashboardStats? stats;
   final VoidCallback onStockTap;
   final VoidCallback onDebtTap;
+  final AppLocalizations l10n;
   const _AlertsRow(
       {required this.stats,
       required this.onStockTap,
-      required this.onDebtTap});
+      required this.onDebtTap,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -312,10 +311,9 @@ class _AlertsRow extends StatelessWidget {
           child: _AlertChip(
             icon: Icons.inventory_2_outlined,
             label: lowStock == 0
-                ? 'Stock OK'
-                : '$lowStock low stock',
-            color:
-                lowStock > 0 ? AppColors.warning : AppColors.success,
+                ? l10n.stockOk
+                : '$lowStock ${l10n.lowStockAlert}',
+            color: lowStock > 0 ? AppColors.warning : AppColors.success,
             onTap: onStockTap,
           ),
         ),
@@ -323,9 +321,8 @@ class _AlertsRow extends StatelessWidget {
         Expanded(
           child: _AlertChip(
             icon: Icons.account_balance_wallet_outlined,
-            label: debts == 0
-                ? 'No debts'
-                : '${formatFCFA(debts)} owed',
+            label:
+                debts == 0 ? l10n.noDebts : '${formatFCFA(debts)} ${l10n.owed}',
             color: debts > 0 ? AppColors.danger : AppColors.success,
             onTap: onDebtTap,
           ),
@@ -350,13 +347,11 @@ class _AlertChip extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-              vertical: 10, horizontal: 12),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(10),
-            border:
-                Border.all(color: color.withValues(alpha: 0.25)),
+            border: Border.all(color: color.withValues(alpha: 0.25)),
           ),
           child: Row(
             children: [
@@ -365,8 +360,7 @@ class _AlertChip extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style:
-                      AppTextStyles.labelL.copyWith(color: color),
+                  style: AppTextStyles.labelL.copyWith(color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -377,11 +371,10 @@ class _AlertChip extends StatelessWidget {
       );
 }
 
-// ── Weekly revenue chart ──────────────────────────────────────────────────────
-
 class _WeeklyChartCard extends StatelessWidget {
   final List<double> weekly;
-  const _WeeklyChartCard({required this.weekly});
+  final AppLocalizations l10n;
+  const _WeeklyChartCard({required this.weekly, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +402,7 @@ class _WeeklyChartCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Weekly total',
+                l10n.weeklyTotal,
                 style: AppTextStyles.headingS
                     .copyWith(color: AppColors.textSecondary),
               ),
@@ -421,16 +414,13 @@ class _WeeklyChartCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // Bars — fixed-height row so labels never cause overflow.
           SizedBox(
             height: 100,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: List.generate(7, (i) {
-                final barH = maxVal > 0
-                    ? (weekly[i] / maxVal) * 94
-                    : 0.0;
+                final barH = maxVal > 0 ? (weekly[i] / maxVal) * 94 : 0.0;
                 final isToday = i == 6;
                 return Container(
                   width: 26,
@@ -438,17 +428,15 @@ class _WeeklyChartCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isToday
                         ? AppColors.ownerPrimary
-                        : AppColors.ownerPrimary
-                            .withValues(alpha: 0.22),
-                    borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(5)),
+                        : AppColors.ownerPrimary.withValues(alpha: 0.22),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(5)),
                   ),
                 );
               }),
             ),
           ),
           const SizedBox(height: 6),
-          // Day labels — separate row below the bars.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(7, (i) {
@@ -459,12 +447,9 @@ class _WeeklyChartCard extends StatelessWidget {
                   days[i],
                   textAlign: TextAlign.center,
                   style: AppTextStyles.labelS.copyWith(
-                    color: isToday
-                        ? AppColors.ownerPrimary
-                        : AppColors.textHint,
-                    fontWeight: isToday
-                        ? FontWeight.w700
-                        : FontWeight.w400,
+                    color:
+                        isToday ? AppColors.ownerPrimary : AppColors.textHint,
+                    fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
                   ),
                 ),
               );
@@ -477,40 +462,39 @@ class _WeeklyChartCard extends StatelessWidget {
 
   List<String> _dayLabels() {
     final today = DateTime.now();
-    return List.generate(
-        7,
-        (i) => DateFormat('E')
-            .format(today.subtract(Duration(days: 6 - i))));
+    return List.generate(7,
+        (i) => DateFormat('E').format(today.subtract(Duration(days: 6 - i))));
   }
 }
 
-// ── Quick actions ─────────────────────────────────────────────────────────────
-
 class _QuickActionsGrid extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _QuickActionsGrid({required this.l10n});
+
   @override
   Widget build(BuildContext context) {
-    const actions = [
+    final actions = [
       _Action(
         icon: Icons.add_box_outlined,
-        label: 'Add Product',
+        label: l10n.addProduct,
         color: AppColors.success,
         route: '/owner/products/add',
       ),
       _Action(
         icon: Icons.bar_chart_rounded,
-        label: 'View Sales',
+        label: l10n.viewSales,
         color: AppColors.accent,
         route: '/owner/sales',
       ),
       _Action(
         icon: Icons.people_outline,
-        label: 'Debts',
+        label: l10n.debts,
         color: AppColors.danger,
         route: '/owner/debts',
       ),
       _Action(
         icon: Icons.auto_awesome_outlined,
-        label: 'AI Insights',
+        label: l10n.aiInsights,
         color: AppColors.ownerPrimary,
         route: '/owner/chat',
       ),
@@ -552,8 +536,7 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         onTap: () => context.push(action.route),
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
@@ -574,8 +557,7 @@ class _ActionTile extends StatelessWidget {
                   color: action.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child:
-                    Icon(action.icon, color: action.color, size: 20),
+                child: Icon(action.icon, color: action.color, size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -591,11 +573,10 @@ class _ActionTile extends StatelessWidget {
       );
 }
 
-// ── Activity feed ─────────────────────────────────────────────────────────────
-
 class _ActivityList extends StatelessWidget {
   final List<ActivityFeed> feed;
-  const _ActivityList({required this.feed});
+  final AppLocalizations l10n;
+  const _ActivityList({required this.feed, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -607,8 +588,7 @@ class _ActivityList extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Center(
-          child: Text('No recent activity',
-              style: AppTextStyles.bodyS),
+          child: Text(l10n.noRecentActivity, style: AppTextStyles.bodyS),
         ),
       );
     }
@@ -632,16 +612,15 @@ class _ActivityList extends StatelessWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: AppColors.accent
-                            .withValues(alpha: 0.1),
+                        color: AppColors.accent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(Icons.receipt_long,
@@ -650,8 +629,7 @@ class _ActivityList extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             item.title,
@@ -660,8 +638,7 @@ class _ActivityList extends StatelessWidget {
                                 fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 2),
-                          Text(item.subtitle,
-                              style: AppTextStyles.bodyS),
+                          Text(item.subtitle, style: AppTextStyles.bodyS),
                         ],
                       ),
                     ),
@@ -674,10 +651,7 @@ class _ActivityList extends StatelessWidget {
                 ),
               ),
               if (!isLast)
-                const Divider(
-                    height: 1,
-                    indent: 64,
-                    color: AppColors.border),
+                const Divider(height: 1, indent: 64, color: AppColors.border),
             ],
           );
         }),

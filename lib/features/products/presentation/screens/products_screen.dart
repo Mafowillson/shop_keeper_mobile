@@ -8,6 +8,7 @@ import 'package:shopkeeper/core/widgets/stock_badge.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -32,8 +33,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
-  String get _shopId =>
-      context.read<AuthProvider>().currentUser?.shopId ?? '';
+  String get _shopId => context.read<AuthProvider>().currentUser?.shopId ?? '';
 
   Future<void> _load({String? category}) => context
       .read<ProductProvider>()
@@ -49,46 +49,50 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> _confirmDeactivate(BuildContext context, Product product) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Remove product?', style: AppTextStyles.headingM),
+        title: Text(l10n.removeProduct, style: AppTextStyles.headingM),
         content: Text(
-          'This will deactivate "${product.name}" from your inventory.',
+          l10n.deactivateProductConfirm(product.name),
           style: AppTextStyles.bodyM,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Remove'),
+            child: Text(l10n.remove),
           ),
         ],
       ),
     );
 
     if (confirmed != true || !context.mounted) return;
-    final ok = await context.read<ProductProvider>().deactivateProduct(product.id);
+    final ok =
+        await context.read<ProductProvider>().deactivateProduct(product.id);
     if (!context.mounted) return;
     if (ok) {
-      SnackBarHelper.showSuccess(context, '${product.name} removed');
+      SnackBarHelper.showSuccess(
+          context, '${product.name} ${l10n.remove.toLowerCase()}d');
     } else {
-      final err = context.read<ProductProvider>().errorMessage ?? 'Failed';
+      final err = context.read<ProductProvider>().errorMessage ?? l10n.error;
       SnackBarHelper.showError(context, err);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Products',
+        title: Text(l10n.products,
             style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
@@ -96,7 +100,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add product',
+            tooltip: l10n.addProductTooltip,
             onPressed: () async {
               await context.push('/owner/products/add');
               if (mounted) _load(category: _selectedCategory);
@@ -120,11 +124,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                   onChanged: _onSearchChanged,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Search products…',
+                    hintText: l10n.searchProductsHint,
                     hintStyle:
                         TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                    prefixIcon:
-                        Icon(Icons.search, color: Colors.white.withValues(alpha: 0.8)),
+                    prefixIcon: Icon(Icons.search,
+                        color: Colors.white.withValues(alpha: 0.8)),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                             icon: const Icon(Icons.clear, color: Colors.white),
@@ -164,8 +168,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             onSelected: (_) => _onCategoryChanged(cat),
                             selectedColor: AppColors.ownerPrimary,
                             labelStyle: AppTextStyles.bodyM.copyWith(
-                              color: selected ? Colors.white : AppColors.textPrimary,
-                              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                              color: selected
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontWeight:
+                                  selected ? FontWeight.w600 : FontWeight.w400,
                             ),
                             backgroundColor: AppColors.background,
                             side: BorderSide(
@@ -182,13 +189,14 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
               // ── Count bar ──────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   children: [
                     Text(
                       provider.isLoading
-                          ? 'Loading…'
-                          : '${products.length} product${products.length == 1 ? '' : 's'}',
+                          ? l10n.loadingEllipsis
+                          : '${products.length} ${l10n.products.toLowerCase()}',
                       style: AppTextStyles.bodyM
                           .copyWith(color: AppColors.textSecondary),
                     ),
@@ -253,16 +261,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                 _load(category: _selectedCategory);
                               }
                             },
+                            l10n: l10n,
                           )
                         : RefreshIndicator(
                             color: AppColors.ownerPrimary,
-                            onRefresh: () =>
-                                _load(category: _selectedCategory),
+                            onRefresh: () => _load(category: _selectedCategory),
                             child: ListView.builder(
                               padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                               itemCount: products.length,
                               itemBuilder: (ctx, i) => _ProductCard(
                                 product: products[i],
+                                l10n: l10n,
                                 onEdit: () async {
                                   await context.push(
                                       '/owner/products/${products[i].id}/edit');
@@ -284,17 +293,17 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 }
 
-// ── Product card ──────────────────────────────────────────────────────────────
-
 class _ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onEdit;
   final VoidCallback onDeactivate;
+  final AppLocalizations l10n;
 
   const _ProductCard({
     required this.product,
     required this.onEdit,
     required this.onDeactivate,
+    required this.l10n,
   });
 
   @override
@@ -313,7 +322,6 @@ class _ProductCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              // Icon
               Container(
                 width: 48,
                 height: 48,
@@ -325,8 +333,6 @@ class _ProductCard extends StatelessWidget {
                     color: AppColors.accent, size: 22),
               ),
               const SizedBox(width: 12),
-
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +354,7 @@ class _ProductCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'FCFA ${product.retailPrice.toStringAsFixed(0)}',
+                          '${l10n.fcfa} ${product.retailPrice.toStringAsFixed(0)}',
                           style: AppTextStyles.bodyM.copyWith(
                             color: AppColors.ownerPrimary,
                             fontWeight: FontWeight.w600,
@@ -364,11 +370,8 @@ class _ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Menu
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert,
-                    color: Colors.grey[400], size: 20),
+                icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 onSelected: (v) {
@@ -381,7 +384,7 @@ class _ProductCard extends StatelessWidget {
                     child: Row(children: [
                       const Icon(Icons.edit_outlined, size: 18),
                       const SizedBox(width: 8),
-                      Text('Edit', style: AppTextStyles.bodyM),
+                      Text(l10n.edit, style: AppTextStyles.bodyM),
                     ]),
                   ),
                   PopupMenuItem(
@@ -390,7 +393,7 @@ class _ProductCard extends StatelessWidget {
                       const Icon(Icons.delete_outline,
                           size: 18, color: AppColors.danger),
                       const SizedBox(width: 8),
-                      Text('Remove',
+                      Text(l10n.remove,
                           style: AppTextStyles.bodyM
                               .copyWith(color: AppColors.danger)),
                     ]),
@@ -405,13 +408,13 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-
 class _EmptyState extends StatelessWidget {
   final bool hasSearch;
   final VoidCallback onAdd;
+  final AppLocalizations l10n;
 
-  const _EmptyState({required this.hasSearch, required this.onAdd});
+  const _EmptyState(
+      {required this.hasSearch, required this.onAdd, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -424,15 +427,15 @@ class _EmptyState extends StatelessWidget {
             Icon(Icons.inventory_2_outlined, size: 72, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              hasSearch ? 'No products match your search' : 'No products yet',
-              style:
-                  AppTextStyles.headingM.copyWith(color: AppColors.textSecondary),
+              hasSearch ? l10n.noProductsMatchSearch : l10n.noProductsYet,
+              style: AppTextStyles.headingM
+                  .copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             if (!hasSearch) ...[
               const SizedBox(height: 8),
               Text(
-                'Add your first product to start tracking inventory.',
+                l10n.addFirstProduct,
                 style: AppTextStyles.bodyM
                     .copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
@@ -441,7 +444,7 @@ class _EmptyState extends StatelessWidget {
               TextButton.icon(
                 onPressed: onAdd,
                 icon: const Icon(Icons.add),
-                label: const Text('Add product'),
+                label: Text(l10n.addProduct),
                 style: TextButton.styleFrom(
                     foregroundColor: AppColors.ownerPrimary),
               ),

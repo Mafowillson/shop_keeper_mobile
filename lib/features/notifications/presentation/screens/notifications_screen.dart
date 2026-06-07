@@ -7,6 +7,7 @@ import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/notifications/domain/entities/app_notification.dart';
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -37,21 +38,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   List<AppNotification> _filtered(List<AppNotification> all) {
     if (_selectedFilter == 'All') return all;
-    if (_selectedFilter == 'Unread') return all.where((n) => !n.isRead).toList();
+    if (_selectedFilter == 'Unread') {
+      return all.where((n) => !n.isRead).toList();
+    }
     final type = _filterToType(_selectedFilter);
     return type == null ? all : all.where((n) => n.type == type).toList();
   }
 
   NotificationType? _filterToType(String filter) {
     switch (filter) {
-      case 'Stock':   return NotificationType.lowStock;
-      case 'Sale':    return NotificationType.largeSale;
-      case 'Payment': return NotificationType.debtPayment;
-      case 'Staff':   return NotificationType.staffLogin;
-      case 'Added':   return NotificationType.productAdded;
-      case 'Updated': return NotificationType.productUpdated;
-      case 'Deleted': return NotificationType.productDeleted;
-      default:        return null;
+      case 'Stock':
+        return NotificationType.lowStock;
+      case 'Sale':
+        return NotificationType.largeSale;
+      case 'Payment':
+        return NotificationType.debtPayment;
+      case 'Staff':
+        return NotificationType.staffLogin;
+      case 'Added':
+        return NotificationType.productAdded;
+      case 'Updated':
+        return NotificationType.productUpdated;
+      case 'Deleted':
+        return NotificationType.productDeleted;
+      default:
+        return null;
     }
   }
 
@@ -103,6 +114,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final primaryColor =
         _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
 
@@ -113,8 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: RefreshIndicator(
-            onRefresh: () =>
-                provider.loadNotifications(isStaff: _isStaff),
+            onRefresh: () => provider.loadNotifications(isStaff: _isStaff),
             color: primaryColor,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -124,6 +135,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   primaryColor: primaryColor,
                   onMarkAllRead:
                       provider.unreadCount > 0 ? provider.markAllAsRead : null,
+                  l10n: l10n,
                 ),
                 if (provider.isLoading && provider.notifications.isEmpty)
                   SliverFillRemaining(
@@ -148,9 +160,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     ),
                   if (items.isEmpty)
-                    const SliverFillRemaining(
+                    SliverFillRemaining(
                       hasScrollBody: false,
-                      child: _EmptyState(),
+                      child: _EmptyState(l10n: l10n),
                     )
                   else
                     SliverPadding(
@@ -161,6 +173,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             notification: items[i],
                             icon: _iconFor(items[i].type),
                             color: _colorFor(items[i].type),
+                            l10n: l10n,
                             onTap: items[i].isRead
                                 ? null
                                 : () => provider.markAsRead(items[i].id),
@@ -179,16 +192,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────────
-
 class _NotificationsHeader extends StatelessWidget {
   final int unreadCount;
   final Color primaryColor;
   final VoidCallback? onMarkAllRead;
+  final AppLocalizations l10n;
   const _NotificationsHeader(
       {required this.unreadCount,
       required this.primaryColor,
-      required this.onMarkAllRead});
+      required this.onMarkAllRead,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
@@ -201,7 +214,7 @@ class _NotificationsHeader extends StatelessWidget {
             TextButton(
               onPressed: onMarkAllRead,
               child: Text(
-                'Mark all read',
+                l10n.markAllRead,
                 style: AppTextStyles.labelL.copyWith(color: Colors.white),
               ),
             ),
@@ -225,7 +238,7 @@ class _NotificationsHeader extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Notifications',
+                      l10n.notifications,
                       style:
                           AppTextStyles.headingL.copyWith(color: Colors.white),
                     ),
@@ -249,7 +262,9 @@ class _NotificationsHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  unreadCount == 0 ? 'All caught up' : '$unreadCount unread',
+                  unreadCount == 0
+                      ? l10n.allCaughtUp
+                      : l10n.unreadCount(unreadCount),
                   style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
                 ),
               ],
@@ -258,8 +273,6 @@ class _NotificationsHeader extends StatelessWidget {
         ),
       );
 }
-
-// ── Filter bar ─────────────────────────────────────────────────────────────────
 
 class _FilterBar extends StatelessWidget {
   final String selected;
@@ -310,19 +323,19 @@ class _FilterBar extends StatelessWidget {
       );
 }
 
-// ── Notification tile ──────────────────────────────────────────────────────────
-
 class _NotificationTile extends StatelessWidget {
   final AppNotification notification;
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
+  final AppLocalizations l10n;
 
   const _NotificationTile({
     required this.notification,
     required this.icon,
     required this.color,
     required this.onTap,
+    required this.l10n,
   });
 
   @override
@@ -409,7 +422,7 @@ class _NotificationTile extends StatelessWidget {
                     if (!isRead) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Tap to dismiss',
+                        l10n.tapToDismiss,
                         style: AppTextStyles.labelS.copyWith(color: color),
                       ),
                     ],
@@ -432,10 +445,9 @@ class _NotificationTile extends StatelessWidget {
   }
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────────
-
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final AppLocalizations l10n;
+  const _EmptyState({required this.l10n});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -459,22 +471,17 @@ class _EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No notifications',
+                l10n.noNotifications,
                 style: AppTextStyles.headingS
                     .copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 6),
-              Text(
-                "You're all caught up.",
-                style: AppTextStyles.bodyS,
-              ),
+              Text(l10n.allCaughtUpPeriod, style: AppTextStyles.bodyS),
             ],
           ),
         ),
       );
 }
-
-// ── Error banner ───────────────────────────────────────────────────────────────
 
 class _ErrorBanner extends StatelessWidget {
   final String message;
@@ -502,4 +509,3 @@ class _ErrorBanner extends StatelessWidget {
         ),
       );
 }
-

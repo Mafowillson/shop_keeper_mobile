@@ -9,6 +9,7 @@ import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/risk_badge.dart';
 import 'package:shopkeeper/features/debts/domain/entities/debt_record.dart';
 import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class CustomerDetailScreen extends StatefulWidget {
   final String customerId;
@@ -39,6 +40,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
   }
 
   Future<void> _recordPayment() async {
+    final l10n = AppLocalizations.of(context)!;
     final amount = double.tryParse(_paymentController.text);
     if (amount == null || amount <= 0) return;
 
@@ -46,7 +48,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
     final success = await context.read<DebtProvider>().recordPayment(
           widget.customerId,
           amount,
-          _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+          _noteController.text.trim().isEmpty
+              ? null
+              : _noteController.text.trim(),
         );
 
     if (!mounted) return;
@@ -55,24 +59,25 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       _noteController.clear();
       scaffoldMessenger.showSnackBar(
         SnackBar(
-          content: Text('Payment of ${formatFCFA(amount)} recorded'),
+          content: Text(
+              '${l10n.paymentRecord} ${formatFCFA(amount)} ${l10n.success.toLowerCase()}'),
           backgroundColor: AppColors.success,
         ),
       );
-      // Reload history to show the new record.
       context.read<DebtProvider>().loadCustomerDetail(widget.customerId);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<DebtProvider>(
       builder: (context, provider, _) {
         final customer = provider.selectedCustomer;
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(customer?.name ?? 'Customer'),
+            title: Text(customer?.name ?? l10n.customers),
             backgroundColor: AppColors.ownerPrimary,
             elevation: 0,
           ),
@@ -81,8 +86,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
               : customer == null
                   ? Center(
                       child: Text(
-                        provider.errorMessage ?? 'Customer not found',
-                        style: AppTextStyles.bodyM.copyWith(color: AppColors.danger),
+                        provider.errorMessage ?? l10n.noDataFound,
+                        style: AppTextStyles.bodyM
+                            .copyWith(color: AppColors.danger),
                       ),
                     )
                   : SingleChildScrollView(
@@ -90,14 +96,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.ownerPrimary.withValues(alpha: 0.08),
+                              color: AppColors.ownerPrimary
+                                  .withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                  color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
+                                  color: AppColors.ownerPrimary
+                                      .withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               children: [
@@ -117,14 +124,15 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(customer.name,
                                           style: AppTextStyles.headingL),
                                       if (customer.phone.isNotEmpty)
                                         Text(customer.phone,
-                                            style: AppTextStyles.bodyM
-                                                .copyWith(color: Colors.grey[600])),
+                                            style: AppTextStyles.bodyM.copyWith(
+                                                color: Colors.grey[600])),
                                       const SizedBox(height: 6),
                                       Row(
                                         children: [
@@ -133,7 +141,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                           Text(
                                             'Since ${DateFormat('MMM y').format(customer.createdAt)}',
                                             style: AppTextStyles.bodyM.copyWith(
-                                                color: Colors.grey[600], fontSize: 11),
+                                                color: Colors.grey[600],
+                                                fontSize: 11),
                                           ),
                                         ],
                                       ),
@@ -144,13 +153,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-
-                          // Debt stats
                           Row(
                             children: [
                               Expanded(
                                 child: _StatCard(
-                                  label: 'Outstanding Debt',
+                                  label: l10n.outstandingDebt,
                                   value: formatFCFA(customer.totalDebt),
                                   color: customer.totalDebt > 0
                                       ? AppColors.danger
@@ -160,7 +167,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _StatCard(
-                                  label: 'Debt Records',
+                                  label: l10n.debtRecords,
                                   value: '${provider.debtHistory.length}',
                                   color: AppColors.accent,
                                 ),
@@ -168,71 +175,76 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 24),
-
-                          // Record payment
                           if (customer.totalDebt > 0) ...[
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.05),
+                                color:
+                                    AppColors.success.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: AppColors.success.withValues(alpha: 0.3)),
+                                    color: AppColors.success
+                                        .withValues(alpha: 0.3)),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Record Payment', style: AppTextStyles.headingM),
+                                  Text(l10n.recordPayment,
+                                      style: AppTextStyles.headingM),
                                   const SizedBox(height: 12),
                                   TextField(
                                     controller: _paymentController,
                                     keyboardType: TextInputType.number,
                                     decoration: InputDecoration(
-                                      hintText: 'Amount',
-                                      prefixText: 'FCFA ',
+                                      hintText: l10n.amount,
+                                      prefixText: '${l10n.fcfa} ',
                                       border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8)),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 12),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 12),
                                     ),
                                   ),
                                   const SizedBox(height: 10),
                                   TextField(
                                     controller: _noteController,
                                     decoration: InputDecoration(
-                                      hintText: 'Note (optional)',
+                                      hintText: l10n.noteOptional,
                                       border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(8)),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 12),
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 12),
                                     ),
                                   ),
                                   const SizedBox(height: 12),
                                   AppButton.primary(
                                     label: provider.isSaving
-                                        ? 'Recording…'
-                                        : 'Record Payment',
-                                    onPressed:
-                                        provider.isSaving ? null : _recordPayment,
+                                        ? l10n.recordingEllipsis
+                                        : l10n.recordPayment,
+                                    onPressed: provider.isSaving
+                                        ? null
+                                        : _recordPayment,
                                   ),
                                 ],
                               ),
                             ),
                             const SizedBox(height: 24),
                           ],
-
-                          // Debt history
-                          Text('Transaction History', style: AppTextStyles.headingM),
+                          Text(l10n.transactionHistory,
+                              style: AppTextStyles.headingM),
                           const SizedBox(height: 12),
                           if (provider.debtHistory.isEmpty)
                             Center(
-                              child: Text('No transactions yet',
+                              child: Text(l10n.noTransactionsYet,
                                   style: AppTextStyles.bodyM
                                       .copyWith(color: Colors.grey[500])),
                             )
                           else
                             ...provider.debtHistory.map(
-                                (r) => _DebtRecordTile(record: r)),
+                                (r) => _DebtRecordTile(record: r, l10n: l10n)),
                         ],
                       ),
                     ),
@@ -246,7 +258,8 @@ class _StatCard extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  const _StatCard({required this.label, required this.value, required this.color});
+  const _StatCard(
+      {required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -263,8 +276,7 @@ class _StatCard extends StatelessWidget {
                 style: AppTextStyles.bodyM
                     .copyWith(color: Colors.grey[600], fontSize: 12)),
             const SizedBox(height: 6),
-            Text(value,
-                style: AppTextStyles.headingS.copyWith(color: color)),
+            Text(value, style: AppTextStyles.headingS.copyWith(color: color)),
           ],
         ),
       );
@@ -272,7 +284,8 @@ class _StatCard extends StatelessWidget {
 
 class _DebtRecordTile extends StatelessWidget {
   final DebtRecord record;
-  const _DebtRecordTile({required this.record});
+  final AppLocalizations l10n;
+  const _DebtRecordTile({required this.record, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -309,15 +322,17 @@ class _DebtRecordTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isCredit ? 'Credit' : 'Payment',
-                  style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                  isCredit ? l10n.creditRecord : l10n.paymentRecord,
+                  style:
+                      AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
                 if (record.note != null && record.note!.isNotEmpty)
                   Text(record.note!,
                       style: AppTextStyles.bodyM
                           .copyWith(color: Colors.grey[600], fontSize: 12)),
                 Text(
-                  DateFormat('d MMM y, h:mm a').format(record.recordedAt.toLocal()),
+                  DateFormat('d MMM y, h:mm a')
+                      .format(record.recordedAt.toLocal()),
                   style: AppTextStyles.bodyM
                       .copyWith(color: Colors.grey[400], fontSize: 11),
                 ),
@@ -333,7 +348,7 @@ class _DebtRecordTile extends StatelessWidget {
                     .copyWith(fontWeight: FontWeight.w700, color: color),
               ),
               Text(
-                'Balance: ${formatFCFA(record.balanceAfter)}',
+                '${l10n.balance} ${formatFCFA(record.balanceAfter)}',
                 style: AppTextStyles.bodyM
                     .copyWith(color: Colors.grey[500], fontSize: 11),
               ),

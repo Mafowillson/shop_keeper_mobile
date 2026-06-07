@@ -3,7 +3,8 @@ import 'package:shopkeeper/features/auth/data/models/user_model.dart';
 
 abstract class IAuthRemoteDataSource {
   Future<UserModel> login(String email, String password, UserRole role);
-  Future<UserModel> register({required String name, required String email, required String password});
+  Future<UserModel> register(
+      {required String name, required String email, required String password});
   Future<String> registerShop({required String shopName});
   Future<UserModel> refreshSession();
   Future<void> logout();

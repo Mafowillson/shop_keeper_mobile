@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
-import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -39,36 +39,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  String? _requiredValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    return null;
-  }
-
-  String? _emailValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
-  String? _passwordValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
-    }
-    return null;
-  }
-
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final authProvider = context.read<AuthProvider>();
     await authProvider.register(
@@ -81,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (authProvider.errorMessage != null) {
         SnackBarHelper.showError(context, authProvider.errorMessage!);
       } else {
-        SnackBarHelper.showSuccess(context, 'Account created successfully!');
+        SnackBarHelper.showSuccess(context, l10n.accountCreatedSuccessfully);
         context.go('/register-shop');
       }
     }
@@ -89,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -125,13 +99,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      AppStrings.appName,
+                      l10n.appName,
                       style:
                           AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Grow your retail business efficiently',
+                      l10n.growRetailBusiness,
                       style:
                           AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
@@ -166,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Register Owner Account',
+                          l10n.registerOwnerAccount,
                           style: AppTextStyles.displayS.copyWith(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,
@@ -174,35 +148,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Create a secure account to manage your retail business',
+                          l10n.createSecureAccount,
                           style: AppTextStyles.bodyS,
                         ),
                         const SizedBox(height: 24),
                         AppTextField(
-                          label: 'Full Name',
+                          label: l10n.fullName,
                           hintText: 'e.g. John Doe',
                           controller: _nameController,
-                          validator: _requiredValidator,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return l10n.fieldRequired;
+                            }
+                            return null;
+                          },
                           prefixIcon:
                               const Icon(Icons.person_outline, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
-                          label: 'Email Address',
+                          label: l10n.emailAddress,
                           hintText: 'e.g. john@example.com',
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          validator: _emailValidator,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return l10n.fieldRequired;
+                            }
+                            final emailRegex =
+                                RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            if (!emailRegex.hasMatch(v.trim())) {
+                              return l10n.enterValidEmail;
+                            }
+                            return null;
+                          },
                           prefixIcon:
                               const Icon(Icons.email_outlined, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
-                          label: 'Password',
-                          hintText: 'Minimum 6 characters',
+                          label: l10n.password,
+                          hintText: l10n.minimumSixChars,
                           controller: _passwordController,
                           obscureText: _obscurePassword,
-                          validator: _passwordValidator,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return l10n.fieldRequired;
+                            }
+                            if (v.length < 6) {
+                              return l10n.passwordMinLength;
+                            }
+                            return null;
+                          },
                           prefixIcon: const Icon(Icons.lock_outline, size: 22),
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -221,7 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         const SizedBox(height: 32),
                         AppButton.primary(
-                          label: 'Create Account',
+                          label: l10n.createAccount,
                           isLoading: authProvider.isLoading,
                           onPressed: _handleRegister,
                         ),
@@ -230,14 +227,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Already have an account? ',
+                              '${l10n.alreadyHaveAccount} ',
                               style: AppTextStyles.bodyM
                                   .copyWith(color: AppColors.textSecondary),
                             ),
                             GestureDetector(
                               onTap: () => context.go('/login'),
                               child: Text(
-                                'Sign In',
+                                l10n.signIn,
                                 style: AppTextStyles.bodyM.copyWith(
                                   color: AppColors.accent,
                                   fontWeight: FontWeight.w700,

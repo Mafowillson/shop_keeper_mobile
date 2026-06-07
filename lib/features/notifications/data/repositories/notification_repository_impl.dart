@@ -12,7 +12,8 @@ class NotificationRepositoryImpl implements INotificationRepository {
   NotificationRepositoryImpl(this._remote);
 
   @override
-  TaskEither<Failure, List<AppNotification>> getNotifications({bool isStaff = false}) =>
+  TaskEither<Failure, List<AppNotification>> getNotifications(
+          {bool isStaff = false}) =>
       TaskEither.tryCatch(
         () async {
           final models = await _remote.getNotifications(isStaff: isStaff);

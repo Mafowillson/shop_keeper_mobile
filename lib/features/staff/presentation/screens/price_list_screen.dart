@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class PriceListScreen extends StatefulWidget {
   const PriceListScreen({super.key});
@@ -52,6 +53,7 @@ class _PriceListScreenState extends State<PriceListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Consumer<ProductProvider>(
@@ -65,6 +67,7 @@ class _PriceListScreenState extends State<PriceListScreen> {
                 controller: _searchController,
                 onChanged: () => setState(() {}),
                 resultCount: products.length,
+                l10n: l10n,
               ),
               _CategorySliver(
                 categories: categories,
@@ -75,15 +78,11 @@ class _PriceListScreenState extends State<PriceListScreen> {
             body: _Body(
               provider: provider,
               products: products,
+              l10n: l10n,
               onRefresh: () {
-                final shopId = context
-                        .read<AuthProvider>()
-                        .currentUser
-                        ?.shopId ??
-                    '';
-                return context
-                    .read<ProductProvider>()
-                    .loadProducts(shopId);
+                final shopId =
+                    context.read<AuthProvider>().currentUser?.shopId ?? '';
+                return context.read<ProductProvider>().loadProducts(shopId);
               },
             ),
           );
@@ -99,11 +98,13 @@ class _SearchAppBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onChanged;
   final int resultCount;
+  final AppLocalizations l10n;
 
   const _SearchAppBar({
     required this.controller,
     required this.onChanged,
     required this.resultCount,
+    required this.l10n,
   });
 
   @override
@@ -111,18 +112,15 @@ class _SearchAppBar extends StatelessWidget {
         pinned: true,
         backgroundColor: AppColors.staffPrimary,
         foregroundColor: Colors.white,
-        // Let Flutter place the back button and title automatically.
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Price List',
-                style: AppTextStyles.headingM
-                    .copyWith(color: Colors.white)),
+            Text(l10n.priceList,
+                style: AppTextStyles.headingM.copyWith(color: Colors.white)),
             Text(
-              '$resultCount product${resultCount == 1 ? '' : 's'}',
-              style: AppTextStyles.labelM
-                  .copyWith(color: Colors.white60),
+              '$resultCount ${l10n.products.toLowerCase()}',
+              style: AppTextStyles.labelM.copyWith(color: Colors.white60),
             ),
           ],
         ),
@@ -136,12 +134,11 @@ class _SearchAppBar extends StatelessWidget {
               onChanged: (_) => onChanged(),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Search products…',
-                hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5)),
+                hintText: l10n.searchProductsHint,
+                hintStyle:
+                    TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                 prefixIcon: Icon(Icons.search,
-                    color: Colors.white.withValues(alpha: 0.75),
-                    size: 20),
+                    color: Colors.white.withValues(alpha: 0.75), size: 20),
                 suffixIcon: controller.text.isNotEmpty
                     ? GestureDetector(
                         onTap: () {
@@ -219,8 +216,7 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
         height: 44,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           itemCount: categories.length,
           itemBuilder: (_, i) {
             final cat = categories[i];
@@ -231,8 +227,8 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
                 onTap: () => onSelect(cat),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.staffPrimary
@@ -247,12 +243,10 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
                   child: Text(
                     cat,
                     style: AppTextStyles.labelL.copyWith(
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      color:
+                          isSelected ? Colors.white : AppColors.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -268,11 +262,13 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
 class _Body extends StatelessWidget {
   final ProductProvider provider;
   final List<Product> products;
+  final AppLocalizations l10n;
   final Future<void> Function() onRefresh;
 
   const _Body({
     required this.provider,
     required this.products,
+    required this.l10n,
     required this.onRefresh,
   });
 
@@ -280,8 +276,7 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     if (provider.isLoading && provider.products.isEmpty) {
       return const Center(
-          child:
-              CircularProgressIndicator(color: AppColors.staffPrimary));
+          child: CircularProgressIndicator(color: AppColors.staffPrimary));
     }
 
     if (provider.errorMessage != null && provider.products.isEmpty) {
@@ -302,7 +297,7 @@ class _Body extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRefresh,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
+                label: Text(l10n.retry),
                 style: FilledButton.styleFrom(
                     backgroundColor: AppColors.staffPrimary),
               ),
@@ -319,9 +314,8 @@ class _Body extends StatelessWidget {
           children: [
             Icon(Icons.search_off, size: 52, color: Colors.grey[300]),
             const SizedBox(height: 12),
-            Text('No products found',
-                style: AppTextStyles.bodyM
-                    .copyWith(color: Colors.grey[500])),
+            Text(l10n.noProductsMatchSearch,
+                style: AppTextStyles.bodyM.copyWith(color: Colors.grey[500])),
           ],
         ),
       );
@@ -333,7 +327,7 @@ class _Body extends StatelessWidget {
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
         itemCount: products.length,
-        itemBuilder: (_, i) => _PriceCard(product: products[i]),
+        itemBuilder: (_, i) => _PriceCard(product: products[i], l10n: l10n),
       ),
     );
   }
@@ -343,13 +337,13 @@ class _Body extends StatelessWidget {
 
 class _PriceCard extends StatelessWidget {
   final Product product;
-  const _PriceCard({required this.product});
+  final AppLocalizations l10n;
+  const _PriceCard({required this.product, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
     final isOut = product.isOutOfStock;
 
-    // Sort units smallest → largest so retail appears first.
     final sortedUnits = [...product.units]
       ..sort((a, b) => a.quantityInBase.compareTo(b.quantityInBase));
 
@@ -365,17 +359,17 @@ class _PriceCard extends StatelessWidget {
         child: _PriceCell(
           icon: isBase ? Icons.sell_outlined : Icons.inventory_2_outlined,
           label: isBase ? unit.name : '${unit.name} ×${unit.quantityInBase}',
-          value: 'FCFA ${unit.price.toStringAsFixed(0)}',
+          value: '${l10n.fcfa} ${unit.price.toStringAsFixed(0)}',
           valueColor: isBase ? AppColors.staffPrimary : AppColors.accent,
         ),
       ));
     }
-    priceCells.add(const VerticalDivider(
-        width: 1, thickness: 1, color: AppColors.border));
+    priceCells.add(
+        const VerticalDivider(width: 1, thickness: 1, color: AppColors.border));
     priceCells.add(Expanded(
       child: _PriceCell(
         icon: Icons.layers_outlined,
-        label: 'In stock',
+        label: l10n.inStock,
         value: '${product.stockQty} ${product.baseUnit}',
         valueColor: product.isOutOfStock
             ? AppColors.danger
@@ -403,19 +397,16 @@ class _PriceCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // ── Header ────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
               child: Row(
                 children: [
-                  // Colour accent bar
                   Container(
                     width: 4,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: isOut
-                          ? Colors.grey.shade300
-                          : AppColors.staffPrimary,
+                      color:
+                          isOut ? Colors.grey.shade300 : AppColors.staffPrimary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -433,29 +424,22 @@ class _PriceCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           product.category,
-                          style: AppTextStyles.bodyS.copyWith(
-                              color: AppColors.textSecondary),
+                          style: AppTextStyles.bodyS
+                              .copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  _StockPill(product),
+                  _StockPill(product, l10n: l10n),
                 ],
               ),
             ),
-
-            // Divider
             const Divider(height: 1, color: AppColors.border),
-
-            // ── Price row (all units + stock) ──────────────────────────
             IntrinsicHeight(
               child: Row(children: priceCells),
             ),
-
-            // ── Stock bar ──────────────────────────────────────────────
-            if (!isOut)
-              _StockBar(product: product),
+            if (!isOut) _StockBar(product: product),
           ],
         ),
       ),
@@ -525,9 +509,7 @@ class _StockBar extends StatelessWidget {
     final max = (threshold * 3).clamp(1.0, double.infinity);
     final ratio = (stock / max).clamp(0.0, 1.0);
 
-    final barColor = product.isLowStock
-        ? AppColors.warning
-        : AppColors.success;
+    final barColor = product.isLowStock ? AppColors.warning : AppColors.success;
 
     return Container(
       decoration: const BoxDecoration(
@@ -535,8 +517,7 @@ class _StockBar extends StatelessWidget {
         color: Colors.white,
       ),
       child: ClipRRect(
-        borderRadius:
-            const BorderRadius.vertical(bottom: Radius.circular(14)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
         child: LinearProgressIndicator(
           value: ratio,
           minHeight: 4,
@@ -552,7 +533,8 @@ class _StockBar extends StatelessWidget {
 
 class _StockPill extends StatelessWidget {
   final Product product;
-  const _StockPill(this.product);
+  final AppLocalizations l10n;
+  const _StockPill(this.product, {required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -561,15 +543,15 @@ class _StockPill extends StatelessWidget {
     final Color bg;
 
     if (product.isOutOfStock) {
-      label = 'Out of Stock';
+      label = l10n.outOfStock;
       fg = AppColors.danger;
       bg = AppColors.dangerLight;
     } else if (product.isLowStock) {
-      label = 'Low Stock';
+      label = l10n.lowStockAlert;
       fg = AppColors.warning;
       bg = AppColors.warningLight;
     } else {
-      label = 'Available';
+      label = l10n.availableLabel;
       fg = AppColors.success;
       bg = AppColors.successLight;
     }

@@ -1,0 +1,23 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# ShopKeeper Android signing — local developer setup
+# ─────────────────────────────────────────────────────────────────────────────
+# Copy this file to:  android/key.properties
+# Then fill in the real values below.
+#
+# key.properties is gitignored — NEVER commit it.
+# The keystore file is also gitignored — keep it safe outside the repo.
+#
+# To generate a keystore for the first time:
+#   keytool -genkey -v \
+#     -keystore android/app/upload-keystore.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 \
+#     -alias upload
+#
+# Then base64-encode it for the GitHub Secret:
+#   base64 -w 0 android/app/upload-keystore.jks
+# ─────────────────────────────────────────────────────────────────────────────
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=app/upload-keystore.jks

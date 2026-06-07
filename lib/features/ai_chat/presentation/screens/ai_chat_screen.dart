@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/enums/message_role.dart';
 import 'package:shopkeeper/features/ai_chat/domain/entities/chat_message.dart';
 import 'package:shopkeeper/features/ai_chat/presentation/providers/chat_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class AiChatScreen extends StatefulWidget {
   const AiChatScreen({super.key});
@@ -17,13 +18,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
   late TextEditingController _messageController;
   late ScrollController _scrollController;
   final FocusNode _focusNode = FocusNode();
-
-  static const _suggestions = [
-    ('📊', "Today's sales summary"),
-    ('⚠️', 'What needs restocking?'),
-    ('💰', 'Top products this week'),
-    ('📈', 'Give me business insights'),
-  ];
 
   @override
   void initState() {
@@ -63,19 +57,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   void _confirmClear() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Start new chat', style: AppTextStyles.headingM),
+        title: Text(l10n.startNewChat, style: AppTextStyles.headingM),
         content: Text(
-          'This will delete your entire conversation history.',
+          l10n.deleteConversation,
           style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
+            child: Text(l10n.cancel,
                 style: AppTextStyles.labelL
                     .copyWith(color: AppColors.textSecondary)),
           ),
@@ -89,7 +84,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               Navigator.pop(context);
               context.read<ChatProvider>().clearHistory();
             },
-            child: Text('Clear', style: AppTextStyles.labelL),
+            child: Text(l10n.clear, style: AppTextStyles.labelL),
           ),
         ],
       ),
@@ -98,11 +93,12 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          _Header(onClear: _confirmClear),
+          _Header(onClear: _confirmClear, l10n: l10n),
           Expanded(
             child: Consumer<ChatProvider>(
               builder: (context, provider, _) {
@@ -121,12 +117,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   return _ErrorState(
                     message: provider.errorMessage!,
                     onRetry: () => provider.loadHistory(),
+                    l10n: l10n,
                   );
                 }
 
                 if (provider.messages.isEmpty) {
                   return _EmptyState(
-                    suggestions: _suggestions,
+                    l10n: l10n,
                     onSuggestion: (s) => _send(s),
                   );
                 }
@@ -151,6 +148,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             controller: _messageController,
             focusNode: _focusNode,
             onSend: _send,
+            l10n: l10n,
           ),
         ],
       ),
@@ -158,11 +156,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-
 class _Header extends StatelessWidget {
   final VoidCallback onClear;
-  const _Header({required this.onClear});
+  final AppLocalizations l10n;
+  const _Header({required this.onClear, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +178,7 @@ class _Header extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
             onPressed: () => Navigator.of(context).pop(),
-            tooltip: 'Back',
+            tooltip: l10n.back,
           ),
           const SizedBox(width: 4),
           Container(
@@ -202,7 +199,7 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'ShopKeeper AI',
+                  l10n.shopkeeperAI,
                   style: AppTextStyles.headingM
                       .copyWith(color: Colors.white, fontSize: 17),
                 ),
@@ -219,7 +216,7 @@ class _Header extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      'Powered by Groq',
+                      l10n.poweredByGroq,
                       style: AppTextStyles.labelM.copyWith(
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
@@ -232,7 +229,7 @@ class _Header extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded,
                 color: Colors.white, size: 22),
-            tooltip: 'Clear chat',
+            tooltip: l10n.clearChat,
             onPressed: onClear,
           ),
         ],
@@ -241,15 +238,20 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-
 class _EmptyState extends StatelessWidget {
-  final List<(String, String)> suggestions;
+  final AppLocalizations l10n;
   final ValueChanged<String> onSuggestion;
-  const _EmptyState({required this.suggestions, required this.onSuggestion});
+  const _EmptyState({required this.l10n, required this.onSuggestion});
 
   @override
   Widget build(BuildContext context) {
+    final suggestions = [
+      ('📊', l10n.aiSuggestion1),
+      ('⚠️', l10n.aiSuggestion2),
+      ('💰', l10n.aiSuggestion3),
+      ('📈', l10n.aiSuggestion4),
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
@@ -268,20 +270,20 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'How can I help you today?',
+            l10n.howCanIHelp,
             style:
                 AppTextStyles.displayS.copyWith(color: AppColors.textPrimary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Ask me about sales, inventory, or\nbusiness insights for your shop.',
+            l10n.askAboutSales,
             style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
           Text(
-            'SUGGESTED',
+            l10n.suggested,
             style: AppTextStyles.labelM.copyWith(
               color: AppColors.textHint,
               letterSpacing: 1.2,
@@ -325,11 +327,9 @@ class _SuggestionTile extends StatelessWidget {
                 Text(emoji, style: const TextStyle(fontSize: 20)),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.bodyM
-                        .copyWith(color: AppColors.textPrimary),
-                  ),
+                  child: Text(label,
+                      style: AppTextStyles.bodyM
+                          .copyWith(color: AppColors.textPrimary)),
                 ),
                 const Icon(Icons.arrow_forward_ios_rounded,
                     size: 14, color: AppColors.textHint),
@@ -342,8 +342,6 @@ class _SuggestionTile extends StatelessWidget {
   }
 }
 
-// ── Message bubble ────────────────────────────────────────────────────────────
-
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
   const _MessageBubble({required this.message});
@@ -351,7 +349,6 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == MessageRole.user;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -395,16 +392,12 @@ class _UserBubble extends StatelessWidget {
               bottomRight: Radius.circular(18),
             ),
           ),
-          child: Text(
-            message.text,
-            style: AppTextStyles.bodyM.copyWith(color: Colors.white),
-          ),
+          child: Text(message.text,
+              style: AppTextStyles.bodyM.copyWith(color: Colors.white)),
         ),
         const SizedBox(height: 4),
-        Text(
-          _fmt(message.timestamp),
-          style: AppTextStyles.labelS.copyWith(color: AppColors.textHint),
-        ),
+        Text(_fmt(message.timestamp),
+            style: AppTextStyles.labelS.copyWith(color: AppColors.textHint)),
       ],
     );
   }
@@ -437,17 +430,13 @@ class _AiBubble extends StatelessWidget {
               ),
             ],
           ),
-          child: Text(
-            message.text,
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textPrimary, height: 1.5),
-          ),
+          child: Text(message.text,
+              style: AppTextStyles.bodyM
+                  .copyWith(color: AppColors.textPrimary, height: 1.5)),
         ),
         const SizedBox(height: 4),
-        Text(
-          _fmt(message.timestamp),
-          style: AppTextStyles.labelS.copyWith(color: AppColors.textHint),
-        ),
+        Text(_fmt(message.timestamp),
+            style: AppTextStyles.labelS.copyWith(color: AppColors.textHint)),
       ],
     );
   }
@@ -476,8 +465,6 @@ class _AiAvatar extends StatelessWidget {
     );
   }
 }
-
-// ── Typing indicator ──────────────────────────────────────────────────────────
 
 class _TypingIndicator extends StatelessWidget {
   const _TypingIndicator();
@@ -543,12 +530,9 @@ class _BouncingDotState extends State<_BouncingDot>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _anim = Tween<double>(begin: 0, end: -6).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+        vsync: this, duration: const Duration(milliseconds: 600));
+    _anim = Tween<double>(begin: 0, end: -6)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
     Future.delayed(widget.delay, () {
       if (mounted) _ctrl.repeat(reverse: true);
     });
@@ -570,26 +554,25 @@ class _BouncingDotState extends State<_BouncingDot>
           width: 7,
           height: 7,
           decoration: BoxDecoration(
-            color: AppColors.textHint,
-            borderRadius: BorderRadius.circular(4),
-          ),
+              color: AppColors.textHint,
+              borderRadius: BorderRadius.circular(4)),
         ),
       ),
     );
   }
 }
 
-// ── Input bar ─────────────────────────────────────────────────────────────────
-
 class _InputBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final Future<void> Function(String) onSend;
+  final AppLocalizations l10n;
 
   const _InputBar({
     required this.controller,
     required this.focusNode,
     required this.onSend,
+    required this.l10n,
   });
 
   @override
@@ -630,7 +613,7 @@ class _InputBar extends StatelessWidget {
                 style:
                     AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
                 decoration: InputDecoration(
-                  hintText: 'Ask anything about your shop…',
+                  hintText: l10n.askAnything,
                   hintStyle:
                       AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
                   border: InputBorder.none,
@@ -688,12 +671,12 @@ class _SendButton extends StatelessWidget {
   }
 }
 
-// ── Error state ───────────────────────────────────────────────────────────────
-
 class _ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _ErrorState({required this.message, required this.onRetry});
+  final AppLocalizations l10n;
+  const _ErrorState(
+      {required this.message, required this.onRetry, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -716,14 +699,12 @@ class _ErrorState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Something went wrong', style: AppTextStyles.headingM),
+            Text(l10n.somethingWentWrong, style: AppTextStyles.headingM),
             const SizedBox(height: 6),
-            Text(
-              message,
-              style:
-                  AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
-            ),
+            Text(message,
+                style: AppTextStyles.bodyM
+                    .copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center),
             const SizedBox(height: 20),
             FilledButton.icon(
               style: FilledButton.styleFrom(
@@ -735,7 +716,7 @@ class _ErrorState extends StatelessWidget {
               ),
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text('Try again', style: AppTextStyles.labelL),
+              label: Text(l10n.tryAgain, style: AppTextStyles.labelL),
             ),
           ],
         ),

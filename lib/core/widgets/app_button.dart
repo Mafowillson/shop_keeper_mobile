@@ -27,13 +27,13 @@ class AppButton extends StatelessWidget {
     double? width,
     Key? key,
   }) : this(
-    label: label,
-    onPressed: onPressed,
-    isLoading: isLoading,
-    variant: AppButtonVariant.primary,
-    width: width,
-    key: key,
-  );
+          label: label,
+          onPressed: onPressed,
+          isLoading: isLoading,
+          variant: AppButtonVariant.primary,
+          width: width,
+          key: key,
+        );
 
   const AppButton.outlined({
     required String label,
@@ -42,13 +42,13 @@ class AppButton extends StatelessWidget {
     double? width,
     Key? key,
   }) : this(
-    label: label,
-    onPressed: onPressed,
-    isLoading: isLoading,
-    variant: AppButtonVariant.outlined,
-    width: width,
-    key: key,
-  );
+          label: label,
+          onPressed: onPressed,
+          isLoading: isLoading,
+          variant: AppButtonVariant.outlined,
+          width: width,
+          key: key,
+        );
 
   const AppButton.danger({
     required String label,
@@ -57,13 +57,13 @@ class AppButton extends StatelessWidget {
     double? width,
     Key? key,
   }) : this(
-    label: label,
-    onPressed: onPressed,
-    isLoading: isLoading,
-    variant: AppButtonVariant.danger,
-    width: width,
-    key: key,
-  );
+          label: label,
+          onPressed: onPressed,
+          isLoading: isLoading,
+          variant: AppButtonVariant.danger,
+          width: width,
+          key: key,
+        );
 
   const AppButton.accent({
     required String label,
@@ -72,13 +72,13 @@ class AppButton extends StatelessWidget {
     double? width,
     Key? key,
   }) : this(
-    label: label,
-    onPressed: onPressed,
-    isLoading: isLoading,
-    variant: AppButtonVariant.accent,
-    width: width,
-    key: key,
-  );
+          label: label,
+          onPressed: onPressed,
+          isLoading: isLoading,
+          variant: AppButtonVariant.accent,
+          width: width,
+          key: key,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +93,13 @@ class AppButton extends StatelessWidget {
         style: buttonStyle,
         child: isLoading
             ? const SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-          ),
-        )
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
             : Text(label, style: textStyle),
       ),
     );
@@ -111,32 +111,37 @@ class AppButton extends StatelessWidget {
         return ElevatedButton.styleFrom(
           backgroundColor: AppColors.ownerPrimary,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         );
       case AppButtonVariant.outlined:
         return OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColors.ownerPrimary, width: 1.5),
           foregroundColor: AppColors.ownerPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         );
       case AppButtonVariant.danger:
         return OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColors.danger, width: 1.5),
           foregroundColor: AppColors.danger,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         );
       case AppButtonVariant.accent:
         return ElevatedButton.styleFrom(
           backgroundColor: AppColors.accent,
           foregroundColor: AppColors.textPrimary,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         );
     }
   }
 
   TextStyle _getTextStyle() {
     return AppTextStyles.headingM.copyWith(
-      color: variant == AppButtonVariant.outlined || variant == AppButtonVariant.danger
+      color: variant == AppButtonVariant.outlined ||
+              variant == AppButtonVariant.danger
           ? null
           : Colors.white,
     );

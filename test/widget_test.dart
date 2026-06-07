@@ -12,7 +12,8 @@ import 'package:shopkeeper/core/enums/sync_state.dart';
 import 'package:shopkeeper/core/widgets/sync_status_badge.dart';
 
 void main() {
-  testWidgets('SyncStatusBadge smoke test — renders without error', (tester) async {
+  testWidgets('SyncStatusBadge smoke test — renders without error',
+      (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

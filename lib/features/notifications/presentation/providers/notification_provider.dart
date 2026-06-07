@@ -62,7 +62,8 @@ class NotificationProvider extends ChangeNotifier {
     result.fold(
       (failure) => _errorMessage = failure.message,
       (_) {
-        _notifications = _notifications.map((n) => n.copyWith(isRead: true)).toList();
+        _notifications =
+            _notifications.map((n) => n.copyWith(isRead: true)).toList();
       },
     );
     notifyListeners();

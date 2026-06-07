@@ -28,8 +28,8 @@ class SaveProductUseCase {
           'Only one unit can have quantity-in-base = 1.'));
     }
     if (product.units.any((u) => u.price <= 0)) {
-      return TaskEither.left(
-          const ValidationFailure('All unit prices must be greater than zero.'));
+      return TaskEither.left(const ValidationFailure(
+          'All unit prices must be greater than zero.'));
     }
     return _repository.saveProduct(product);
   }

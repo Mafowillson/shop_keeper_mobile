@@ -28,8 +28,8 @@ class ProductModel {
   // ── API response → model ──────────────────────────────────────────────────
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    final rawUnits = (json['units'] as List<dynamic>? ?? [])
-        .cast<Map<String, dynamic>>();
+    final rawUnits =
+        (json['units'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
 
     final units = rawUnits
         .map((u) => UnitDefinition(

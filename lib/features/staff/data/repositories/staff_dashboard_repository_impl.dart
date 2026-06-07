@@ -12,8 +12,7 @@ class StaffDashboardRepositoryImpl implements IStaffDashboardRepository {
   const StaffDashboardRepositoryImpl(this._remote);
 
   @override
-  TaskEither<Failure, StaffDashboardStats> getStats() =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, StaffDashboardStats> getStats() => TaskEither.tryCatch(
         () async => (await _remote.getStats()).toEntity(),
         (e, _) => ServerFailure('Failed to load staff dashboard: $e'),
       );

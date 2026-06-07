@@ -68,37 +68,37 @@ class PolicyHeader extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                left: 20,
-                right: 20,
-                bottom: 20,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
+                  left: 20,
+                  right: 20,
+                  bottom: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(icon, color: Colors.white, size: 22),
                       ),
-                      child: Icon(icon, color: Colors.white, size: 22),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      title,
-                      style: AppTextStyles.headingL
-                          .copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: AppTextStyles.bodyS
-                          .copyWith(color: Colors.white60),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      Text(
+                        title,
+                        style: AppTextStyles.headingL
+                            .copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style:
+                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               ],
             ),
           ),
@@ -124,8 +124,8 @@ class PolicyIntroCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.ownerPrimary.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: AppColors.ownerPrimary.withValues(alpha: 0.18)),
+          border:
+              Border.all(color: AppColors.ownerPrimary.withValues(alpha: 0.18)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,8 +181,7 @@ class PolicySectionCard extends StatelessWidget {
                       color: section.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(section.icon,
-                        size: 18, color: section.color),
+                    child: Icon(section.icon, size: 18, color: section.color),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -193,8 +192,8 @@ class PolicySectionCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: section.color.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(6),

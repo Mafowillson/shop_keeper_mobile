@@ -7,6 +7,7 @@ import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/staff/presentation/providers/staff_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class CreateStaffScreen extends StatefulWidget {
   const CreateStaffScreen({super.key});
@@ -39,6 +40,7 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
     FocusScope.of(context).unfocus();
 
     final provider = context.read<StaffProvider>();
@@ -51,20 +53,22 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
     if (!mounted) return;
 
     if (success) {
-      SnackBarHelper.showSuccess(context, 'Staff account created successfully');
+      SnackBarHelper.showSuccess(context, l10n.staffCreatedSuccessfully);
       context.pop();
     } else {
       SnackBarHelper.showError(
-          context, provider.errorMessage ?? 'Failed to create staff');
+          context, provider.errorMessage ?? l10n.failedCreateStaff);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Add Staff Member', style: AppTextStyles.headingL.copyWith(color: Colors.white)),
+        title: Text(l10n.addStaffMember,
+            style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -76,63 +80,66 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _HeaderCard(),
+              _HeaderCard(l10n: l10n),
               const SizedBox(height: 24),
-              Text('Account details', style: AppTextStyles.headingM),
+              Text(l10n.accountDetails, style: AppTextStyles.headingM),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Full Name',
+                label: l10n.fullName,
                 hintText: 'e.g. Jean-Paul Mbassi',
                 controller: _nameController,
-                prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.textSecondary),
+                prefixIcon: const Icon(Icons.badge_outlined,
+                    color: AppColors.textSecondary),
                 validator: (v) {
                   if (v == null || v.trim().length < 2) {
-                    return 'Name must be at least 2 characters';
+                    return l10n.nameMinTwoChars;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Email Address',
+                label: l10n.emailAddress,
                 hintText: 'e.g. staff@example.com',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
+                prefixIcon: const Icon(Icons.email_outlined,
+                    color: AppColors.textSecondary),
                 validator: (v) {
                   if (v == null || !v.contains('@') || !v.contains('.')) {
-                    return 'Enter a valid email address';
+                    return l10n.enterValidEmailAddress;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               AppTextField(
-                label: 'Phone Number',
+                label: l10n.phoneNumber,
                 hintText: 'e.g. 237612345678',
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.textSecondary),
+                prefixIcon: const Icon(Icons.phone_outlined,
+                    color: AppColors.textSecondary),
                 validator: (v) {
                   if (v == null || v.trim().length < 9) {
-                    return 'Enter a valid phone number (min 9 digits)';
+                    return l10n.enterValidPhone;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              _PhonePasswordNote(),
+              _PhonePasswordNote(l10n: l10n),
               const SizedBox(height: 32),
               Consumer<StaffProvider>(
                 builder: (context, provider, _) => AppButton.primary(
-                  label: 'Create Staff Account',
+                  label: l10n.createStaffAccount,
                   isLoading: provider.isLoading,
                   onPressed: provider.isLoading ? null : _submit,
                 ),
               ),
               const SizedBox(height: 16),
               AppButton.outlined(
-                label: 'Cancel',
+                label: l10n.cancel,
                 onPressed: () => context.pop(),
               ),
               const SizedBox(height: 24),
@@ -145,6 +152,9 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
 }
 
 class _HeaderCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _HeaderCard({required this.l10n});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -152,7 +162,10 @@ class _HeaderCard extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.ownerPrimary, AppColors.ownerPrimary.withValues(alpha: 0.82)],
+          colors: [
+            AppColors.ownerPrimary,
+            AppColors.ownerPrimary.withValues(alpha: 0.82)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -168,20 +181,20 @@ class _HeaderCard extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.person_add_alt_1, color: Colors.white, size: 30),
+            child: const Icon(Icons.person_add_alt_1,
+                color: Colors.white, size: 30),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'New Staff Account',
-                  style: AppTextStyles.headingL.copyWith(color: Colors.white),
-                ),
+                Text(l10n.newStaffAccount,
+                    style:
+                        AppTextStyles.headingL.copyWith(color: Colors.white)),
                 const SizedBox(height: 6),
                 Text(
-                  'Fill in the details below to create login credentials for your staff member.',
+                  l10n.fillInStaffDetails,
                   style: AppTextStyles.bodyS.copyWith(color: Colors.white70),
                 ),
               ],
@@ -194,6 +207,9 @@ class _HeaderCard extends StatelessWidget {
 }
 
 class _PhonePasswordNote extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _PhonePasswordNote({required this.l10n});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -206,12 +222,12 @@ class _PhonePasswordNote extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, color: AppColors.accent, size: 20),
+          const Icon(Icons.info_outline_rounded,
+              color: AppColors.accent, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'The phone number serves as this staff member\'s password. '
-              'Share their email and phone number so they can log in to ShopKeeper.',
+              l10n.phoneAsPassword,
               style: AppTextStyles.bodyS.copyWith(
                 color: AppColors.accentDark,
                 height: 1.5,

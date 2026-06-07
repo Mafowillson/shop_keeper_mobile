@@ -45,7 +45,8 @@ class ChatRemoteDataSourceImpl implements IChatRemoteDataSource {
 
   String _errorMessage(DioException e) {
     final data = e.response?.data;
-    if (data is Map) return data['error'] as String? ?? e.message ?? 'Request failed';
+    if (data is Map)
+      return data['error'] as String? ?? e.message ?? 'Request failed';
     return e.message ?? 'Request failed';
   }
 }

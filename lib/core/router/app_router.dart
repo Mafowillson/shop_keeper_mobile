@@ -85,166 +85,168 @@ class AppRouter {
 
           return null;
         },
-    routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/onboarding',
-        builder: (context, state) => const OnboardingPageView(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
-      GoRoute(
-        path: '/register-shop',
-        builder: (context, state) => const RegisterShopScreen(),
-      ),
-      GoRoute(
-        path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
-      ),
-      GoRoute(
-        path: '/verify-email',
-        builder: (context, state) => const VerifyEmailScreen(),
-      ),
-      GoRoute(
-        path: '/reset-password',
-        builder: (context, state) => ResetPasswordScreen(
-          email: state.extra as String? ?? '',
-        ),
-      ),
-      ShellRoute(
-        builder: (context, state, child) => OwnerShell(location: state.uri.toString(), child: child),
         routes: [
           GoRoute(
-            path: '/owner/dashboard',
-            builder: (context, state) => const OwnerDashboardScreen(),
+            path: '/splash',
+            builder: (context, state) => const SplashScreen(),
           ),
           GoRoute(
-            path: '/owner/notifications',
-            builder: (context, state) => const NotificationsScreen(),
+            path: '/onboarding',
+            builder: (context, state) => const OnboardingPageView(),
           ),
           GoRoute(
-            path: '/owner/profile',
-            builder: (context, state) => const OwnerProfileScreen(),
+            path: '/login',
+            builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: '/register',
+            builder: (context, state) => const RegisterScreen(),
+          ),
+          GoRoute(
+            path: '/register-shop',
+            builder: (context, state) => const RegisterShopScreen(),
+          ),
+          GoRoute(
+            path: '/forgot-password',
+            builder: (context, state) => const ForgotPasswordScreen(),
+          ),
+          GoRoute(
+            path: '/verify-email',
+            builder: (context, state) => const VerifyEmailScreen(),
+          ),
+          GoRoute(
+            path: '/reset-password',
+            builder: (context, state) => ResetPasswordScreen(
+              email: state.extra as String? ?? '',
+            ),
+          ),
+          ShellRoute(
+            builder: (context, state, child) =>
+                OwnerShell(location: state.uri.toString(), child: child),
+            routes: [
+              GoRoute(
+                path: '/owner/dashboard',
+                builder: (context, state) => const OwnerDashboardScreen(),
+              ),
+              GoRoute(
+                path: '/owner/notifications',
+                builder: (context, state) => const NotificationsScreen(),
+              ),
+              GoRoute(
+                path: '/owner/profile',
+                builder: (context, state) => const OwnerProfileScreen(),
+              ),
+            ],
+          ),
+          ShellRoute(
+            builder: (context, state, child) =>
+                StaffShell(location: state.uri.toString(), child: child),
+            routes: [
+              GoRoute(
+                path: '/staff/home',
+                builder: (context, state) => const StaffHomeScreen(),
+              ),
+              GoRoute(
+                path: '/staff/notifications',
+                builder: (context, state) => const NotificationsScreen(),
+              ),
+              GoRoute(
+                path: '/staff/profile',
+                builder: (context, state) => const StaffProfileScreen(),
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/owner/products',
+            builder: (context, state) => const ProductsScreen(),
+          ),
+          GoRoute(
+            path: '/owner/products/add',
+            builder: (context, state) => const EditProductScreen(),
+          ),
+          GoRoute(
+            path: '/owner/products/:id/edit',
+            builder: (context, state) {
+              final productId = state.pathParameters['id'];
+              return EditProductScreen(productId: productId);
+            },
+          ),
+          GoRoute(
+            path: '/owner/sales',
+            builder: (context, state) => const SalesHistoryScreen(),
+          ),
+          GoRoute(
+            path: '/owner/sales/:id',
+            builder: (context, state) {
+              final saleId = state.pathParameters['id'];
+              return SaleDetailScreen(saleId: saleId!);
+            },
+          ),
+          GoRoute(
+            path: '/owner/debts',
+            builder: (context, state) => const CustomerDebtsScreen(),
+          ),
+          GoRoute(
+            path: '/owner/debts/:customerId',
+            builder: (context, state) {
+              final customerId = state.pathParameters['customerId'];
+              return CustomerDetailScreen(customerId: customerId!);
+            },
+          ),
+          GoRoute(
+            path: '/owner/chat',
+            builder: (context, state) => const AiChatScreen(),
+          ),
+          GoRoute(
+            path: '/owner/staff/create',
+            builder: (context, state) => const CreateStaffScreen(),
+          ),
+          GoRoute(
+            path: '/owner/staff/manage',
+            builder: (context, state) => const ManageStaffScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: '/settings/support',
+            builder: (context, state) => const ContactSupportScreen(),
+          ),
+          GoRoute(
+            path: '/settings/privacy',
+            builder: (context, state) => const PrivacyPolicyScreen(),
+          ),
+          GoRoute(
+            path: '/settings/terms',
+            builder: (context, state) => const TermsOfServiceScreen(),
+          ),
+          GoRoute(
+            path: '/staff/prices',
+            builder: (context, state) => const PriceListScreen(),
+          ),
+          GoRoute(
+            path: '/staff/sale/new',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: NewSaleScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/staff/sale/payment',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: PaymentScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/staff/sale/confirm',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: SaleConfirmScreen(),
+            ),
           ),
         ],
-      ),
-      ShellRoute(
-        builder: (context, state, child) => StaffShell(location: state.uri.toString(), child: child),
-        routes: [
-          GoRoute(
-            path: '/staff/home',
-            builder: (context, state) => const StaffHomeScreen(),
-          ),
-          GoRoute(
-            path: '/staff/notifications',
-            builder: (context, state) => const NotificationsScreen(),
-          ),
-          GoRoute(
-            path: '/staff/profile',
-            builder: (context, state) => const StaffProfileScreen(),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/owner/products',
-        builder: (context, state) => const ProductsScreen(),
-      ),
-      GoRoute(
-        path: '/owner/products/add',
-        builder: (context, state) => const EditProductScreen(),
-      ),
-      GoRoute(
-        path: '/owner/products/:id/edit',
-        builder: (context, state) {
-          final productId = state.pathParameters['id'];
-          return EditProductScreen(productId: productId);
-        },
-      ),
-      GoRoute(
-        path: '/owner/sales',
-        builder: (context, state) => const SalesHistoryScreen(),
-      ),
-      GoRoute(
-        path: '/owner/sales/:id',
-        builder: (context, state) {
-          final saleId = state.pathParameters['id'];
-          return SaleDetailScreen(saleId: saleId!);
-        },
-      ),
-      GoRoute(
-        path: '/owner/debts',
-        builder: (context, state) => const CustomerDebtsScreen(),
-      ),
-      GoRoute(
-        path: '/owner/debts/:customerId',
-        builder: (context, state) {
-          final customerId = state.pathParameters['customerId'];
-          return CustomerDetailScreen(customerId: customerId!);
-        },
-      ),
-      GoRoute(
-        path: '/owner/chat',
-        builder: (context, state) => const AiChatScreen(),
-      ),
-      GoRoute(
-        path: '/owner/staff/create',
-        builder: (context, state) => const CreateStaffScreen(),
-      ),
-      GoRoute(
-        path: '/owner/staff/manage',
-        builder: (context, state) => const ManageStaffScreen(),
-      ),
-      GoRoute(
-        path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: '/settings/support',
-        builder: (context, state) => const ContactSupportScreen(),
-      ),
-      GoRoute(
-        path: '/settings/privacy',
-        builder: (context, state) => const PrivacyPolicyScreen(),
-      ),
-      GoRoute(
-        path: '/settings/terms',
-        builder: (context, state) => const TermsOfServiceScreen(),
-      ),
-      GoRoute(
-        path: '/staff/prices',
-        builder: (context, state) => const PriceListScreen(),
-      ),
-      GoRoute(
-        path: '/staff/sale/new',
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: NewSaleScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/staff/sale/payment',
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: PaymentScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/staff/sale/confirm',
-        pageBuilder: (context, state) => const MaterialPage(
-          fullscreenDialog: true,
-          child: SaleConfirmScreen(),
-        ),
-      ),
-    ],
-    initialLocation: '/splash',
-  );
+        initialLocation: '/splash',
+      );
 }

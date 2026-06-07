@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
-import 'package:shopkeeper/main.dart' show localNotifications, shopkeeperChannel;
+import 'package:shopkeeper/main.dart'
+    show localNotifications, shopkeeperChannel;
 
 class FcmService {
   final Dio _dio;

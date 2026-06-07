@@ -9,6 +9,7 @@ class RecordPaymentUseCase {
 
   const RecordPaymentUseCase(this._repository);
 
-  TaskEither<Failure, Unit> call(String customerId, double amount, String? note) =>
+  TaskEither<Failure, Unit> call(
+          String customerId, double amount, String? note) =>
       _repository.recordPayment(customerId, amount, note);
 }

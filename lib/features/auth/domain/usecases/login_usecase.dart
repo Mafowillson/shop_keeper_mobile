@@ -11,6 +11,7 @@ class LoginUseCase {
 
   const LoginUseCase(this._repository);
 
-  TaskEither<Failure, User> call(String email, String password, UserRole role) =>
+  TaskEither<Failure, User> call(
+          String email, String password, UserRole role) =>
       _repository.login(email, password, role);
 }

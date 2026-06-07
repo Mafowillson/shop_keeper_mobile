@@ -31,8 +31,7 @@ class ProductRepositoryImpl implements IProductRepository {
       );
 
   @override
-  TaskEither<Failure, Product> getProductById(String id) =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, Product> getProductById(String id) => TaskEither.tryCatch(
         () async {
           final model = await _remote.getProductById(id);
           return model.toEntity();
@@ -54,8 +53,7 @@ class ProductRepositoryImpl implements IProductRepository {
       );
 
   @override
-  TaskEither<Failure, Unit> deactivateProduct(String id) =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, Unit> deactivateProduct(String id) => TaskEither.tryCatch(
         () async {
           await _remote.deactivateProduct(id);
           return unit;
@@ -70,7 +68,8 @@ class ProductRepositoryImpl implements IProductRepository {
   }) =>
       TaskEither.tryCatch(
         () async {
-          final models = await _remote.getProducts(shopId: shopId, search: query);
+          final models =
+              await _remote.getProducts(shopId: shopId, search: query);
           return models.map((m) => m.toEntity()).toList();
         },
         (e, _) => ServerFailure('$e'),

@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class StaffProfileScreen extends StatefulWidget {
   const StaffProfileScreen({super.key});
@@ -24,6 +25,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().currentUser;
     final initials = _initials(user?.name);
 
@@ -38,7 +40,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
             foregroundColor: Colors.white,
             elevation: 0,
             title: Text(
-              'My Profile',
+              l10n.myProfile,
               style: AppTextStyles.headingM.copyWith(color: Colors.white),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -52,42 +54,42 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
               children: [
                 _StatsStrip(user: user),
                 const SizedBox(height: 24),
-                const _SectionLabel('Account details'),
+                _SectionLabel(l10n.accountDetails),
                 const SizedBox(height: 10),
                 _InfoCard(rows: [
                   _InfoRow(
                     icon: Icons.store_outlined,
-                    label: 'Shop name',
+                    label: l10n.shopNameLabel,
                     value: user?.shopName.isNotEmpty == true
                         ? user!.shopName
-                        : 'Not set',
+                        : l10n.notSet,
                     accentColor: AppColors.staffPrimary,
                   ),
                   _InfoRow(
                     icon: Icons.person_outline_rounded,
-                    label: 'Staff name',
+                    label: l10n.staffName,
                     value: user?.name.isNotEmpty == true
                         ? user!.name
-                        : 'Not set',
+                        : l10n.notSet,
                     accentColor: AppColors.staffPrimary,
                   ),
                   _InfoRow(
                     icon: Icons.description_outlined,
-                    label: 'Shop description',
+                    label: l10n.shopDescription,
                     value: user?.shopDescription.isNotEmpty == true
                         ? user!.shopDescription
-                        : 'Not set',
+                        : l10n.notSet,
                     accentColor: AppColors.staffPrimary,
                   ),
                 ]),
                 const SizedBox(height: 24),
-                const _SectionLabel('Actions'),
+                _SectionLabel(l10n.actions),
                 const SizedBox(height: 10),
                 _ActionCard(tiles: [
                   _ActionTileData(
                     icon: Icons.settings_outlined,
-                    label: 'Settings',
-                    subtitle: 'Manage app preferences',
+                    label: l10n.settings,
+                    subtitle: l10n.manageAppPreferences,
                     color: AppColors.staffPrimary,
                     onTap: () => context.push('/settings'),
                   ),
@@ -106,13 +108,11 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _SignOutSheet(
-        subtitle:
-            'You will need your email and phone number to log back in.',
-      ),
+      builder: (_) => _SignOutSheet(subtitle: l10n.staffSignOutSubtitle),
     );
     if (confirmed != true || !context.mounted) return;
     await context.read<AuthProvider>().logout();
@@ -250,6 +250,7 @@ class _Circle extends StatelessWidget {
 class _StaffBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
@@ -266,7 +267,7 @@ class _StaffBadge extends StatelessWidget {
           const Icon(Icons.badge_outlined, size: 13, color: Colors.white),
           const SizedBox(width: 5),
           Text(
-            'Staff',
+            l10n.staffRole,
             style: AppTextStyles.labelL.copyWith(color: Colors.white),
           ),
         ],
@@ -284,6 +285,7 @@ class _StatsStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isActive = user?.isActive == true;
 
     return Container(
@@ -295,25 +297,29 @@ class _StatsStrip extends StatelessWidget {
             _StatCell(
               icon: Icons.circle,
               iconColor: isActive ? AppColors.success : AppColors.danger,
-              label: 'Status',
-              value: isActive ? 'Active' : 'Inactive',
+              label: l10n.statusLabel,
+              value: isActive ? l10n.active : l10n.inactive,
               valueColor: isActive ? AppColors.success : AppColors.danger,
             ),
             const VerticalDivider(width: 1, thickness: 1),
-            const _StatCell(
+            _StatCell(
               icon: Icons.work_outline_rounded,
               iconColor: AppColors.staffPrimary,
-              label: 'Role',
-              value: 'Staff',
+              label: l10n.roleLabel,
+              value: l10n.staffRole,
               valueColor: AppColors.staffPrimary,
             ),
             const VerticalDivider(width: 1, thickness: 1),
             _StatCell(
               icon: Icons.store_outlined,
               iconColor: AppColors.accent,
-              label: 'Shop',
-              value: user?.shopId.isNotEmpty == true ? 'Assigned' : 'Unassigned',
-              valueColor: user?.shopId.isNotEmpty == true ? AppColors.success : AppColors.textSecondary,
+              label: l10n.shopLabel,
+              value: user?.shopId.isNotEmpty == true
+                  ? l10n.assigned
+                  : l10n.unassigned,
+              valueColor: user?.shopId.isNotEmpty == true
+                  ? AppColors.success
+                  : AppColors.textSecondary,
             ),
           ],
         ),
@@ -352,14 +358,14 @@ class _StatCell extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: AppTextStyles.labelM.copyWith(color: AppColors.textSecondary),
+            style:
+                AppTextStyles.labelM.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
     );
   }
 }
-
 
 // ── Section label ─────────────────────────────────────────────────────────────
 
@@ -456,8 +462,8 @@ class _InfoTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   row.value,
-                  style: AppTextStyles.bodyM
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style:
+                      AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -545,14 +551,16 @@ class _ActionTile extends StatelessWidget {
                 children: [
                   Text(
                     data.label,
-                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyM
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 2),
                   Text(data.subtitle, style: AppTextStyles.bodyS),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.grey[350], size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: Colors.grey[350], size: 20),
           ],
         ),
       ),
@@ -568,6 +576,7 @@ class _SignOutSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -598,12 +607,11 @@ class _SignOutSheet extends StatelessWidget {
                 color: AppColors.danger, size: 30),
           ),
           const SizedBox(height: 16),
-          Text('Sign out?', style: AppTextStyles.headingL),
+          Text(l10n.signOutQuestion, style: AppTextStyles.headingL),
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
@@ -618,7 +626,7 @@ class _SignOutSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: Text('Cancel',
+                  child: Text(l10n.cancel,
                       style: AppTextStyles.headingS
                           .copyWith(color: AppColors.textPrimary)),
                 ),
@@ -635,9 +643,9 @@ class _SignOutSheet extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     elevation: 0,
                   ),
-                  child: Text('Sign Out',
-                      style: AppTextStyles.headingS
-                          .copyWith(color: Colors.white)),
+                  child: Text(l10n.signOut,
+                      style:
+                          AppTextStyles.headingS.copyWith(color: Colors.white)),
                 ),
               ),
             ],
@@ -657,6 +665,7 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Material(
@@ -688,7 +697,7 @@ class _LogoutButton extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sign Out',
+                        l10n.signOut,
                         style: AppTextStyles.bodyM.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.danger,
@@ -696,7 +705,7 @@ class _LogoutButton extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Sign out of your ShopKeeper account',
+                        l10n.signOutDescription,
                         style: AppTextStyles.bodyS,
                       ),
                     ],

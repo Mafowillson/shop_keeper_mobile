@@ -20,47 +20,48 @@ class DebtRecordModel {
     required this.recordedAt,
   });
 
-  factory DebtRecordModel.fromJson(Map<String, dynamic> json) => DebtRecordModel(
-    id: json['id'] as String,
-    customerId: json['customer_id'] as String,
-    type: (json['type'] as String?) == 'payment'
-        ? DebtType.payment
-        : DebtType.credit,
-    amount: (json['amount'] as num).toDouble(),
-    balanceAfter: (json['balance_after'] as num).toDouble(),
-    note: json['note'] as String?,
-    recordedAt: DateTime.parse(json['recorded_at'] as String),
-  );
+  factory DebtRecordModel.fromJson(Map<String, dynamic> json) =>
+      DebtRecordModel(
+        id: json['id'] as String,
+        customerId: json['customer_id'] as String,
+        type: (json['type'] as String?) == 'payment'
+            ? DebtType.payment
+            : DebtType.credit,
+        amount: (json['amount'] as num).toDouble(),
+        balanceAfter: (json['balance_after'] as num).toDouble(),
+        note: json['note'] as String?,
+        recordedAt: DateTime.parse(json['recorded_at'] as String),
+      );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'customer_id': customerId,
-    'type': type.toString().split('.').last,
-    'amount': amount,
-    'balance_after': balanceAfter,
-    'note': note,
-    'recorded_at': recordedAt.toIso8601String(),
-  };
+        'id': id,
+        'customer_id': customerId,
+        'type': type.toString().split('.').last,
+        'amount': amount,
+        'balance_after': balanceAfter,
+        'note': note,
+        'recorded_at': recordedAt.toIso8601String(),
+      };
 
   factory DebtRecordModel.fromEntity(DebtRecord entity) => DebtRecordModel(
-    id: entity.id,
-    customerId: entity.customerId,
-    type: entity.type,
-    amount: entity.amount,
-    balanceAfter: entity.balanceAfter,
-    note: entity.note,
-    recordedAt: entity.recordedAt,
-  );
+        id: entity.id,
+        customerId: entity.customerId,
+        type: entity.type,
+        amount: entity.amount,
+        balanceAfter: entity.balanceAfter,
+        note: entity.note,
+        recordedAt: entity.recordedAt,
+      );
 
   DebtRecord toEntity() => DebtRecord(
-    id: id,
-    customerId: customerId,
-    type: type,
-    amount: amount,
-    balanceAfter: balanceAfter,
-    note: note,
-    recordedAt: recordedAt,
-  );
+        id: id,
+        customerId: customerId,
+        type: type,
+        amount: amount,
+        balanceAfter: balanceAfter,
+        note: note,
+        recordedAt: recordedAt,
+      );
 
   DebtRecordModel copyWith({
     String? id,

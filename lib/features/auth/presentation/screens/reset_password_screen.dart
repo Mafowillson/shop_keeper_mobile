@@ -10,11 +10,10 @@ import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  /// Email passed from the forgot-password screen.
   final String email;
-
   const ResetPasswordScreen({required this.email, super.key});
 
   @override
@@ -46,15 +45,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
-    for (final c in _codeControllers) { c.dispose(); }
-    for (final f in _codeFocusNodes) { f.dispose(); }
+    for (final c in _codeControllers) {
+      c.dispose();
+    }
+    for (final f in _codeFocusNodes) {
+      f.dispose();
+    }
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _timer?.cancel();
     super.dispose();
   }
-
-  // ── Countdown ────────────────────────────────────────────────────────────
 
   void _startCountdown() {
     setState(() => _resendCountdown = 60);
@@ -69,11 +70,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
   }
 
-  // ── Code helpers ─────────────────────────────────────────────────────────
-
-  String get _enteredCode =>
-      _codeControllers.map((c) => c.text).join();
-
+  String get _enteredCode => _codeControllers.map((c) => c.text).join();
   bool get _codeComplete => _enteredCode.length == _codeLength;
 
   void _onDigitChanged(int index, String value) {
@@ -82,8 +79,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       for (int i = 0; i < _codeLength && i < digits.length; i++) {
         _codeControllers[i].text = digits[i];
       }
-      final next =
-          _codeControllers.indexWhere((c) => c.text.isEmpty);
+      final next = _codeControllers.indexWhere((c) => c.text.isEmpty);
       _codeFocusNodes[next == -1 ? _codeLength - 1 : next].requestFocus();
       setState(() {});
       return;
@@ -104,16 +100,17 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   void _clearCode() {
-    for (final c in _codeControllers) { c.clear(); }
+    for (final c in _codeControllers) {
+      c.clear();
+    }
     _codeFocusNodes[0].requestFocus();
     setState(() {});
   }
 
-  // ── Actions ──────────────────────────────────────────────────────────────
-
   Future<void> _handleReset() async {
     if (!_codeComplete) return;
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final auth = context.read<AuthProvider>();
     final success = await auth.resetPassword(
@@ -126,18 +123,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     if (!success) {
       SnackBarHelper.showError(
-          context, auth.errorMessage ?? 'Invalid code. Please try again.');
+          context, auth.errorMessage ?? l10n.invalidCodeTryAgain);
       _clearCode();
       return;
     }
 
-    SnackBarHelper.showSuccess(
-        context, 'Password reset! Please log in with your new password.');
+    SnackBarHelper.showSuccess(context, l10n.passwordResetSuccess);
     context.go('/login');
   }
 
   Future<void> _handleResend() async {
     if (_resendCountdown > 0) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final auth = context.read<AuthProvider>();
     final success = await auth.forgotPassword(widget.email);
@@ -146,17 +143,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     if (success) {
       _startCountdown();
-      SnackBarHelper.showSuccess(context, 'A new code has been sent.');
+      SnackBarHelper.showSuccess(context, l10n.newCodeSent);
     } else {
       SnackBarHelper.showError(
-          context, auth.errorMessage ?? 'Could not send code. Try again.');
+          context, auth.errorMessage ?? l10n.couldNotSendCode);
     }
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
@@ -165,9 +161,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: AppColors.textPrimary),
-        title: Text('Reset Password',
-            style: AppTextStyles.headingM
-                .copyWith(color: AppColors.textPrimary)),
+        title: Text(l10n.resetPasswordTitle,
+            style:
+                AppTextStyles.headingM.copyWith(color: AppColors.textPrimary)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -177,9 +173,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Header ──────────────────────────────────────────────────
                 Text(
-                  'Enter the 6-digit code sent to',
+                  l10n.enterCodeSentTo,
                   style: AppTextStyles.bodyM
                       .copyWith(color: AppColors.textSecondary),
                 ),
@@ -192,8 +187,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // ── OTP row ──────────────────────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(
@@ -207,26 +200,24 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // ── Resend row ───────────────────────────────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Didn't receive it? ",
+                      '${l10n.didntReceiveIt} ',
                       style: AppTextStyles.bodyS
                           .copyWith(color: AppColors.textSecondary),
                     ),
                     _resendCountdown > 0
                         ? Text(
-                            'Resend in ${_resendCountdown}s',
+                            l10n.resendInSeconds(_resendCountdown),
                             style: AppTextStyles.bodyS
                                 .copyWith(color: AppColors.textSecondary),
                           )
                         : GestureDetector(
                             onTap: auth.isLoading ? null : _handleResend,
                             child: Text(
-                              'Resend',
+                              l10n.resend,
                               style: AppTextStyles.bodyS.copyWith(
                                 color: AppColors.ownerPrimary,
                                 fontWeight: FontWeight.w700,
@@ -236,15 +227,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ],
                 ),
                 const SizedBox(height: 32),
-
-                // ── New password ─────────────────────────────────────────────
-                Text('New Password',
+                Text(l10n.newPassword,
                     style: AppTextStyles.bodyS
                         .copyWith(color: AppColors.textSecondary)),
                 const SizedBox(height: 8),
                 AppTextField(
-                  label: 'New Password',
-                  hintText: 'Minimum 6 characters',
+                  label: l10n.newPassword,
+                  hintText: l10n.minimumSixChars,
                   controller: _newPasswordController,
                   obscureText: _obscureNew,
                   prefixIcon: const Icon(Icons.lock_outline, size: 20),
@@ -256,23 +245,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       size: 20,
                       color: AppColors.textSecondary,
                     ),
-                    onPressed: () =>
-                        setState(() => _obscureNew = !_obscureNew),
+                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return 'Password is required';
+                      return l10n.passwordRequired;
                     }
                     if (v.trim().length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l10n.passwordMinSixChars;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 AppTextField(
-                  label: 'Confirm Password',
-                  hintText: 'Re-enter your new password',
+                  label: l10n.confirmPassword,
+                  hintText: l10n.minimumSixChars,
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirm,
                   prefixIcon: const Icon(Icons.lock_outline, size: 20),
@@ -289,23 +277,20 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return 'Please confirm your password';
+                      return l10n.pleaseConfirmPassword;
                     }
                     if (v.trim() != _newPasswordController.text.trim()) {
-                      return 'Passwords do not match';
+                      return l10n.passwordsDoNotMatch;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 40),
-
-                // ── Submit ───────────────────────────────────────────────────
                 AppButton.primary(
-                  label: 'Reset Password',
+                  label: l10n.resetPasswordTitle,
                   isLoading: auth.isLoading,
-                  onPressed: (_codeComplete && !auth.isLoading)
-                      ? _handleReset
-                      : null,
+                  onPressed:
+                      (_codeComplete && !auth.isLoading) ? _handleReset : null,
                 ),
               ],
             ),
@@ -315,8 +300,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
   }
 }
-
-// ── Reusable OTP box ─────────────────────────────────────────────────────────
 
 class _OtpBox extends StatelessWidget {
   final TextEditingController controller;
@@ -367,8 +350,8 @@ class _OtpBox extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                  color: AppColors.ownerPrimary, width: 2),
+              borderSide:
+                  const BorderSide(color: AppColors.ownerPrimary, width: 2),
             ),
           ),
           onChanged: onChanged,

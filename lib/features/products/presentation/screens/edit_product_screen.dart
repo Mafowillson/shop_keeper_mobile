@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
-import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
@@ -9,14 +8,13 @@ import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
-
-// ── Unit entry (form state for one unit row) ───────────────────────────────────
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class _UnitEntry {
   final TextEditingController name;
   final TextEditingController qty;
   final TextEditingController price;
-  final TextEditingController stock; // opening stock, create-mode only
+  final TextEditingController stock;
 
   _UnitEntry({String n = '', String q = '', String p = '', String s = '0'})
       : name = TextEditingController(text: n),
@@ -33,8 +31,6 @@ class _UnitEntry {
     stock.dispose();
   }
 }
-
-// ── Screen ─────────────────────────────────────────────────────────────────────
 
 class EditProductScreen extends StatefulWidget {
   final String? productId;
@@ -53,13 +49,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
   bool _isLoadingProduct = false;
 
   static const _categories = [
-    'Beverages', 'Snacks & Sweets', 'Grains & Staples',
-    'Dairy & Eggs', 'Cleaning & Hygiene', 'Household', 'Toiletries', 'Other',
+    'Beverages',
+    'Snacks & Sweets',
+    'Grains & Staples',
+    'Dairy & Eggs',
+    'Cleaning & Hygiene',
+    'Household',
+    'Toiletries',
+    'Other',
   ];
 
   bool get _isNew => widget.productId == null;
-
-  // ── Computed helpers ────────────────────────────────────────────────────────
 
   String get _baseUnitName {
     for (final e in _units) {
@@ -79,8 +79,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
     return total;
   }
-
-  // ── Lifecycle ───────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -111,8 +109,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _units.add(entry);
   }
 
-  // ── Data loading ────────────────────────────────────────────────────────────
-
   Future<void> _loadProduct() async {
     setState(() => _isLoadingProduct = true);
     final product = context
@@ -142,8 +138,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     if (_units.isEmpty) _addEntry(_UnitEntry(q: '1'));
   }
 
-  // ── Unit management ─────────────────────────────────────────────────────────
-
   void _addUnit() {
     if (_units.length >= 5) return;
     setState(() => _addEntry(_UnitEntry()));
@@ -157,12 +151,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
     });
   }
 
-  // ── Submission ──────────────────────────────────────────────────────────────
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
 
-    // Cross-field: exactly one base unit
     final baseCount = _units.where((e) => e.isBase).length;
     if (baseCount == 0) {
       SnackBarHelper.showError(
@@ -175,9 +167,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
 
-    // Check duplicate names
-    final names =
-        _units.map((e) => e.name.text.trim().toLowerCase()).toList();
+    final names = _units.map((e) => e.name.text.trim().toLowerCase()).toList();
     if (names.toSet().length != names.length) {
       SnackBarHelper.showError(context, 'Unit names must be unique.');
       return;
@@ -189,13 +179,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
         .map((e) => UnitDefinition(
               name: e.name.text.trim().toLowerCase(),
               quantityInBase: int.parse(e.qty.text.trim()),
-              price: double.parse(
-                  e.price.text.replaceAll(',', '').trim()),
+              price: double.parse(e.price.text.replaceAll(',', '').trim()),
             ))
         .toList();
 
-    final baseUnitName =
-        units.firstWhere((u) => u.quantityInBase == 1).name;
+    final baseUnitName = units.firstWhere((u) => u.quantityInBase == 1).name;
 
     Map<String, int>? initialStock;
     if (_isNew) {
@@ -207,8 +195,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       }
     }
 
-    final shopId =
-        context.read<AuthProvider>().currentUser?.shopId ?? '';
+    final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
 
     final product = Product(
       id: widget.productId ?? '',
@@ -218,43 +205,37 @@ class _EditProductScreenState extends State<EditProductScreen> {
       baseUnit: baseUnitName,
       units: units,
       stockQty: 0,
-      lowStockThreshold:
-          int.tryParse(_thresholdController.text.trim()) ?? 0,
+      lowStockThreshold: int.tryParse(_thresholdController.text.trim()) ?? 0,
       isActive: true,
       initialStock: initialStock,
     );
 
-    final saved =
-        await context.read<ProductProvider>().saveProduct(product);
+    final saved = await context.read<ProductProvider>().saveProduct(product);
 
     if (!mounted) return;
 
     if (saved != null) {
       SnackBarHelper.showSuccess(
         context,
-        _isNew ? 'Product created successfully' : 'Product updated',
+        _isNew ? l10n.productCreatedSuccessfully : l10n.productUpdated,
       );
       Navigator.of(context).pop();
     } else {
-      final err = context.read<ProductProvider>().errorMessage ??
-          'Save failed';
+      final err = context.read<ProductProvider>().errorMessage ?? l10n.error;
       SnackBarHelper.showError(context, err);
     }
   }
 
-  // ── Build ───────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
-    final title =
-        _isNew ? AppStrings.addProduct : AppStrings.editProduct;
+    final l10n = AppLocalizations.of(context)!;
+    final title = _isNew ? l10n.addProduct : l10n.editProduct;
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(title,
-            style:
-                AppTextStyles.headingL.copyWith(color: Colors.white)),
+            style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -268,41 +249,34 @@ class _EditProductScreenState extends State<EditProductScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Product info ───────────────────────────────────
-                  const _SectionHeader(
+                  _SectionHeader(
                     icon: Icons.label_outline,
-                    title: 'Product Info',
-                    subtitle: 'Name and category',
+                    title: l10n.productInfo,
+                    subtitle: l10n.nameAndCategory,
                   ),
                   const SizedBox(height: 12),
                   AppTextField(
-                    label: 'Product name',
+                    label: l10n.productName,
                     hintText: 'e.g. Top Cube Sugar',
                     controller: _nameController,
-                    prefixIcon: const Icon(Icons.storefront_outlined,
-                        size: 20),
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Required'
-                        : null,
+                    prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? l10n.required : null,
                   ),
                   const SizedBox(height: 12),
                   _CategoryDropdown(
                     selected: _selectedCategory,
                     categories: _categories,
-                    onChanged: (v) =>
-                        setState(() => _selectedCategory = v),
+                    label: l10n.category,
+                    onChanged: (v) => setState(() => _selectedCategory = v),
                   ),
                   const SizedBox(height: 24),
-
-                  // ── Units ──────────────────────────────────────────
-                  const _SectionHeader(
+                  _SectionHeader(
                     icon: Icons.layers_outlined,
-                    title: 'Units',
-                    subtitle:
-                        'Define how this product is sold — exactly one unit must have qty-in-base = 1',
+                    title: l10n.units,
+                    subtitle: l10n.howManyBaseUnits,
                   ),
                   const SizedBox(height: 12),
-
                   ..._units.asMap().entries.map(
                         (e) => _UnitCard(
                           index: e.key,
@@ -311,17 +285,16 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           isNew: _isNew,
                           onRemove: () => _removeUnit(e.key),
                           onChanged: () => setState(() {}),
+                          l10n: l10n,
                         ),
                       ),
-
                   if (_units.length < 5)
                     Padding(
                       padding: const EdgeInsets.only(top: 4, bottom: 8),
                       child: TextButton.icon(
                         onPressed: _addUnit,
-                        icon: const Icon(Icons.add_circle_outline,
-                            size: 18),
-                        label: Text('Add another unit',
+                        icon: const Icon(Icons.add_circle_outline, size: 18),
+                        label: Text(l10n.addAnotherUnit,
                             style: AppTextStyles.labelL),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.ownerPrimary,
@@ -331,12 +304,10 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       ),
                     ),
                   const SizedBox(height: 8),
-
-                  // ── Opening stock (create only) ────────────────────
                   if (_isNew) ...[
-                    const _SectionHeader(
+                    _SectionHeader(
                       icon: Icons.warehouse_outlined,
-                      title: 'Opening Stock',
+                      title: l10n.openingStock,
                       subtitle:
                           'Enter how much you have now — leave blank if starting at zero',
                     ),
@@ -346,55 +317,49 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       computedTotal: _computedStockTotal,
                       baseUnitName: _baseUnitName,
                       onChanged: () => setState(() {}),
+                      l10n: l10n,
                     ),
                     const SizedBox(height: 24),
                   ],
-
-                  // ── Stock info (edit only) ─────────────────────────
                   if (!_isNew) ...[
-                    const _SectionHeader(
+                    _SectionHeader(
                       icon: Icons.inventory_2_outlined,
-                      title: 'Current Stock',
+                      title: l10n.currentStock,
                       subtitle:
                           'Stock is updated automatically when sales are recorded',
                     ),
                     const SizedBox(height: 12),
                     _CurrentStockSection(
                       productId: widget.productId!,
+                      l10n: l10n,
                     ),
                     const SizedBox(height: 24),
                   ],
-
-                  // ── Threshold ──────────────────────────────────────
                   _SectionHeader(
                     icon: Icons.warning_amber_outlined,
-                    title: 'Low Stock Alert',
+                    title: l10n.lowStockAlert,
                     subtitle:
                         'Alert when stock falls below this many $_baseUnitName',
                   ),
                   const SizedBox(height: 12),
                   AppTextField(
-                    label:
-                        'Threshold (in $_baseUnitName)',
+                    label: 'Threshold (in $_baseUnitName)',
                     hintText: 'e.g. 5',
                     controller: _thresholdController,
                     keyboardType: TextInputType.number,
-                    prefixIcon: const Icon(Icons.notifications_outlined,
-                        size: 20),
-                    validator: (v) =>
-                        int.tryParse(v?.trim() ?? '') == null
-                            ? 'Enter a whole number'
-                            : null,
+                    prefixIcon:
+                        const Icon(Icons.notifications_outlined, size: 20),
+                    validator: (v) => int.tryParse(v?.trim() ?? '') == null
+                        ? l10n.enterWholeNumber
+                        : null,
                   ),
                   const SizedBox(height: 32),
-
-                  // ── Actions ────────────────────────────────────────
                   Consumer<ProductProvider>(
                     builder: (_, provider, __) => Row(
                       children: [
                         Expanded(
                           child: AppButton.outlined(
-                            label: AppStrings.cancel,
+                            label: l10n.cancel,
                             onPressed: provider.isSaving
                                 ? null
                                 : () => Navigator.pop(context),
@@ -403,10 +368,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: AppButton.primary(
-                            label: AppStrings.save,
+                            label: l10n.save,
                             isLoading: provider.isSaving,
-                            onPressed:
-                                provider.isSaving ? null : _submit,
+                            onPressed: provider.isSaving ? null : _submit,
                           ),
                         ),
                       ],
@@ -422,8 +386,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
               child: Container(
                 color: Colors.black12,
                 child: const Center(
-                  child: CircularProgressIndicator(
-                      color: AppColors.ownerPrimary),
+                  child:
+                      CircularProgressIndicator(color: AppColors.ownerPrimary),
                 ),
               ),
             ),
@@ -433,8 +397,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 }
 
-// ── Unit card ──────────────────────────────────────────────────────────────────
-
 class _UnitCard extends StatelessWidget {
   final int index;
   final _UnitEntry entry;
@@ -442,6 +404,7 @@ class _UnitCard extends StatelessWidget {
   final bool isNew;
   final VoidCallback onRemove;
   final VoidCallback onChanged;
+  final AppLocalizations l10n;
 
   const _UnitCard({
     required this.index,
@@ -450,6 +413,7 @@ class _UnitCard extends StatelessWidget {
     required this.isNew,
     required this.onRemove,
     required this.onChanged,
+    required this.l10n,
   });
 
   @override
@@ -478,10 +442,8 @@ class _UnitCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isBase
                   ? AppColors.ownerPrimary.withValues(alpha: 0.06)
@@ -499,8 +461,8 @@ class _UnitCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 if (isBase)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.ownerPrimary,
                       borderRadius: BorderRadius.circular(6),
@@ -531,8 +493,6 @@ class _UnitCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Fields
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
             child: Column(
@@ -542,31 +502,27 @@ class _UnitCard extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: AppTextField(
-                        label: 'Unit name',
+                        label: l10n.unitName,
                         hintText: 'e.g. carton',
                         controller: entry.name,
                         onChanged: (_) => onChanged(),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty
-                                ? 'Required'
-                                : null,
+                        validator: (v) => v == null || v.trim().isEmpty
+                            ? l10n.required
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       flex: 2,
                       child: AppTextField(
-                        label: 'Qty in base',
+                        label: l10n.qtyInBase,
                         hintText: 'e.g. 25',
                         controller: entry.qty,
                         keyboardType: TextInputType.number,
                         onChanged: (_) => onChanged(),
                         validator: (v) {
-                          final n =
-                              int.tryParse(v?.trim() ?? '');
-                          if (n == null || n < 1) {
-                            return 'Min 1';
-                          }
+                          final n = int.tryParse(v?.trim() ?? '');
+                          if (n == null || n < 1) return l10n.minOne;
                           return null;
                         },
                       ),
@@ -575,27 +531,23 @@ class _UnitCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 AppTextField(
-                  label: 'Price (FCFA)',
+                  label: l10n.priceFCFA,
                   hintText: 'e.g. 21000',
                   controller: entry.price,
                   keyboardType: TextInputType.number,
-                  prefixIcon:
-                      const Icon(Icons.sell_outlined, size: 18),
+                  prefixIcon: const Icon(Icons.sell_outlined, size: 18),
                   validator: (v) {
-                    final n = double.tryParse(
-                        v?.replaceAll(',', '').trim() ?? '');
-                    if (n == null || n <= 0) return 'Must be > 0';
+                    final n =
+                        double.tryParse(v?.replaceAll(',', '').trim() ?? '');
+                    if (n == null || n <= 0) return l10n.mustBePositive;
                     return null;
                   },
                 ),
-                // Hint: what qty-in-base means
                 const SizedBox(height: 6),
                 Text(
-                  isBase
-                      ? 'This is the base unit — stock is tracked in this unit'
-                      : 'How many base units fit in this unit',
-                  style: AppTextStyles.labelS
-                      .copyWith(color: AppColors.textHint),
+                  isBase ? l10n.baseUnitHint : l10n.howManyBaseUnits,
+                  style:
+                      AppTextStyles.labelS.copyWith(color: AppColors.textHint),
                 ),
               ],
             ),
@@ -606,19 +558,19 @@ class _UnitCard extends StatelessWidget {
   }
 }
 
-// ── Opening stock section ──────────────────────────────────────────────────────
-
 class _OpeningStockSection extends StatelessWidget {
   final List<_UnitEntry> units;
   final int computedTotal;
   final String baseUnitName;
   final VoidCallback onChanged;
+  final AppLocalizations l10n;
 
   const _OpeningStockSection({
     required this.units,
     required this.computedTotal,
     required this.baseUnitName,
     required this.onChanged,
+    required this.l10n,
   });
 
   @override
@@ -635,9 +587,7 @@ class _OpeningStockSection extends StatelessWidget {
         children: [
           ...units.asMap().entries.map((e) {
             final unitName = e.value.name.text.trim();
-            final label = unitName.isEmpty
-                ? 'Unit ${e.key + 1}'
-                : unitName;
+            final label = unitName.isEmpty ? 'Unit ${e.key + 1}' : unitName;
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
@@ -648,9 +598,8 @@ class _OpeningStockSection extends StatelessWidget {
                       label,
                       style: AppTextStyles.labelL.copyWith(
                         color: AppColors.textPrimary,
-                        fontWeight: e.value.isBase
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                        fontWeight:
+                            e.value.isBase ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -690,11 +639,10 @@ class _OpeningStockSection extends StatelessWidget {
   }
 }
 
-// ── Current stock section (edit mode) ─────────────────────────────────────────
-
 class _CurrentStockSection extends StatelessWidget {
   final String productId;
-  const _CurrentStockSection({required this.productId});
+  final AppLocalizations l10n;
+  const _CurrentStockSection({required this.productId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -724,15 +672,14 @@ class _CurrentStockSection extends StatelessWidget {
                   width: 34,
                   height: 34,
                   decoration: BoxDecoration(
-                    color: AppColors.ownerPrimary
-                        .withValues(alpha: 0.08),
+                    color: AppColors.ownerPrimary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
                       u.name.substring(0, 1).toUpperCase(),
-                      style: AppTextStyles.headingS.copyWith(
-                          color: AppColors.ownerPrimary),
+                      style: AppTextStyles.headingS
+                          .copyWith(color: AppColors.ownerPrimary),
                     ),
                   ),
                 ),
@@ -745,7 +692,7 @@ class _CurrentStockSection extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '$available available',
+                  '$available ${l10n.available}',
                   style: AppTextStyles.labelL.copyWith(
                     color: available == 0
                         ? AppColors.danger
@@ -763,8 +710,6 @@ class _CurrentStockSection extends StatelessWidget {
     );
   }
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final IconData icon;
@@ -785,12 +730,10 @@ class _SectionHeader extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color:
-                  AppColors.ownerPrimary.withValues(alpha: 0.08),
+              color: AppColors.ownerPrimary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon,
-                size: 17, color: AppColors.ownerPrimary),
+            child: Icon(icon, size: 17, color: AppColors.ownerPrimary),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -814,11 +757,13 @@ class _SectionHeader extends StatelessWidget {
 class _CategoryDropdown extends StatelessWidget {
   final String selected;
   final List<String> categories;
+  final String label;
   final ValueChanged<String> onChanged;
 
   const _CategoryDropdown({
     required this.selected,
     required this.categories,
+    required this.label,
     required this.onChanged,
   });
 
@@ -826,7 +771,7 @@ class _CategoryDropdown extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Category',
+          Text(label,
               style: AppTextStyles.headingS
                   .copyWith(color: AppColors.textPrimary)),
           const SizedBox(height: 8),
@@ -843,9 +788,7 @@ class _CategoryDropdown extends StatelessWidget {
                 isExpanded: true,
                 items: categories
                     .map((c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(c,
-                            style: AppTextStyles.bodyM)))
+                        value: c, child: Text(c, style: AppTextStyles.bodyM)))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) onChanged(v);

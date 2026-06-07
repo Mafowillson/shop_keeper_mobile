@@ -25,7 +25,8 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
         'page_size': pageSize,
       };
       if (search != null && search.isNotEmpty) params['search'] = search;
-      if (category != null && category.isNotEmpty) params['category'] = category;
+      if (category != null && category.isNotEmpty)
+        params['category'] = category;
 
       final res = await _dio.get('/products', queryParameters: params);
       final list = res.data['products'] as List<dynamic>? ?? [];
@@ -61,7 +62,8 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
   @override
   Future<ProductModel> updateProduct(String id, ProductModel model) async {
     try {
-      final res = await _dio.put('/products/$id', data: model.toUpdateRequest());
+      final res =
+          await _dio.put('/products/$id', data: model.toUpdateRequest());
       return ProductModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw Exception(_errorMessage(e));
@@ -79,7 +81,8 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
 
   String _errorMessage(DioException e) {
     final data = e.response?.data;
-    if (data is Map) return data['error'] as String? ?? e.message ?? 'Request failed';
+    if (data is Map)
+      return data['error'] as String? ?? e.message ?? 'Request failed';
     return e.message ?? 'Request failed';
   }
 }

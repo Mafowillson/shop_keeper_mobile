@@ -13,10 +13,12 @@ class DebtRepositoryImpl implements IDebtRepository {
   const DebtRepositoryImpl(this._remote);
 
   @override
-  TaskEither<Failure, List<Customer>> getCustomers({required String shopId, bool? hasDebt}) =>
+  TaskEither<Failure, List<Customer>> getCustomers(
+          {required String shopId, bool? hasDebt}) =>
       TaskEither.tryCatch(
         () async {
-          final models = await _remote.getCustomers(shopId: shopId, hasDebt: hasDebt);
+          final models =
+              await _remote.getCustomers(shopId: shopId, hasDebt: hasDebt);
           return models.map((m) => m.toEntity()).toList();
         },
         (e, _) => ServerFailure(e.toString()),
@@ -30,9 +32,12 @@ class DebtRepositoryImpl implements IDebtRepository {
       );
 
   @override
-  TaskEither<Failure, Customer> createCustomer({required String shopId, required String name, String? phone}) =>
+  TaskEither<Failure, Customer> createCustomer(
+          {required String shopId, required String name, String? phone}) =>
       TaskEither.tryCatch(
-        () async => (await _remote.createCustomer(shopId: shopId, name: name, phone: phone)).toEntity(),
+        () async => (await _remote.createCustomer(
+                shopId: shopId, name: name, phone: phone))
+            .toEntity(),
         (e, _) => ServerFailure(e.toString()),
       );
 
@@ -47,7 +52,8 @@ class DebtRepositoryImpl implements IDebtRepository {
       );
 
   @override
-  TaskEither<Failure, Unit> recordPayment(String customerId, double amount, String? note) =>
+  TaskEither<Failure, Unit> recordPayment(
+          String customerId, double amount, String? note) =>
       TaskEither.tryCatch(
         () async {
           await _remote.recordPayment(customerId, amount, note);

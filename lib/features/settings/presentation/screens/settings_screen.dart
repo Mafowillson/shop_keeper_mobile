@@ -7,6 +7,7 @@ import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/settings/presentation/providers/settings_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -36,12 +37,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Consumer<SettingsProvider>(
         builder: (context, provider, _) => CustomScrollView(
           slivers: [
-            _SettingsHeader(primary: _primary),
+            _SettingsHeader(primary: _primary, l10n: l10n),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
               sliver: SliverList(
@@ -56,8 +58,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (_isOwner) ...[
                     _SectionLabel(
                       icon: Icons.notifications_outlined,
-                      title: 'Alert Preferences',
-                      subtitle: 'Choose which events notify you',
+                      title: l10n.alertPreferences,
+                      subtitle: l10n.chooseAlerts,
                       trailing: provider.isSavingPrefs
                           ? const _SavingIndicator()
                           : null,
@@ -68,40 +70,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         : _NotificationPrefsCard(
                             provider: provider,
                             primary: _primary,
+                            l10n: l10n,
                           ),
                     const SizedBox(height: 24),
                   ],
 
-                  // ── Language ─────────────────────────────────────────
-                  const _SectionLabel(
+                  // ── Language (auto-detected) ──────────────────────────
+                  _SectionLabel(
                     icon: Icons.language_outlined,
-                    title: 'Language',
-                    subtitle: 'App display language',
+                    title: l10n.languageSetting,
+                    subtitle: l10n.appDisplayLanguage,
                   ),
                   const SizedBox(height: 10),
-                  _LanguageCard(provider: provider, primary: _primary),
+                  _AutoLanguageCard(l10n: l10n),
                   const SizedBox(height: 24),
 
                   // ── Staff: push notification info ────────────────────
                   if (!_isOwner) ...[
-                    const _SectionLabel(
+                    _SectionLabel(
                       icon: Icons.notifications_active_outlined,
-                      title: 'Notifications',
-                      subtitle: 'How you receive alerts',
+                      title: l10n.pushNotifications,
+                      subtitle: l10n.pushNotifDescription,
                     ),
                     const SizedBox(height: 10),
-                    const _StaffNotifInfoCard(),
+                    _StaffNotifInfoCard(l10n: l10n),
                     const SizedBox(height: 24),
                   ],
 
                   // ── About ────────────────────────────────────────────
-                  const _SectionLabel(
+                  _SectionLabel(
                     icon: Icons.info_outline_rounded,
-                    title: 'About',
+                    title: l10n.about,
                     subtitle: 'App information and support',
                   ),
                   const SizedBox(height: 10),
-                  _AboutCard(primary: _primary),
+                  _AboutCard(primary: _primary, l10n: l10n),
                 ]),
               ),
             ),
@@ -116,7 +119,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 class _SettingsHeader extends StatelessWidget {
   final Color primary;
-  const _SettingsHeader({required this.primary});
+  final AppLocalizations l10n;
+  const _SettingsHeader({required this.primary, required this.l10n});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
@@ -130,10 +134,7 @@ class _SettingsHeader extends StatelessWidget {
           background: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  primary.withValues(alpha: 0.85),
-                  primary,
-                ],
+                colors: [primary.withValues(alpha: 0.85), primary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -161,13 +162,13 @@ class _SettingsHeader extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Settings',
+                            l10n.settings,
                             style: AppTextStyles.headingL
                                 .copyWith(color: Colors.white),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Customize your experience',
+                            l10n.customizeExperience,
                             style: AppTextStyles.bodyS
                                 .copyWith(color: Colors.white60),
                           ),
@@ -208,8 +209,7 @@ class _SectionLabel extends StatelessWidget {
               color: AppColors.ownerPrimary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(9),
             ),
-            child:
-                Icon(icon, size: 17, color: AppColors.ownerPrimary),
+            child: Icon(icon, size: 17, color: AppColors.ownerPrimary),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -240,35 +240,30 @@ class _ErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(message,
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.danger)),
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
             ),
             GestureDetector(
               onTap: onDismiss,
-              child: const Icon(Icons.close,
-                  color: AppColors.danger, size: 16),
+              child: const Icon(Icons.close, color: AppColors.danger, size: 16),
             ),
           ],
         ),
       );
 }
 
-// ── Loading card ───────────────────────────────────────────────────────────────
+// ── Loading / saving ───────────────────────────────────────────────────────────
 
 class _LoadingCard extends StatelessWidget {
   const _LoadingCard();
@@ -286,31 +281,31 @@ class _LoadingCard extends StatelessWidget {
       );
 }
 
-// ── Saving indicator ───────────────────────────────────────────────────────────
-
 class _SavingIndicator extends StatelessWidget {
   const _SavingIndicator();
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 12,
-            height: 12,
-            child: CircularProgressIndicator(
-              strokeWidth: 1.5,
-              color: AppColors.ownerPrimary,
-            ),
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(
+          width: 12,
+          height: 12,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+            color: AppColors.ownerPrimary,
           ),
-          const SizedBox(width: 6),
-          Text(
-            'Saving…',
-            style: AppTextStyles.labelS
-                .copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      );
+        ),
+        const SizedBox(width: 6),
+        Text(
+          l10n.savingEllipsis,
+          style: AppTextStyles.labelS.copyWith(color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
 }
 
 // ── Notification preferences card (owner) ─────────────────────────────────────
@@ -318,8 +313,9 @@ class _SavingIndicator extends StatelessWidget {
 class _NotificationPrefsCard extends StatelessWidget {
   final SettingsProvider provider;
   final Color primary;
+  final AppLocalizations l10n;
   const _NotificationPrefsCard(
-      {required this.provider, required this.primary});
+      {required this.provider, required this.primary, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -329,8 +325,8 @@ class _NotificationPrefsCard extends StatelessWidget {
         _ToggleTile(
           icon: Icons.inventory_2_outlined,
           iconColor: AppColors.warning,
-          label: 'Low stock alerts',
-          subtitle: 'Notify when a product runs low',
+          label: l10n.lowStockAlerts,
+          subtitle: l10n.notifyWhenLowStock,
           value: p.lowStock,
           primary: primary,
           onChanged: (_) => provider.toggleLowStock(),
@@ -339,8 +335,8 @@ class _NotificationPrefsCard extends StatelessWidget {
         _ToggleTile(
           icon: Icons.trending_up_rounded,
           iconColor: AppColors.success,
-          label: 'Large sale alerts',
-          subtitle: 'Notify on high-value transactions',
+          label: l10n.largeSaleAlerts,
+          subtitle: l10n.notifyHighValue,
           value: p.largeSale,
           primary: primary,
           onChanged: (_) => provider.toggleLargeSale(),
@@ -349,8 +345,8 @@ class _NotificationPrefsCard extends StatelessWidget {
         _ToggleTile(
           icon: Icons.payments_outlined,
           iconColor: AppColors.accent,
-          label: 'Debt payment alerts',
-          subtitle: 'Notify when a customer pays',
+          label: l10n.debtPaymentAlerts,
+          subtitle: l10n.notifyCustomerPays,
           value: p.debtPayment,
           primary: primary,
           onChanged: (_) => provider.toggleDebtPayment(),
@@ -359,8 +355,8 @@ class _NotificationPrefsCard extends StatelessWidget {
         _ToggleTile(
           icon: Icons.badge_outlined,
           iconColor: AppColors.ownerPrimary,
-          label: 'Staff login alerts',
-          subtitle: 'Notify when staff signs in',
+          label: l10n.staffLoginAlerts,
+          subtitle: l10n.notifyStaffSignIn,
           value: p.staffLogin,
           primary: primary,
           onChanged: (_) => provider.toggleStaffLogin(),
@@ -370,24 +366,25 @@ class _NotificationPrefsCard extends StatelessWidget {
           _NavTile(
             icon: Icons.bar_chart_rounded,
             iconColor: AppColors.success,
-            label: 'Large sale threshold',
-            subtitle: 'Sales above this amount trigger an alert',
+            label: l10n.largeSaleThresholdLabel,
+            subtitle: l10n.salesAboveThisAmount,
             value: formatFCFA(p.largeSaleThreshold),
-            onTap: () => _editThreshold(context, provider),
+            onTap: () => _editThreshold(context, provider, l10n),
           ),
         ],
       ],
     );
   }
 
-  Future<void> _editThreshold(
-      BuildContext context, SettingsProvider provider) async {
+  Future<void> _editThreshold(BuildContext context, SettingsProvider provider,
+      AppLocalizations l10n) async {
     final result = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _ThresholdSheet(
         currentValue: provider.notifPrefs.largeSaleThreshold,
+        l10n: l10n,
       ),
     );
     if (result != null) {
@@ -396,145 +393,64 @@ class _NotificationPrefsCard extends StatelessWidget {
   }
 }
 
-// ── Language card ──────────────────────────────────────────────────────────────
+// ── Auto language card ─────────────────────────────────────────────────────────
 
-class _LanguageCard extends StatelessWidget {
-  final SettingsProvider provider;
-  final Color primary;
-  const _LanguageCard(
-      {required this.provider, required this.primary});
+class _AutoLanguageCard extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _AutoLanguageCard({required this.l10n});
 
   @override
-  Widget build(BuildContext context) => _SettingsCard(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+  Widget build(BuildContext context) {
+    final locale =
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    final langName = locale == 'fr' ? 'Français' : 'English';
+
+    return _SettingsCard(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.ownerPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(Icons.translate_rounded,
+                    size: 18, color: AppColors.ownerPrimary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: Icon(Icons.translate_rounded,
-                          size: 18, color: primary),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Display language',
-                              style: AppTextStyles.labelL.copyWith(
-                                  color: AppColors.textPrimary)),
-                          Text(
-                            provider.isFrench ? 'Français' : 'English',
-                            style: AppTextStyles.bodyS,
-                          ),
-                        ],
-                      ),
+                    Text(langName,
+                        style: AppTextStyles.labelL
+                            .copyWith(color: AppColors.textPrimary)),
+                    Text(
+                      l10n.languageAutoDetected,
+                      style: AppTextStyles.bodyS,
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
-                Container(
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      _LangTab(
-                        label: 'English',
-                        flag: '🇬🇧',
-                        isSelected: !provider.isFrench,
-                        primary: primary,
-                        onTap: () => provider.setLanguage('en'),
-                      ),
-                      _LangTab(
-                        label: 'Français',
-                        flag: '🇫🇷',
-                        isSelected: provider.isFrench,
-                        primary: primary,
-                        onTap: () => provider.setLanguage('fr'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-}
-
-class _LangTab extends StatelessWidget {
-  final String label;
-  final String flag;
-  final bool isSelected;
-  final Color primary;
-  final VoidCallback onTap;
-  const _LangTab({
-    required this.label,
-    required this.flag,
-    required this.isSelected,
-    required this.primary,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: GestureDetector(
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            margin: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.white : Colors.transparent,
-              borderRadius: BorderRadius.circular(9),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.07),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(flag, style: const TextStyle(fontSize: 14)),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: AppTextStyles.labelL.copyWith(
-                    color: isSelected
-                        ? primary
-                        : AppColors.textSecondary,
-                    fontWeight: isSelected
-                        ? FontWeight.w700
-                        : FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const Icon(Icons.phone_android_outlined,
+                  size: 18, color: AppColors.textSecondary),
+            ],
           ),
         ),
-      );
+      ],
+    );
+  }
 }
 
 // ── Staff notification info card ───────────────────────────────────────────────
 
 class _StaffNotifInfoCard extends StatelessWidget {
-  const _StaffNotifInfoCard();
+  final AppLocalizations l10n;
+  const _StaffNotifInfoCard({required this.l10n});
 
   @override
   Widget build(BuildContext context) => _SettingsCard(
@@ -559,14 +475,12 @@ class _StaffNotifInfoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Push notifications',
+                      Text(l10n.pushNotifications,
                           style: AppTextStyles.labelL
                               .copyWith(color: AppColors.textPrimary)),
                       const SizedBox(height: 4),
-                      Text(
-                        'You receive instant push alerts when the owner adds, updates, or removes products. These are managed by your device.',
-                        style: AppTextStyles.bodyS,
-                      ),
+                      Text(l10n.pushNotifDescription,
+                          style: AppTextStyles.bodyS),
                     ],
                   ),
                 ),
@@ -574,20 +488,20 @@ class _StaffNotifInfoCard extends StatelessWidget {
             ),
           ),
           const _Divider(),
-          const _InfoRow(
+          _InfoRow(
               icon: Icons.add_box_outlined,
               color: AppColors.accent,
-              label: 'New products added'),
+              label: l10n.newProductsAdded),
           const _Divider(),
-          const _InfoRow(
+          _InfoRow(
               icon: Icons.edit_outlined,
               color: AppColors.warning,
-              label: 'Price / stock updates'),
+              label: l10n.priceStockUpdates),
           const _Divider(),
-          const _InfoRow(
+          _InfoRow(
               icon: Icons.delete_outline,
               color: AppColors.danger,
-              label: 'Products removed'),
+              label: l10n.productsRemoved),
         ],
       );
 }
@@ -601,8 +515,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         child: Row(
           children: [
             Container(
@@ -615,11 +528,9 @@ class _InfoRow extends StatelessWidget {
               child: Icon(icon, size: 15, color: color),
             ),
             const SizedBox(width: 12),
-            Text(
-              label,
-              style: AppTextStyles.labelL
-                  .copyWith(color: AppColors.textSecondary),
-            ),
+            Text(label,
+                style: AppTextStyles.labelL
+                    .copyWith(color: AppColors.textSecondary)),
             const Spacer(),
             Container(
               width: 8,
@@ -638,7 +549,8 @@ class _InfoRow extends StatelessWidget {
 
 class _AboutCard extends StatelessWidget {
   final Color primary;
-  const _AboutCard({required this.primary});
+  final AppLocalizations l10n;
+  const _AboutCard({required this.primary, required this.l10n});
 
   @override
   Widget build(BuildContext context) => _SettingsCard(
@@ -646,31 +558,31 @@ class _AboutCard extends StatelessWidget {
           _ValueTile(
             icon: Icons.tag_rounded,
             iconColor: primary,
-            label: 'Version',
+            label: l10n.version,
             value: '1.0.0',
           ),
           const _Divider(),
           _NavTile(
             icon: Icons.headset_mic_outlined,
             iconColor: primary,
-            label: 'Contact Support',
-            subtitle: 'Get help or report an issue',
+            label: l10n.contactSupport,
+            subtitle: l10n.getHelpOrReport,
             onTap: () => context.push('/settings/support'),
           ),
           const _Divider(),
           _NavTile(
             icon: Icons.privacy_tip_outlined,
             iconColor: primary,
-            label: 'Privacy Policy',
-            subtitle: 'How we handle your data',
+            label: l10n.privacyPolicy,
+            subtitle: l10n.howWeHandleData,
             onTap: () => context.push('/settings/privacy'),
           ),
           const _Divider(),
           _NavTile(
             icon: Icons.gavel_outlined,
             iconColor: primary,
-            label: 'Terms of Service',
-            subtitle: 'Usage terms and conditions',
+            label: l10n.termsOfService,
+            subtitle: l10n.usageTerms,
             onTap: () => context.push('/settings/terms'),
           ),
         ],
@@ -699,8 +611,7 @@ class _SettingsCard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children),
+              crossAxisAlignment: CrossAxisAlignment.start, children: children),
         ),
       );
 }
@@ -751,11 +662,9 @@ class _ToggleTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: AppTextStyles.labelL
-                        .copyWith(color: AppColors.textPrimary),
-                  ),
+                  Text(label,
+                      style: AppTextStyles.labelL
+                          .copyWith(color: AppColors.textPrimary)),
                   Text(subtitle, style: AppTextStyles.bodyS),
                 ],
               ),
@@ -795,8 +704,7 @@ class _NavTile extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
         onTap: onTap,
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Container(
@@ -813,11 +721,9 @@ class _NavTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      label,
-                      style: AppTextStyles.labelL
-                          .copyWith(color: AppColors.textPrimary),
-                    ),
+                    Text(label,
+                        style: AppTextStyles.labelL
+                            .copyWith(color: AppColors.textPrimary)),
                     if (subtitle != null)
                       Text(subtitle!, style: AppTextStyles.bodyS),
                   ],
@@ -855,8 +761,7 @@ class _ValueTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -870,16 +775,14 @@ class _ValueTile extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.labelL
-                    .copyWith(color: AppColors.textPrimary),
-              ),
+              child: Text(label,
+                  style: AppTextStyles.labelL
+                      .copyWith(color: AppColors.textPrimary)),
             ),
             Text(
               value,
-              style: AppTextStyles.labelL
-                  .copyWith(color: AppColors.textSecondary),
+              style:
+                  AppTextStyles.labelL.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -890,7 +793,8 @@ class _ValueTile extends StatelessWidget {
 
 class _ThresholdSheet extends StatefulWidget {
   final double currentValue;
-  const _ThresholdSheet({required this.currentValue});
+  final AppLocalizations l10n;
+  const _ThresholdSheet({required this.currentValue, required this.l10n});
 
   @override
   State<_ThresholdSheet> createState() => _ThresholdSheetState();
@@ -932,6 +836,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = widget.l10n;
     final kb = MediaQuery.of(context).viewInsets.bottom;
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + kb),
@@ -943,7 +848,6 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── drag handle ──────────────────────────────────
           Center(
             child: Container(
               width: 40,
@@ -955,8 +859,6 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── header ───────────────────────────────────────
           Row(
             children: [
               Container(
@@ -974,10 +876,10 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Large Sale Threshold',
+                    Text(l10n.largeSaleThresholdTitle,
                         style: AppTextStyles.headingS),
                     Text(
-                      "You'll be alerted when a single sale exceeds this",
+                      l10n.youWillBeAlerted,
                       style: AppTextStyles.bodyS
                           .copyWith(color: AppColors.textSecondary),
                     ),
@@ -987,21 +889,17 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             ],
           ),
           const Divider(height: 28, color: AppColors.border),
-
-          // ── current value ─────────────────────────────────
-          Text('Current threshold',
+          Text(l10n.currentThreshold,
               style: AppTextStyles.labelL
                   .copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: 4),
           Text(
             formatFCFA(widget.currentValue),
-            style: AppTextStyles.headingL
-                .copyWith(color: AppColors.ownerPrimary),
+            style:
+                AppTextStyles.headingL.copyWith(color: AppColors.ownerPrimary),
           ),
           const SizedBox(height: 20),
-
-          // ── preset chips ──────────────────────────────────
-          Text('Quick select',
+          Text(l10n.quickSelect,
               style: AppTextStyles.labelL
                   .copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: 10),
@@ -1009,30 +907,27 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             spacing: 8,
             runSpacing: 8,
             children: _presets.map((p) {
-              final selected =
-                  _controller.text.trim() == p.toStringAsFixed(0);
+              final selected = _controller.text.trim() == p.toStringAsFixed(0);
               return GestureDetector(
                 onTap: () => _selectPreset(p),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: selected
                         ? AppColors.ownerPrimary
                         : AppColors.background,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: selected
-                          ? AppColors.ownerPrimary
-                          : AppColors.border,
+                      color:
+                          selected ? AppColors.ownerPrimary : AppColors.border,
                     ),
                   ),
                   child: Text(
                     formatFCFA(p),
                     style: AppTextStyles.labelL.copyWith(
-                      color:
-                          selected ? Colors.white : AppColors.textPrimary,
+                      color: selected ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -1040,9 +935,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             }).toList(),
           ),
           const SizedBox(height: 20),
-
-          // ── custom input ──────────────────────────────────
-          Text('Custom amount',
+          Text(l10n.customAmount,
               style: AppTextStyles.labelL
                   .copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: 8),
@@ -1050,13 +943,12 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             controller: _controller,
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: '50000',
-              suffixText: 'FCFA',
-              suffixStyle: AppTextStyles.labelL
-                  .copyWith(color: AppColors.textSecondary),
+              suffixText: l10n.fcfa,
+              suffixStyle:
+                  AppTextStyles.labelL.copyWith(color: AppColors.textSecondary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.border),
@@ -1067,14 +959,12 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                    color: AppColors.ownerPrimary, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.ownerPrimary, width: 2),
               ),
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── actions ───────────────────────────────────────
           Row(
             children: [
               Expanded(
@@ -1087,7 +977,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
                     side: const BorderSide(color: AppColors.border),
                   ),
                   child: Text(
-                    'Cancel',
+                    l10n.cancel,
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.textSecondary),
                   ),
@@ -1106,9 +996,8 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
-                    'Save',
-                    style: AppTextStyles.labelL
-                        .copyWith(color: Colors.white),
+                    l10n.save,
+                    style: AppTextStyles.labelL.copyWith(color: Colors.white),
                   ),
                 ),
               ),

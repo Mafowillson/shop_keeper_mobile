@@ -5,6 +5,7 @@ import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/features/staff/data/datasources/staff_remote_datasource.dart';
 import 'package:shopkeeper/features/staff/data/models/staff_model.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class ManageStaffScreen extends StatefulWidget {
   const ManageStaffScreen({super.key});
@@ -34,9 +35,19 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
     });
     try {
       final list = await _ds.listStaff();
-      if (mounted) setState(() { _staff = list; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _staff = list;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _error = e.toString().replaceFirst('Exception: ', ''); _loading = false; });
+      if (mounted) {
+        setState(() {
+          _error = e.toString().replaceFirst('Exception: ', '');
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -50,7 +61,8 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
 
     setState(() => _toggling.add(staff.id));
     try {
-      final updated = await _ds.toggleActive(staff.id, isActive: !staff.isActive);
+      final updated =
+          await _ds.toggleActive(staff.id, isActive: !staff.isActive);
       if (mounted) {
         setState(() {
           final idx = _staff.indexWhere((s) => s.id == staff.id);
@@ -63,7 +75,8 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
           SnackBar(
             content: Text(e.toString().replaceFirst('Exception: ', '')),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -74,11 +87,12 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          const _Header(),
+          _Header(l10n: l10n),
           if (_loading)
             const SliverFillRemaining(
               child: Center(
@@ -86,9 +100,10 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
               ),
             )
           else if (_error != null)
-            SliverFillRemaining(child: _ErrorView(message: _error!, onRetry: _load))
+            SliverFillRemaining(
+                child: _ErrorView(message: _error!, onRetry: _load, l10n: l10n))
           else if (_staff.isEmpty)
-            const SliverFillRemaining(child: _EmptyView())
+            SliverFillRemaining(child: _EmptyView(l10n: l10n))
           else
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
@@ -102,6 +117,7 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
                         staff: s,
                         isToggling: _toggling.contains(s.id),
                         onToggle: () => _toggle(s),
+                        l10n: l10n,
                       ),
                     );
                   },
@@ -115,10 +131,9 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
   }
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────────
-
 class _Header extends StatelessWidget {
-  const _Header();
+  final AppLocalizations l10n;
+  const _Header({required this.l10n});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
@@ -171,15 +186,15 @@ class _Header extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Manage Staff',
+                        l10n.manageStaff,
                         style: AppTextStyles.headingL
                             .copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Activate or deactivate team members',
-                        style: AppTextStyles.bodyS
-                            .copyWith(color: Colors.white60),
+                        l10n.activateOrDeactivateTeam,
+                        style:
+                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
                       ),
                     ],
                   ),
@@ -191,21 +206,22 @@ class _Header extends StatelessWidget {
       );
 }
 
-// ── Staff card ─────────────────────────────────────────────────────────────────
-
 class _StaffCard extends StatelessWidget {
   final StaffModel staff;
   final bool isToggling;
   final VoidCallback onToggle;
+  final AppLocalizations l10n;
 
   const _StaffCard({
     required this.staff,
     required this.isToggling,
     required this.onToggle,
+    required this.l10n,
   });
 
   String get _initials {
-    final parts = staff.name.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    final parts =
+        staff.name.trim().split(' ').where((p) => p.isNotEmpty).toList();
     if (parts.isEmpty) return '?';
     if (parts.length == 1) return parts[0][0].toUpperCase();
     return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -232,7 +248,6 @@ class _StaffCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // ── Avatar ──────────────────────────────────────
             Container(
               width: 48,
               height: 48,
@@ -252,8 +267,6 @@ class _StaffCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-
-            // ── Info ─────────────────────────────────────────
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +283,6 @@ class _StaffCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Status pill
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
@@ -279,7 +291,7 @@ class _StaffCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          active ? 'Active' : 'Inactive',
+                          active ? l10n.active : l10n.inactive,
                           style: AppTextStyles.labelS.copyWith(
                             color: statusColor,
                             fontWeight: FontWeight.w700,
@@ -289,25 +301,18 @@ class _StaffCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Text(
-                    staff.email,
-                    style:
-                        AppTextStyles.bodyS.copyWith(color: AppColors.textSecondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 1),
-                  Text(
-                    staff.phoneNumber,
-                    style:
-                        AppTextStyles.bodyS.copyWith(color: AppColors.textSecondary),
-                  ),
+                  Text(staff.email,
+                      style: AppTextStyles.bodyS
+                          .copyWith(color: AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  Text(staff.phoneNumber,
+                      style: AppTextStyles.bodyS
+                          .copyWith(color: AppColors.textSecondary)),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-
-            // ── Toggle button ─────────────────────────────────
             isToggling
                 ? const SizedBox(
                     width: 22,
@@ -344,17 +349,16 @@ class _StaffCard extends StatelessWidget {
   }
 }
 
-// ── Toggle confirm sheet ───────────────────────────────────────────────────────
-
 class _ToggleSheet extends StatelessWidget {
   final StaffModel staff;
   const _ToggleSheet({required this.staff});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final deactivating = staff.isActive;
     final actionColor = deactivating ? AppColors.danger : AppColors.success;
-    final actionLabel = deactivating ? 'Deactivate' : 'Activate';
+    final actionLabel = deactivating ? l10n.deactivate : l10n.activate;
     final actionIcon =
         deactivating ? Icons.person_off_outlined : Icons.person_outlined;
 
@@ -368,7 +372,6 @@ class _ToggleSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // handle
           Center(
             child: Container(
               width: 40,
@@ -380,8 +383,6 @@ class _ToggleSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-
-          // icon
           Container(
             width: 60,
             height: 60,
@@ -392,7 +393,6 @@ class _ToggleSheet extends StatelessWidget {
             child: Icon(actionIcon, color: actionColor, size: 28),
           ),
           const SizedBox(height: 14),
-
           Text(
             '$actionLabel ${staff.name.split(' ').first}?',
             style: AppTextStyles.headingM,
@@ -403,12 +403,10 @@ class _ToggleSheet extends StatelessWidget {
             deactivating
                 ? 'This staff member will no longer be able to log in or process sales.'
                 : 'This staff member will regain access to the app and can process sales.',
-            style:
-                AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
-
           Row(
             children: [
               Expanded(
@@ -421,7 +419,7 @@ class _ToggleSheet extends StatelessWidget {
                     side: const BorderSide(color: AppColors.border),
                   ),
                   child: Text(
-                    'Cancel',
+                    l10n.cancel,
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.textSecondary),
                   ),
@@ -437,11 +435,9 @@ class _ToggleSheet extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: Text(
-                    actionLabel,
-                    style:
-                        AppTextStyles.labelL.copyWith(color: Colors.white),
-                  ),
+                  child: Text(actionLabel,
+                      style:
+                          AppTextStyles.labelL.copyWith(color: Colors.white)),
                 ),
               ),
             ],
@@ -452,10 +448,9 @@ class _ToggleSheet extends StatelessWidget {
   }
 }
 
-// ── Empty / Error states ───────────────────────────────────────────────────────
-
 class _EmptyView extends StatelessWidget {
-  const _EmptyView();
+  final AppLocalizations l10n;
+  const _EmptyView({required this.l10n});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -473,15 +468,13 @@ class _EmptyView extends StatelessWidget {
                   size: 34, color: AppColors.ownerPrimary),
             ),
             const SizedBox(height: 16),
-            Text('No staff members yet',
+            Text(l10n.noStaffYet,
                 style: AppTextStyles.headingS
                     .copyWith(color: AppColors.textSecondary)),
             const SizedBox(height: 6),
-            Text(
-              'Add staff from your profile screen.',
-              style: AppTextStyles.bodyM
-                  .copyWith(color: AppColors.textSecondary),
-            ),
+            Text(l10n.addStaffFromProfile,
+                style: AppTextStyles.bodyM
+                    .copyWith(color: AppColors.textSecondary)),
           ],
         ),
       );
@@ -490,7 +483,9 @@ class _EmptyView extends StatelessWidget {
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
-  const _ErrorView({required this.message, required this.onRetry});
+  final AppLocalizations l10n;
+  const _ErrorView(
+      {required this.message, required this.onRetry, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -502,21 +497,19 @@ class _ErrorView extends StatelessWidget {
               const Icon(Icons.error_outline,
                   size: 48, color: AppColors.danger),
               const SizedBox(height: 12),
-              Text('Could not load staff',
+              Text(l10n.couldNotLoadStaff,
                   style: AppTextStyles.headingS
                       .copyWith(color: AppColors.textPrimary)),
               const SizedBox(height: 6),
-              Text(
-                message,
-                style: AppTextStyles.bodyS
-                    .copyWith(color: AppColors.textSecondary),
-                textAlign: TextAlign.center,
-              ),
+              Text(message,
+                  style: AppTextStyles.bodyS
+                      .copyWith(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center),
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try again'),
+                label: Text(l10n.retry),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.ownerPrimary,
                   shape: RoundedRectangleBorder(

@@ -123,7 +123,8 @@ void main() {
   });
 
   group('LoginScreen — Staff role', () {
-    testWidgets('switching to Staff tab hides Forgot password?', (tester) async {
+    testWidgets('switching to Staff tab hides Forgot password?',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp(FakeAuthProvider()));
       await tester.pumpAndSettle();
 
@@ -133,7 +134,8 @@ void main() {
       expect(find.text('Forgot password?'), findsNothing);
     });
 
-    testWidgets('switching to Staff tab shows Phone Number label', (tester) async {
+    testWidgets('switching to Staff tab shows Phone Number label',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp(FakeAuthProvider()));
       await tester.pumpAndSettle();
 
@@ -153,7 +155,8 @@ void main() {
       expect(find.byIcon(Icons.phone_outlined), findsOneWidget);
     });
 
-    testWidgets('switching to Staff tab hides password visibility icon', (tester) async {
+    testWidgets('switching to Staff tab hides password visibility icon',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp(FakeAuthProvider()));
       await tester.pumpAndSettle();
 
@@ -165,15 +168,18 @@ void main() {
   });
 
   group('LoginScreen — loading state', () {
-    testWidgets('Sign In button shows spinner when isLoading is true', (tester) async {
+    testWidgets('Sign In button shows spinner when isLoading is true',
+        (tester) async {
       final auth = FakeAuthProvider(isLoading: true);
       await tester.pumpWidget(_buildTestApp(auth));
-      await tester.pump(); // don't settle — CircularProgressIndicator never stops
+      await tester
+          .pump(); // don't settle — CircularProgressIndicator never stops
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('ElevatedButton is disabled when isLoading is true', (tester) async {
+    testWidgets('ElevatedButton is disabled when isLoading is true',
+        (tester) async {
       final auth = FakeAuthProvider(isLoading: true);
       await tester.pumpWidget(_buildTestApp(auth));
       await tester.pump();

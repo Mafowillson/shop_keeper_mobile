@@ -146,8 +146,7 @@ class SettingsProvider extends ChangeNotifier {
       _updatePrefs(_notifPrefs.copyWith(largeSale: !_notifPrefs.largeSale));
 
   Future<void> toggleDebtPayment() =>
-      _updatePrefs(
-          _notifPrefs.copyWith(debtPayment: !_notifPrefs.debtPayment));
+      _updatePrefs(_notifPrefs.copyWith(debtPayment: !_notifPrefs.debtPayment));
 
   Future<void> toggleStaffLogin() =>
       _updatePrefs(_notifPrefs.copyWith(staffLogin: !_notifPrefs.staffLogin));

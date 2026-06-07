@@ -5,6 +5,7 @@ import 'package:shopkeeper/features/ai_chat/domain/entities/chat_message.dart';
 import 'package:shopkeeper/features/ai_chat/domain/usecases/clear_history_usecase.dart';
 import 'package:shopkeeper/features/ai_chat/domain/usecases/load_history_usecase.dart';
 import 'package:shopkeeper/features/ai_chat/domain/usecases/send_message_usecase.dart';
+
 @injectable
 class ChatProvider extends ChangeNotifier {
   final SendMessageUseCase _sendMessage;

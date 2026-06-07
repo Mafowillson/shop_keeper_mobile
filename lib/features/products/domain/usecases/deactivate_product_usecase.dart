@@ -9,5 +9,6 @@ class DeactivateProductUseCase {
 
   const DeactivateProductUseCase(this._repository);
 
-  TaskEither<Failure, Unit> call(String id) => _repository.deactivateProduct(id);
+  TaskEither<Failure, Unit> call(String id) =>
+      _repository.deactivateProduct(id);
 }

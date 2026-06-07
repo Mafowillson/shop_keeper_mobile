@@ -22,7 +22,8 @@ class StaffRemoteDataSource {
     }
   }
 
-  Future<StaffModel> toggleActive(String staffId, {required bool isActive}) async {
+  Future<StaffModel> toggleActive(String staffId,
+      {required bool isActive}) async {
     try {
       final res = await _dio.put(
         '/staff/$staffId',
@@ -34,10 +35,9 @@ class StaffRemoteDataSource {
     }
   }
 
-  String _err(DioException e) =>
-      e.response?.data is Map
-          ? (e.response!.data as Map)['error'] as String? ?? e.message ?? 'Error'
-          : e.message ?? 'Error';
+  String _err(DioException e) => e.response?.data is Map
+      ? (e.response!.data as Map)['error'] as String? ?? e.message ?? 'Error'
+      : e.message ?? 'Error';
 
   Future<StaffModel> createStaff({
     required String name,

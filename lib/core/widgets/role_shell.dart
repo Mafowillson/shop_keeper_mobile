@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 // ── Owner shell ───────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ class _OwnerShellState extends State<OwnerShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final unread = context.watch<NotificationProvider>().unreadCount;
 
     return Scaffold(
@@ -66,9 +68,9 @@ class _OwnerShellState extends State<OwnerShell> {
         selectedItemColor: AppColors.ownerPrimary,
         unselectedItemColor: AppColors.textSecondary,
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.dashboard),
+            label: l10n.dashboard,
           ),
           BottomNavigationBarItem(
             icon: _BadgeIcon(
@@ -77,11 +79,11 @@ class _OwnerShellState extends State<OwnerShell> {
               count: unread,
               isSelected: _selectedIndex == 1,
             ),
-            label: 'Notifications',
+            label: l10n.notifications,
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),
@@ -140,6 +142,7 @@ class _StaffShellState extends State<StaffShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final unread = context.watch<NotificationProvider>().unreadCount;
 
     return Scaffold(
@@ -151,9 +154,9 @@ class _StaffShellState extends State<StaffShell> {
         selectedItemColor: AppColors.staffPrimary,
         unselectedItemColor: AppColors.textSecondary,
         items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: l10n.home,
           ),
           BottomNavigationBarItem(
             icon: _BadgeIcon(
@@ -162,11 +165,11 @@ class _StaffShellState extends State<StaffShell> {
               count: unread,
               isSelected: _selectedIndex == 1,
             ),
-            label: 'Notifications',
+            label: l10n.notifications,
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),

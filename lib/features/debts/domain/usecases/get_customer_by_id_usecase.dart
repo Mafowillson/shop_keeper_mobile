@@ -10,5 +10,6 @@ class GetCustomerByIdUseCase {
 
   const GetCustomerByIdUseCase(this._repository);
 
-  TaskEither<Failure, Customer> call(String id) => _repository.getCustomerById(id);
+  TaskEither<Failure, Customer> call(String id) =>
+      _repository.getCustomerById(id);
 }
