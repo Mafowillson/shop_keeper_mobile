@@ -5,6 +5,9 @@ on:
   push:
     branches: [main, develop]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Job 1 — develop branch → unsigned debug APK
 # Useful for quickly sharing internal builds without signing setup.
