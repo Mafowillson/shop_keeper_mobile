@@ -23,6 +23,22 @@ class SaleItemModel {
         totalPrice: (json['total_price'] as num?)?.toDouble() ?? 0.0,
       );
 
+  Map<String, dynamic> toJson() => {
+        'product_id': productId,
+        'unit': unit,
+        'quantity': quantity,
+        'unit_price': unitPrice,
+        'total_price': totalPrice,
+      };
+
+  factory SaleItemModel.fromEntity(SaleItem entity) => SaleItemModel(
+        productId: entity.productId,
+        unit: entity.unit,
+        quantity: entity.quantity,
+        unitPrice: entity.unitPrice,
+        totalPrice: entity.totalPrice,
+      );
+
   SaleItem toEntity() => SaleItem(
         productId: productId,
         unit: unit,

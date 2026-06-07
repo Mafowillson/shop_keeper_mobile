@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
+import 'package:shopkeeper/core/widgets/offline_banner.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/dashboard/domain/entities/dashboard_stats.dart';
 import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
@@ -43,6 +44,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
+                const SliverToBoxAdapter(child: OfflineBanner()),
                 _DashboardHeader(
                   ownerName: ownerName,
                   onRefresh: () => provider.loadStats(),

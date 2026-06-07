@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/enums/notification_type.dart';
+import 'package:shopkeeper/core/offline/hive_boxes.dart';
+import 'package:shopkeeper/core/widgets/last_updated_indicator.dart';
+import 'package:shopkeeper/core/widgets/offline_banner.dart';
+import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/notifications/domain/entities/app_notification.dart';
@@ -130,6 +135,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
+                const SliverToBoxAdapter(child: OfflineBanner()),
                 _NotificationsHeader(
                   unreadCount: provider.unreadCount,
                   primaryColor: primaryColor,
@@ -166,7 +172,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     )
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, i) => _NotificationTile(
@@ -182,6 +188,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         ),
                       ),
                     ),
+                  SliverToBoxAdapter(
+                    child: LastUpdatedIndicator(
+                      boxName: HiveBoxes.notifications,
+                      metadata: getIt<CacheMetadataService>(),
+                    ),
+                  ),
                 ],
               ],
             ),

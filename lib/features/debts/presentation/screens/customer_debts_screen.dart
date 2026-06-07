@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/offline/hive_boxes.dart';
 import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
+import 'package:shopkeeper/core/widgets/last_updated_indicator.dart';
+import 'package:shopkeeper/core/widgets/offline_banner.dart';
 import 'package:shopkeeper/core/widgets/risk_badge.dart';
+import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/debts/domain/entities/customer.dart';
 import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
@@ -183,6 +188,7 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
 
           return Column(
             children: [
+              const OfflineBanner(),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: _SummaryCard(
@@ -272,14 +278,22 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                               .loadCustomers(shopId);
                         },
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                          itemCount: filtered.length,
-                          itemBuilder: (_, i) => _CustomerCard(
-                            customer: filtered[i],
-                            l10n: l10n,
-                            onTap: () =>
-                                context.push('/owner/debts/${filtered[i].id}'),
-                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                          itemCount: filtered.length + 1,
+                          itemBuilder: (_, i) {
+                            if (i == filtered.length) {
+                              return LastUpdatedIndicator(
+                                boxName: HiveBoxes.customers,
+                                metadata: getIt<CacheMetadataService>(),
+                              );
+                            }
+                            return _CustomerCard(
+                              customer: filtered[i],
+                              l10n: l10n,
+                              onTap: () => context
+                                  .push('/owner/debts/${filtered[i].id}'),
+                            );
+                          },
                         ),
                       ),
               ),

@@ -26,6 +26,15 @@ class CustomerModel {
         createdAt: DateTime.parse(json['created_at'] as String),
       );
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'shop_id': shopId,
+        'name': name,
+        'phone': phone,
+        'total_debt': totalDebt,
+        'created_at': createdAt.toIso8601String(),
+      };
+
   Customer toEntity() => Customer(
         id: id,
         shopId: shopId,

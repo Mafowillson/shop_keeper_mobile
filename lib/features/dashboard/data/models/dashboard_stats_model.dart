@@ -36,6 +36,15 @@ class DashboardStatsModel {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'today_sales': todaySales,
+        'transaction_count': transactionCount,
+        'low_stock_count': lowStockCount,
+        'total_debts': totalDebts,
+        'weekly_revenue': weeklyRevenue,
+        'activity_feed': activityFeed.map((e) => e.toJson()).toList(),
+      };
+
   DashboardStats toEntity() => DashboardStats(
         todaySales: todaySales,
         transactionCount: transactionCount,
@@ -69,6 +78,14 @@ class ActivityFeedModel {
         timestamp: DateTime.parse(json['timestamp'] as String),
         type: json['type'] as String,
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'subtitle': subtitle,
+        'timestamp': timestamp.toIso8601String(),
+        'type': type,
+      };
 
   ActivityFeed toEntity() => ActivityFeed(
         id: id,
