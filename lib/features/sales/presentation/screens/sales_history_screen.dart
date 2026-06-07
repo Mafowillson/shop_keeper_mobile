@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/offline/hive_boxes.dart';
+import 'package:shopkeeper/core/widgets/last_updated_indicator.dart';
+import 'package:shopkeeper/core/widgets/offline_banner.dart';
+import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
@@ -54,6 +59,9 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
 
           return Column(
             children: [
+              // ── Offline banner ───────────────────────────────────────
+              const OfflineBanner(),
+
               // ── Summary strip ────────────────────────────────────────
               Container(
                 color: AppColors.ownerPrimary,
@@ -188,10 +196,17 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                             color: AppColors.ownerPrimary,
                             onRefresh: _load,
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                              itemCount: filtered.length,
-                              itemBuilder: (_, i) =>
-                                  _SaleCard(sale: filtered[i], l10n: l10n),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                              itemCount: filtered.length + 1,
+                              itemBuilder: (_, i) {
+                                if (i == filtered.length) {
+                                  return LastUpdatedIndicator(
+                                    boxName: HiveBoxes.sales,
+                                    metadata: getIt<CacheMetadataService>(),
+                                  );
+                                }
+                                return _SaleCard(sale: filtered[i], l10n: l10n);
+                              },
                             ),
                           ),
               ),

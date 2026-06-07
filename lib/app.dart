@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
+import 'package:shopkeeper/core/cache/cache_service.dart';
 import 'package:shopkeeper/core/enums/notification_type.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
 import 'package:shopkeeper/core/router/app_router.dart';
@@ -13,14 +15,19 @@ import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/features/ai_chat/presentation/providers/chat_provider.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:shopkeeper/features/debts/data/datasources/debt_local_datasource.dart';
 import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
+import 'package:shopkeeper/features/notifications/data/datasources/notification_local_datasource.dart';
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shopkeeper/features/products/data/datasources/product_local_datasource.dart';
+import 'package:shopkeeper/features/sales/data/datasources/sale_local_datasource.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sync_provider.dart';
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
+import 'package:shopkeeper/core/offline/connectivity_service.dart';
 import 'package:shopkeeper/features/staff/data/datasources/staff_remote_datasource.dart';
 import 'package:shopkeeper/features/staff/data/repositories/staff_repository_impl.dart';
 import 'package:shopkeeper/features/staff/domain/usecases/create_staff_usecase.dart';
@@ -40,6 +47,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
   late final OnboardingProvider _onboardingProvider;
   late final NotificationProvider _notificationProvider;
   late final ProductProvider _productProvider;
+  late final SyncProvider _syncProvider;
   late final GoRouter _router;
 
   @override
@@ -49,6 +57,17 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
     _onboardingProvider = getIt<OnboardingProvider>();
     _notificationProvider = getIt<NotificationProvider>();
     _productProvider = getIt<ProductProvider>();
+
+    _syncProvider = SyncProvider(
+      connectivity: getIt<ConnectivityService>(),
+      dioClient: getIt<DioClient>(),
+      productLocal: getIt<ProductLocalDataSource>(),
+      saleLocal: getIt<SaleLocalDataSource>(),
+      debtLocal: getIt<DebtLocalDataSource>(),
+      notifLocal: getIt<NotificationLocalDataSource>(),
+      metadata: getIt<CacheMetadataService>(),
+    );
+
     _router = AppRouter.create(
       authProvider: _authProvider,
       onboardingProvider: _onboardingProvider,
@@ -61,6 +80,11 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       final user = _authProvider.currentUser;
       if (user != null) {
         fcm.uploadTokenForRole(user.role);
+        _syncProvider.initialize(user.shopId);
+      } else {
+        _syncProvider.stop();
+        // Clear all cached data for security when the user logs out.
+        getIt<CacheService>().invalidateAll();
       }
     });
 
@@ -70,6 +94,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       final user = _authProvider.currentUser;
       if (user != null) {
         fcm.uploadTokenForRole(user.role);
+        _syncProvider.initialize(user.shopId);
       }
     });
 
@@ -115,6 +140,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
 
   @override
   void dispose() {
+    _syncProvider.dispose();
     _router.dispose();
     super.dispose();
   }
@@ -134,7 +160,8 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         ChangeNotifierProvider(create: (_) => getIt<StaffDashboardProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<ChatProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<SettingsProvider>()),
-        ChangeNotifierProvider(create: (_) => SyncProvider()),
+        ChangeNotifierProvider.value(value: _syncProvider),
+        ChangeNotifierProvider.value(value: getIt<ConnectivityService>()),
         ChangeNotifierProvider(
           create: (_) => StaffProvider(
             CreateStaffUseCase(

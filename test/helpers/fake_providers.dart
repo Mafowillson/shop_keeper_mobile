@@ -1,6 +1,9 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
+import 'package:shopkeeper/core/cache/cache_status.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/errors/failures.dart';
+import 'package:shopkeeper/core/offline/connectivity_service.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/forgot_password_usecase.dart';
@@ -14,6 +17,8 @@ import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.
 import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/features/products/data/datasources/product_local_datasource.dart';
+import 'package:shopkeeper/features/products/data/models/product_model.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/domain/repositories/i_product_repository.dart';
 import 'package:shopkeeper/features/products/domain/usecases/deactivate_product_usecase.dart';
@@ -22,7 +27,7 @@ import 'package:shopkeeper/features/products/domain/usecases/save_product_usecas
 import 'package:shopkeeper/features/products/domain/usecases/search_products_usecase.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 
-// ── Stub repository impls (methods that are never called throw UnimplementedError)
+// ── Stub repository impls ─────────────────────────────────────────────────────
 
 class _StubAuthRepo implements IAuthRepository {
   @override
@@ -85,11 +90,50 @@ class _StubProductRepo implements IProductRepository {
       throw UnimplementedError();
 }
 
+// ── Stub service deps (no Hive, no platform channels) ────────────────────────
+
+/// CacheMetadataService stub — all methods are no-ops; never touches Hive.
+class _StubCacheMetadataService extends CacheMetadataService {
+  @override
+  Future<void> saveTimestamp(String boxName) async {}
+  @override
+  Future<void> clearTimestamp(String boxName) async {}
+  @override
+  DateTime? getTimestamp(String boxName) => null;
+  @override
+  Duration? getAge(String boxName) => null;
+  @override
+  bool isStale(String boxName) => false;
+  @override
+  CacheStatus statusFor(String boxName, {required bool hasData}) =>
+      CacheStatus.empty;
+  @override
+  Future<void> clearAll() async {}
+}
+
+/// ProductLocalDataSource stub — all methods are no-ops; never touches Hive.
+class _StubProductLocalDS extends ProductLocalDataSource {
+  _StubProductLocalDS() : super(_StubCacheMetadataService());
+
+  @override
+  List<ProductModel> getProducts({required String shopId}) => [];
+  @override
+  ProductModel? getProductById(String id) => null;
+  @override
+  Future<void> cacheProducts(List<ProductModel> products) async {}
+  @override
+  Future<void> saveProduct(ProductModel product) async {}
+  @override
+  Future<void> decrementStock(String productId, int totalBaseUnits) async {}
+  @override
+  Future<void> markInactive(String productId) async {}
+  @override
+  Future<void> invalidate() async {}
+  @override
+  bool get isEmpty => true;
+}
+
 // ── FakeAuthProvider ──────────────────────────────────────────────────────────
-//
-// Subclasses AuthProvider so it can be provided as AuthProvider in the widget
-// tree. Overrides isLoading / currentUser / errorMessage and all async methods
-// so the stub repositories are never actually called.
 
 class FakeAuthProvider extends AuthProvider {
   bool _loading;
@@ -139,9 +183,7 @@ class FakeAuthProvider extends AuthProvider {
   }
 
   @override
-  Future<void> login(String email, String password, UserRole role) async {
-    // No-op by default; tests can override behaviour via setUser / setError.
-  }
+  Future<void> login(String email, String password, UserRole role) async {}
 
   @override
   Future<void> logout() async {}
@@ -166,6 +208,9 @@ class FakeProductProvider extends ProductProvider {
           SaveProductUseCase(_StubProductRepo()),
           DeactivateProductUseCase(_StubProductRepo()),
           SearchProductsUseCase(_StubProductRepo()),
+          _StubProductLocalDS(),
+          _StubCacheMetadataService(),
+          ConnectivityService.stub(),
         );
 
   @override

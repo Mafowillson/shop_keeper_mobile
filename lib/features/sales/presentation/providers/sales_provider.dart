@@ -1,72 +1,107 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
+import 'package:shopkeeper/core/offline/connectivity_service.dart';
+import 'package:shopkeeper/core/offline/hive_boxes.dart';
+import 'package:shopkeeper/features/sales/data/datasources/sale_local_datasource.dart';
 import 'package:shopkeeper/features/sales/domain/entities/cart_item.dart';
 import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
 import 'package:shopkeeper/features/sales/domain/usecases/get_sale_detail_usecase.dart';
 import 'package:shopkeeper/features/sales/domain/usecases/get_sales_usecase.dart';
 import 'package:shopkeeper/features/sales/domain/usecases/record_sale_usecase.dart';
 
-@injectable
+// Registered manually in injection.dart.
 class SalesProvider extends ChangeNotifier {
   final GetSalesUseCase _getSales;
   final GetSaleDetailUseCase _getSaleDetail;
   final RecordSaleUseCase _recordSale;
+  final SaleLocalDataSource _local;
+  final CacheMetadataService _metadata;
+  final ConnectivityService _connectivity;
 
-  SalesProvider(this._getSales, this._getSaleDetail, this._recordSale);
+  SalesProvider(
+    this._getSales,
+    this._getSaleDetail,
+    this._recordSale,
+    this._local,
+    this._metadata,
+    this._connectivity,
+  );
 
   List<Sale> _sales = [];
   Sale? _currentSale;
   bool _isLoading = false;
+  bool _isRefreshing = false;
   bool _isRecording = false;
   String? _errorMessage;
 
   List<Sale> get sales => _sales;
   Sale? get currentSale => _currentSale;
   bool get isLoading => _isLoading;
+  bool get isRefreshing => _isRefreshing;
   bool get isRecording => _isRecording;
   String? get errorMessage => _errorMessage;
+  DateTime? get lastUpdated => _metadata.getTimestamp(HiveBoxes.sales);
 
   double get totalRevenue => _sales.fold(0, (sum, s) => sum + s.totalAmount);
 
-  // ── Load sales history ────────────────────────────────────────────────────
+  // ── Stale-while-revalidate load ───────────────────────────────────────────
 
   Future<void> loadSales(String shopId) async {
-    _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
 
-    final result = await _getSales(shopId: shopId).run();
+    final cached = _local.getSales(shopId: shopId);
+    if (cached.isNotEmpty) {
+      _sales = cached.map((m) => m.toEntity()).toList();
+      _isLoading = false;
+      notifyListeners();
+    } else {
+      _isLoading = true;
+      notifyListeners();
+    }
 
-    result.fold(
-      (f) => _errorMessage = f.message,
-      (list) {
-        _sales = list..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      },
-    );
+    if (_connectivity.isOnline) {
+      _isRefreshing = cached.isNotEmpty;
+      if (_isRefreshing) notifyListeners();
+      final result = await _getSales(shopId: shopId).run();
+      result.fold(
+        (f) {
+          if (_sales.isEmpty) _errorMessage = f.message;
+        },
+        (fresh) =>
+            _sales = fresh..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
+      );
+      _isRefreshing = false;
+    }
 
     _isLoading = false;
     notifyListeners();
   }
-
-  // ── Load sale detail ──────────────────────────────────────────────────────
 
   Future<void> loadSaleDetail(String id) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    final result = await _getSaleDetail(id).run();
+    final cachedModel = _local.getSaleById(id);
+    if (cachedModel != null) {
+      _currentSale = cachedModel.toEntity();
+      _isLoading = false;
+      notifyListeners();
+    }
 
-    result.fold(
-      (f) => _errorMessage = f.message,
-      (sale) => _currentSale = sale,
-    );
+    if (_connectivity.isOnline) {
+      final result = await _getSaleDetail(id).run();
+      result.fold(
+        (f) {
+          if (_currentSale == null) _errorMessage = f.message;
+        },
+        (sale) => _currentSale = sale,
+      );
+    }
 
     _isLoading = false;
     notifyListeners();
   }
-
-  // ── Record a new sale ─────────────────────────────────────────────────────
 
   Future<Sale?> recordSale({
     required String shopId,
@@ -94,6 +129,7 @@ class SalesProvider extends ChangeNotifier {
         created = sale;
         _currentSale = sale;
         _sales = [sale, ..._sales];
+        _metadata.saveTimestamp(HiveBoxes.sales);
       },
     );
 

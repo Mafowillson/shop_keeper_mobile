@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/offline/hive_boxes.dart';
+import 'package:shopkeeper/core/widgets/last_updated_indicator.dart';
+import 'package:shopkeeper/core/widgets/offline_banner.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/core/widgets/stock_badge.dart';
+import 'package:shopkeeper/di/injection.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
@@ -115,6 +120,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
           return Column(
             children: [
+              // ── Offline banner ─────────────────────────────────────────
+              const OfflineBanner(),
+
               // ── Search bar ─────────────────────────────────────────────
               Container(
                 color: AppColors.ownerPrimary,
@@ -267,21 +275,29 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             color: AppColors.ownerPrimary,
                             onRefresh: () => _load(category: _selectedCategory),
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-                              itemCount: products.length,
-                              itemBuilder: (ctx, i) => _ProductCard(
-                                product: products[i],
-                                l10n: l10n,
-                                onEdit: () async {
-                                  await context.push(
-                                      '/owner/products/${products[i].id}/edit');
-                                  if (mounted) {
-                                    _load(category: _selectedCategory);
-                                  }
-                                },
-                                onDeactivate: () =>
-                                    _confirmDeactivate(context, products[i]),
-                              ),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                              itemCount: products.length + 1,
+                              itemBuilder: (ctx, i) {
+                                if (i == products.length) {
+                                  return LastUpdatedIndicator(
+                                    boxName: HiveBoxes.products,
+                                    metadata: getIt<CacheMetadataService>(),
+                                  );
+                                }
+                                return _ProductCard(
+                                  product: products[i],
+                                  l10n: l10n,
+                                  onEdit: () async {
+                                    await context.push(
+                                        '/owner/products/${products[i].id}/edit');
+                                    if (mounted) {
+                                      _load(category: _selectedCategory);
+                                    }
+                                  },
+                                  onDeactivate: () =>
+                                      _confirmDeactivate(context, products[i]),
+                                );
+                              },
                             ),
                           ),
               ),

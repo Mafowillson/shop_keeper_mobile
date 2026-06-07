@@ -50,6 +50,34 @@ class SaleModel {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'shop_id': shopId,
+        'owner_id': ownerId,
+        'customer_id': customerId,
+        'items': items.map((i) => i.toJson()).toList(),
+        'total_amount': totalAmount,
+        'paid_amount': paidAmount,
+        'due_amount': dueAmount,
+        'is_credit': isCredit,
+        'is_paid': isPaid,
+        'created_at': createdAt.toIso8601String(),
+      };
+
+  factory SaleModel.fromEntity(Sale entity) => SaleModel(
+        id: entity.id,
+        shopId: entity.shopId,
+        ownerId: entity.ownerId,
+        customerId: entity.customerId,
+        items: entity.items.map(SaleItemModel.fromEntity).toList(),
+        totalAmount: entity.totalAmount,
+        paidAmount: entity.paidAmount,
+        dueAmount: entity.dueAmount,
+        isCredit: entity.isCredit,
+        isPaid: entity.isPaid,
+        createdAt: entity.createdAt,
+      );
+
   Sale toEntity() => Sale(
         id: id,
         shopId: shopId,

@@ -185,8 +185,7 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i760.ProductRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i583.IDashboardRemoteDataSource>(
         () => _i586.DashboardRemoteDataSourceImpl(gh<_i36.DioClient>()));
-    gh.lazySingleton<_i289.IProductRepository>(() =>
-        _i367.ProductRepositoryImpl(gh<_i773.IProductRemoteDataSource>()));
+    // IProductRepository is registered manually in injection.dart.
     gh.lazySingleton<_i553.INotificationRemoteDataSource>(
         () => _i192.NotificationRemoteDataSourceImpl(gh<_i36.DioClient>()));
     gh.lazySingleton<_i36.ISaleRemoteDataSource>(
@@ -195,8 +194,7 @@ extension GetItInjectableX on _i174.GetIt {
         _i855.DashboardRepositoryImpl(gh<_i583.IDashboardRemoteDataSource>()));
     gh.lazySingleton<_i179.IDebtRemoteDataSource>(
         () => _i235.DebtRemoteDataSourceImpl(gh<_i36.DioClient>()));
-    gh.lazySingleton<_i363.ISaleRepository>(
-        () => _i937.SaleRepositoryImpl(gh<_i36.ISaleRemoteDataSource>()));
+    // ISaleRepository is registered manually in injection.dart.
     gh.lazySingleton<_i678.DeactivateProductUseCase>(
         () => _i678.DeactivateProductUseCase(gh<_i289.IProductRepository>()));
     gh.lazySingleton<_i1022.GetProductByIdUseCase>(
@@ -214,12 +212,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i916.IStaffDashboardRepository>(() =>
         _i368.StaffDashboardRepositoryImpl(
             gh<_i862.IStaffDashboardDataSource>()));
-    gh.factory<_i964.ProductProvider>(() => _i964.ProductProvider(
-          gh<_i835.GetProductsUseCase>(),
-          gh<_i559.SaveProductUseCase>(),
-          gh<_i678.DeactivateProductUseCase>(),
-          gh<_i621.SearchProductsUseCase>(),
-        ));
+    // ProductProvider is registered manually in injection.dart.
     gh.lazySingleton<_i587.IAuthRemoteDataSource>(
         () => _i503.AuthRemoteDataSource(
               gh<_i36.DioClient>(),
@@ -252,22 +245,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i811.LoadHistoryUseCase(gh<_i331.IChatRepository>()));
     gh.lazySingleton<_i521.SendMessageUseCase>(
         () => _i521.SendMessageUseCase(gh<_i331.IChatRepository>()));
-    gh.lazySingleton<_i965.IDebtRepository>(
-        () => _i143.DebtRepositoryImpl(gh<_i179.IDebtRemoteDataSource>()));
-    gh.factory<_i70.DashboardProvider>(
-        () => _i70.DashboardProvider(gh<_i262.GetDashboardStatsUseCase>()));
-    gh.factory<_i995.NotificationProvider>(() => _i995.NotificationProvider(
-          gh<_i217.GetNotificationsUseCase>(),
-          gh<_i609.MarkReadUseCase>(),
-          gh<_i62.MarkAllReadUseCase>(),
-        ));
+    // IDebtRepository is registered manually in injection.dart.
+    // DashboardProvider is registered manually in injection.dart.
+    // NotificationProvider is registered manually in injection.dart.
     gh.lazySingleton<_i454.GetStaffDashboardUseCase>(() =>
         _i454.GetStaffDashboardUseCase(gh<_i916.IStaffDashboardRepository>()));
-    gh.factory<_i852.SalesProvider>(() => _i852.SalesProvider(
-          gh<_i262.GetSalesUseCase>(),
-          gh<_i329.GetSaleDetailUseCase>(),
-          gh<_i478.RecordSaleUseCase>(),
-        ));
+    // SalesProvider is registered manually in injection.dart.
     gh.factory<_i197.ChatProvider>(() => _i197.ChatProvider(
           gh<_i521.SendMessageUseCase>(),
           gh<_i811.LoadHistoryUseCase>(),
@@ -317,13 +300,7 @@ extension GetItInjectableX on _i174.GetIt {
         ));
     gh.factory<_i50.StaffDashboardProvider>(() =>
         _i50.StaffDashboardProvider(gh<_i454.GetStaffDashboardUseCase>()));
-    gh.factory<_i635.DebtProvider>(() => _i635.DebtProvider(
-          gh<_i326.GetCustomersUseCase>(),
-          gh<_i910.GetCustomerByIdUseCase>(),
-          gh<_i91.CreateCustomerUseCase>(),
-          gh<_i968.GetDebtHistoryUseCase>(),
-          gh<_i229.RecordPaymentUseCase>(),
-        ));
+    // DebtProvider is registered manually in injection.dart.
     return this;
   }
 }
