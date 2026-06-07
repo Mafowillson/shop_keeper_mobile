@@ -5,8 +5,7 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart';
-
-// ── Page data ──────────────────────────────────────────────────────────────────
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class _Feature {
   final IconData icon;
@@ -29,65 +28,58 @@ class _PageData {
   });
 }
 
-const _pages = <_PageData>[
+List<_PageData> _buildPages(AppLocalizations l10n) => [
   _PageData(
     icon: Icons.storefront_rounded,
-    gradient: [Color(0xFF145214), Color(0xFF1B5E20)],
-    title: 'Welcome to ShopKeeper',
-    description:
-        'Your complete shop management solution — built for businesses like yours.',
-    features: [],
+    gradient: const [Color(0xFF145214), Color(0xFF1B5E20)],
+    title: l10n.onboarding1Title,
+    description: l10n.onboarding1Description,
   ),
   _PageData(
     icon: Icons.inventory_2_outlined,
-    gradient: [Color(0xFFE65100), Color(0xFFF57F17)],
-    title: 'Smart Inventory',
-    description: 'Always know what you have. Never run out of what matters.',
+    gradient: const [Color(0xFFE65100), Color(0xFFF57F17)],
+    title: l10n.onboarding2Title,
+    description: l10n.onboarding2Description,
     features: [
-      _Feature(Icons.check_circle_outline, 'Live stock levels'),
-      _Feature(Icons.notifications_outlined, 'Low-stock alerts'),
-      _Feature(Icons.warning_amber_outlined, 'Risk categorisation'),
+      _Feature(Icons.check_circle_outline, l10n.onboardingFeatureLiveStock),
+      _Feature(Icons.notifications_outlined, l10n.onboardingFeatureLowStockAlerts),
+      _Feature(Icons.warning_amber_outlined, l10n.onboardingFeatureRisk),
     ],
   ),
   _PageData(
     icon: Icons.receipt_long_outlined,
-    gradient: [Color(0xFF1B5E20), Color(0xFF388E3C)],
-    title: 'Record Sales Fast',
-    description:
-        'Log cash and credit sales in seconds. Daily totals update automatically.',
+    gradient: const [Color(0xFF1B5E20), Color(0xFF388E3C)],
+    title: l10n.onboarding3Title,
+    description: l10n.onboarding3Description,
     features: [
-      _Feature(Icons.add_shopping_cart_outlined, 'Quick sale entry'),
-      _Feature(Icons.history_outlined, 'Full transaction history'),
-      _Feature(Icons.bar_chart_rounded, 'Daily & weekly reports'),
+      _Feature(Icons.add_shopping_cart_outlined, l10n.onboardingFeatureQuickSale),
+      _Feature(Icons.history_outlined, l10n.onboardingFeatureHistory),
+      _Feature(Icons.bar_chart_rounded, l10n.onboardingFeatureReports),
     ],
   ),
   _PageData(
     icon: Icons.account_balance_wallet_outlined,
-    gradient: [Color(0xFFBF360C), Color(0xFFE64A19)],
-    title: 'Manage Customer Debts',
-    description:
-        'Track who owes what, flag risky accounts, and record payments on the spot.',
+    gradient: const [Color(0xFFBF360C), Color(0xFFE64A19)],
+    title: l10n.onboarding4Title,
+    description: l10n.onboarding4Description,
     features: [
-      _Feature(Icons.people_outline, 'Customer profiles'),
-      _Feature(Icons.trending_down_rounded, 'Risk scoring'),
-      _Feature(Icons.payments_outlined, 'Payment tracking'),
+      _Feature(Icons.people_outline, l10n.onboardingFeatureProfiles),
+      _Feature(Icons.trending_down_rounded, l10n.onboardingFeatureRiskScoring),
+      _Feature(Icons.payments_outlined, l10n.onboardingFeaturePaymentTracking),
     ],
   ),
   _PageData(
     icon: Icons.auto_awesome_outlined,
-    gradient: [Color(0xFF4A148C), Color(0xFF7B1FA2)],
-    title: 'AI-Powered Insights',
-    description:
-        'Ask your AI assistant anything. Get weekly reports and smart recommendations.',
+    gradient: const [Color(0xFF4A148C), Color(0xFF7B1FA2)],
+    title: l10n.onboarding5Title,
+    description: l10n.onboarding5Description,
     features: [
-      _Feature(Icons.insights_outlined, 'Weekly summaries'),
-      _Feature(Icons.search_outlined, 'Anomaly detection'),
-      _Feature(Icons.chat_outlined, 'Natural language chat'),
+      _Feature(Icons.insights_outlined, l10n.onboardingFeatureWeekly),
+      _Feature(Icons.search_outlined, l10n.onboardingFeatureAnomaly),
+      _Feature(Icons.chat_outlined, l10n.onboardingFeatureChat),
     ],
   ),
 ];
-
-// ── Page view ──────────────────────────────────────────────────────────────────
 
 class OnboardingPageView extends StatefulWidget {
   const OnboardingPageView({super.key});
@@ -99,8 +91,6 @@ class OnboardingPageView extends StatefulWidget {
 class _OnboardingPageViewState extends State<OnboardingPageView> {
   late final PageController _controller;
   int _current = 0;
-
-  bool get _isLast => _current == _pages.length - 1;
 
   @override
   void initState() {
@@ -114,8 +104,8 @@ class _OnboardingPageViewState extends State<OnboardingPageView> {
     super.dispose();
   }
 
-  void _next() {
-    if (_isLast) {
+  void _next(List<_PageData> pages) {
+    if (_current == pages.length - 1) {
       _finish(skip: false);
     } else {
       _controller.nextPage(
@@ -137,28 +127,30 @@ class _OnboardingPageViewState extends State<OnboardingPageView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final pages = _buildPages(l10n);
+    final isLast = _current == pages.length - 1;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Skip row ───────────────────────────────────────────────
             SizedBox(
               height: 48,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 16),
-                  // Page counter
                   Text(
-                    '${_current + 1} / ${_pages.length}',
+                    '${_current + 1} / ${pages.length}',
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.textHint),
                   ),
                   TextButton(
                     onPressed: () => _finish(skip: true),
                     child: Text(
-                      'Skip',
+                      l10n.skip,
                       style: AppTextStyles.labelL
                           .copyWith(color: AppColors.textSecondary),
                     ),
@@ -166,31 +158,25 @@ class _OnboardingPageViewState extends State<OnboardingPageView> {
                 ],
               ),
             ),
-
-            // ── Pages ──────────────────────────────────────────────────
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _current = i),
                 itemBuilder: (context, i) =>
-                    _OnboardingSlide(data: _pages[i]),
+                    _OnboardingSlide(data: pages[i]),
               ),
             ),
-
-            // ── Bottom nav ─────────────────────────────────────────────
             Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(24, 16, 24, 28),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _DotIndicators(
-                      current: _current, total: _pages.length),
+                  _DotIndicators(current: _current, total: pages.length),
                   const SizedBox(height: 20),
                   AppButton.primary(
-                    label: _isLast ? 'Get Started' : 'Next',
-                    onPressed: _next,
+                    label: isLast ? l10n.getStarted : l10n.next,
+                    onPressed: () => _next(pages),
                   ),
                 ],
               ),
@@ -202,8 +188,6 @@ class _OnboardingPageViewState extends State<OnboardingPageView> {
   }
 }
 
-// ── Slide ──────────────────────────────────────────────────────────────────────
-
 class _OnboardingSlide extends StatelessWidget {
   final _PageData data;
   const _OnboardingSlide({required this.data});
@@ -212,22 +196,12 @@ class _OnboardingSlide extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Graphic area
-        Expanded(
-          flex: 52,
-          child: _GraphicSection(data: data),
-        ),
-        // Content area
-        Expanded(
-          flex: 48,
-          child: _ContentSection(data: data),
-        ),
+        Expanded(flex: 52, child: _GraphicSection(data: data)),
+        Expanded(flex: 48, child: _ContentSection(data: data)),
       ],
     );
   }
 }
-
-// ── Graphic section ────────────────────────────────────────────────────────────
 
 class _GraphicSection extends StatelessWidget {
   final _PageData data;
@@ -249,7 +223,6 @@ class _GraphicSection extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Decorative circles
             Positioned(
               top: -30,
               right: -30,
@@ -274,7 +247,6 @@ class _GraphicSection extends StatelessWidget {
                 ),
               ),
             ),
-            // Main icon
             Container(
               width: 108,
               height: 108,
@@ -297,17 +269,11 @@ class _BottomWaveClipper extends CustomClipper<Path> {
     final path = Path()
       ..lineTo(0, size.height - 28)
       ..quadraticBezierTo(
-        size.width * 0.25,
-        size.height + 10,
-        size.width * 0.5,
-        size.height - 14,
-      )
+          size.width * 0.25, size.height + 10,
+          size.width * 0.5, size.height - 14)
       ..quadraticBezierTo(
-        size.width * 0.75,
-        size.height - 38,
-        size.width,
-        size.height - 14,
-      )
+          size.width * 0.75, size.height - 38,
+          size.width, size.height - 14)
       ..lineTo(size.width, 0)
       ..close();
     return path;
@@ -316,8 +282,6 @@ class _BottomWaveClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(_BottomWaveClipper oldClipper) => false;
 }
-
-// ── Content section ────────────────────────────────────────────────────────────
 
 class _ContentSection extends StatelessWidget {
   final _PageData data;
@@ -348,7 +312,8 @@ class _ContentSection extends StatelessWidget {
             ...data.features.map(
               (f) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: _FeatureRow(feature: f, accentColor: data.gradient.last),
+                child: _FeatureRow(
+                    feature: f, accentColor: data.gradient.last),
               ),
             ),
           ],
@@ -358,13 +323,10 @@ class _ContentSection extends StatelessWidget {
   }
 }
 
-// ── Feature row ────────────────────────────────────────────────────────────────
-
 class _FeatureRow extends StatelessWidget {
   final _Feature feature;
   final Color accentColor;
-  const _FeatureRow(
-      {required this.feature, required this.accentColor});
+  const _FeatureRow({required this.feature, required this.accentColor});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -379,16 +341,12 @@ class _FeatureRow extends StatelessWidget {
             child: Icon(feature.icon, size: 16, color: accentColor),
           ),
           const SizedBox(width: 12),
-          Text(
-            feature.text,
-            style: AppTextStyles.labelL
-                .copyWith(color: AppColors.textPrimary),
-          ),
+          Text(feature.text,
+              style: AppTextStyles.labelL
+                  .copyWith(color: AppColors.textPrimary)),
         ],
       );
 }
-
-// ── Dot indicators ─────────────────────────────────────────────────────────────
 
 class _DotIndicators extends StatelessWidget {
   final int current;
@@ -406,9 +364,8 @@ class _DotIndicators extends StatelessWidget {
             width: isActive ? 22 : 7,
             height: 7,
             decoration: BoxDecoration(
-              color: isActive
-                  ? AppColors.ownerPrimary
-                  : AppColors.border,
+              color:
+                  isActive ? AppColors.ownerPrimary : AppColors.border,
               borderRadius: BorderRadius.circular(4),
             ),
           );

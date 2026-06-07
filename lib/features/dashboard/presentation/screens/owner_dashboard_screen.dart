@@ -8,6 +8,7 @@ import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/dashboard/domain/entities/dashboard_stats.dart';
 import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class OwnerDashboardScreen extends StatefulWidget {
   const OwnerDashboardScreen({super.key});
@@ -27,6 +28,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final ownerName = context.select<AuthProvider, String>(
       (p) => p.currentUser?.name ?? 'Owner',
     );
@@ -44,6 +46,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 _DashboardHeader(
                   ownerName: ownerName,
                   onRefresh: () => provider.loadStats(),
+                  l10n: l10n,
                 ),
                 if (provider.isLoading && provider.stats == null)
                   const SliverFillRemaining(
@@ -61,28 +64,33 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                           _ErrorBanner(provider.errorMessage!),
                           const SizedBox(height: 16),
                         ],
-                        _MetricsRow(stats: provider.stats),
+                        _MetricsRow(stats: provider.stats, l10n: l10n),
                         const SizedBox(height: 12),
                         _AlertsRow(
                           stats: provider.stats,
                           onStockTap: () => context.push('/owner/products'),
                           onDebtTap: () => context.push('/owner/debts'),
+                          l10n: l10n,
                         ),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Revenue — Last 7 Days'),
+                        _SectionLabel(l10n.revenueLastSevenDays),
                         const SizedBox(height: 10),
                         _WeeklyChartCard(
                           weekly: provider.stats?.weeklyRevenue ??
                               List.filled(7, 0.0),
+                          l10n: l10n,
                         ),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Quick Actions'),
+                        _SectionLabel(l10n.quickActions),
                         const SizedBox(height: 10),
-                        _QuickActionsGrid(),
+                        _QuickActionsGrid(l10n: l10n),
                         const SizedBox(height: 24),
-                        const _SectionLabel('Recent Activity'),
+                        _SectionLabel(l10n.recentActivity),
                         const SizedBox(height: 10),
-                        _ActivityList(feed: provider.stats?.activityFeed ?? []),
+                        _ActivityList(
+                          feed: provider.stats?.activityFeed ?? [],
+                          l10n: l10n,
+                        ),
                       ]),
                     ),
                   ),
@@ -95,13 +103,14 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-
 class _DashboardHeader extends StatelessWidget {
   final String ownerName;
   final VoidCallback onRefresh;
+  final AppLocalizations l10n;
   const _DashboardHeader(
-      {required this.ownerName, required this.onRefresh});
+      {required this.ownerName,
+      required this.onRefresh,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +145,7 @@ class _DashboardHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                'Hello, $firstName',
+                l10n.helloName(firstName),
                 style: AppTextStyles.headingL.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 2),
@@ -151,8 +160,6 @@ class _DashboardHeader extends StatelessWidget {
     );
   }
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   final String text;
@@ -195,11 +202,10 @@ class _ErrorBanner extends StatelessWidget {
       );
 }
 
-// ── Key metrics ───────────────────────────────────────────────────────────────
-
 class _MetricsRow extends StatelessWidget {
   final DashboardStats? stats;
-  const _MetricsRow({required this.stats});
+  final AppLocalizations l10n;
+  const _MetricsRow({required this.stats, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -207,7 +213,7 @@ class _MetricsRow extends StatelessWidget {
           Expanded(
             flex: 3,
             child: _MetricTile(
-              label: "Today's Revenue",
+              label: l10n.todaysRevenue,
               value: formatFCFA(stats?.todaySales ?? 0),
               icon: Icons.payments_outlined,
               color: AppColors.ownerPrimary,
@@ -218,7 +224,7 @@ class _MetricsRow extends StatelessWidget {
           Expanded(
             flex: 2,
             child: _MetricTile(
-              label: 'Transactions',
+              label: l10n.transactions,
               value: '${stats?.transactionCount ?? 0}',
               icon: Icons.receipt_long_outlined,
               color: AppColors.accent,
@@ -290,16 +296,16 @@ class _MetricTile extends StatelessWidget {
       );
 }
 
-// ── Alert chips ───────────────────────────────────────────────────────────────
-
 class _AlertsRow extends StatelessWidget {
   final DashboardStats? stats;
   final VoidCallback onStockTap;
   final VoidCallback onDebtTap;
+  final AppLocalizations l10n;
   const _AlertsRow(
       {required this.stats,
       required this.onStockTap,
-      required this.onDebtTap});
+      required this.onDebtTap,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -312,8 +318,8 @@ class _AlertsRow extends StatelessWidget {
           child: _AlertChip(
             icon: Icons.inventory_2_outlined,
             label: lowStock == 0
-                ? 'Stock OK'
-                : '$lowStock low stock',
+                ? l10n.stockOk
+                : '$lowStock ${l10n.lowStockAlert}',
             color:
                 lowStock > 0 ? AppColors.warning : AppColors.success,
             onTap: onStockTap,
@@ -324,8 +330,8 @@ class _AlertsRow extends StatelessWidget {
           child: _AlertChip(
             icon: Icons.account_balance_wallet_outlined,
             label: debts == 0
-                ? 'No debts'
-                : '${formatFCFA(debts)} owed',
+                ? l10n.noDebts
+                : '${formatFCFA(debts)} ${l10n.owed}',
             color: debts > 0 ? AppColors.danger : AppColors.success,
             onTap: onDebtTap,
           ),
@@ -377,11 +383,10 @@ class _AlertChip extends StatelessWidget {
       );
 }
 
-// ── Weekly revenue chart ──────────────────────────────────────────────────────
-
 class _WeeklyChartCard extends StatelessWidget {
   final List<double> weekly;
-  const _WeeklyChartCard({required this.weekly});
+  final AppLocalizations l10n;
+  const _WeeklyChartCard({required this.weekly, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +414,7 @@ class _WeeklyChartCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Weekly total',
+                l10n.weeklyTotal,
                 style: AppTextStyles.headingS
                     .copyWith(color: AppColors.textSecondary),
               ),
@@ -421,7 +426,6 @@ class _WeeklyChartCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // Bars — fixed-height row so labels never cause overflow.
           SizedBox(
             height: 100,
             child: Row(
@@ -448,7 +452,6 @@ class _WeeklyChartCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          // Day labels — separate row below the bars.
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(7, (i) {
@@ -484,33 +487,34 @@ class _WeeklyChartCard extends StatelessWidget {
   }
 }
 
-// ── Quick actions ─────────────────────────────────────────────────────────────
-
 class _QuickActionsGrid extends StatelessWidget {
+  final AppLocalizations l10n;
+  const _QuickActionsGrid({required this.l10n});
+
   @override
   Widget build(BuildContext context) {
-    const actions = [
+    final actions = [
       _Action(
         icon: Icons.add_box_outlined,
-        label: 'Add Product',
+        label: l10n.addProduct,
         color: AppColors.success,
         route: '/owner/products/add',
       ),
       _Action(
         icon: Icons.bar_chart_rounded,
-        label: 'View Sales',
+        label: l10n.viewSales,
         color: AppColors.accent,
         route: '/owner/sales',
       ),
       _Action(
         icon: Icons.people_outline,
-        label: 'Debts',
+        label: l10n.debts,
         color: AppColors.danger,
         route: '/owner/debts',
       ),
       _Action(
         icon: Icons.auto_awesome_outlined,
-        label: 'AI Insights',
+        label: l10n.aiInsights,
         color: AppColors.ownerPrimary,
         route: '/owner/chat',
       ),
@@ -591,11 +595,10 @@ class _ActionTile extends StatelessWidget {
       );
 }
 
-// ── Activity feed ─────────────────────────────────────────────────────────────
-
 class _ActivityList extends StatelessWidget {
   final List<ActivityFeed> feed;
-  const _ActivityList({required this.feed});
+  final AppLocalizations l10n;
+  const _ActivityList({required this.feed, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +610,7 @@ class _ActivityList extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
         ),
         child: Center(
-          child: Text('No recent activity',
+          child: Text(l10n.noRecentActivity,
               style: AppTextStyles.bodyS),
         ),
       );

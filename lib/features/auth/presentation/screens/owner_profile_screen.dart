@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class OwnerProfileScreen extends StatefulWidget {
   const OwnerProfileScreen({super.key});
@@ -24,6 +25,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final user = context.watch<AuthProvider>().currentUser;
     final initials = _initials(user?.name);
 
@@ -38,7 +40,7 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
             foregroundColor: Colors.white,
             elevation: 0,
             title: Text(
-              'My Profile',
+              l10n.myProfile,
               style: AppTextStyles.headingM.copyWith(color: Colors.white),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -52,53 +54,53 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
               children: [
                 _StatsStrip(user: user),
                 const SizedBox(height: 24),
-                const _SectionLabel('Account details'),
+                _SectionLabel(l10n.accountDetails),
                 const SizedBox(height: 10),
                 _InfoCard(rows: [
                   _InfoRow(
                     icon: Icons.store_outlined,
-                    label: 'Shop name',
+                    label: l10n.shopNameLabel,
                     value: user?.shopName.isNotEmpty == true
                         ? user!.shopName
-                        : 'Not set',
+                        : l10n.notSet,
                   ),
                   _InfoRow(
                     icon: Icons.person_outline_rounded,
-                    label: 'Owner name',
+                    label: l10n.ownerName,
                     value: user?.name.isNotEmpty == true
                         ? user!.name
-                        : 'Not set',
+                        : l10n.notSet,
                   ),
                   _InfoRow(
                     icon: Icons.description_outlined,
-                    label: 'Shop description',
+                    label: l10n.shopDescription,
                     value: user?.shopDescription.isNotEmpty == true
                         ? user!.shopDescription
-                        : 'Not set',
+                        : l10n.notSet,
                   ),
                 ]),
                 const SizedBox(height: 24),
-                const _SectionLabel('Quick actions'),
+                _SectionLabel(l10n.quickActions),
                 const SizedBox(height: 10),
                 _ActionCard(tiles: [
                   _ActionTileData(
                     icon: Icons.person_add_alt_1_outlined,
-                    label: 'Add Staff Member',
-                    subtitle: 'Create login credentials for new staff',
+                    label: l10n.addStaffMember,
+                    subtitle: l10n.createLoginCredentialsForNewStaff,
                     color: AppColors.ownerPrimary,
                     onTap: () => context.push('/owner/staff/create'),
                   ),
                   _ActionTileData(
                     icon: Icons.group_outlined,
-                    label: 'Manage Staff',
-                    subtitle: 'Activate or deactivate team members',
+                    label: l10n.manageStaff,
+                    subtitle: l10n.activateOrDeactivateTeam,
                     color: AppColors.accent,
                     onTap: () => context.push('/owner/staff/manage'),
                   ),
                   _ActionTileData(
                     icon: Icons.settings_outlined,
-                    label: 'Settings',
-                    subtitle: 'Manage preferences and security',
+                    label: l10n.settings,
+                    subtitle: l10n.managePreferencesAndSecurity,
                     color: AppColors.ownerPrimary,
                     onTap: () => context.push('/settings'),
                   ),
@@ -117,12 +119,11 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => const _SignOutSheet(
-        subtitle: 'You will need to log back in to access your account.',
-      ),
+      builder: (_) => _SignOutSheet(subtitle: l10n.ownerSignOutSubtitle),
     );
     if (confirmed != true || !context.mounted) return;
     await context.read<AuthProvider>().logout();
@@ -138,7 +139,6 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
         .take(2)
         .join();
   }
-
 }
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
@@ -271,6 +271,7 @@ class _Circle extends StatelessWidget {
 class _RoleBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
@@ -287,7 +288,7 @@ class _RoleBadge extends StatelessWidget {
           const Icon(Icons.verified_outlined, size: 13, color: AppColors.accent),
           const SizedBox(width: 5),
           Text(
-            'Owner',
+            l10n.ownerRole,
             style: AppTextStyles.labelL.copyWith(color: AppColors.accent),
           ),
         ],
@@ -305,6 +306,7 @@ class _StatsStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isActive = user?.isActive == true;
     final isVerified = user?.emailVerified == true;
 
@@ -317,24 +319,24 @@ class _StatsStrip extends StatelessWidget {
             _StatCell(
               icon: Icons.circle,
               iconColor: isActive ? AppColors.success : AppColors.danger,
-              label: 'Status',
-              value: isActive ? 'Active' : 'Inactive',
+              label: l10n.statusLabel,
+              value: isActive ? l10n.active : l10n.inactive,
               valueColor: isActive ? AppColors.success : AppColors.danger,
             ),
             const VerticalDivider(width: 1, thickness: 1),
             _StatCell(
               icon: Icons.mark_email_read_outlined,
               iconColor: isVerified ? AppColors.success : AppColors.warning,
-              label: 'Email',
-              value: isVerified ? 'Verified' : 'Pending',
+              label: l10n.email,
+              value: isVerified ? l10n.verified : l10n.pending,
               valueColor: isVerified ? AppColors.success : AppColors.warning,
             ),
             const VerticalDivider(width: 1, thickness: 1),
-            const _StatCell(
+            _StatCell(
               icon: Icons.admin_panel_settings_outlined,
               iconColor: AppColors.ownerPrimary,
-              label: 'Role',
-              value: 'Owner',
+              label: l10n.roleLabel,
+              value: l10n.ownerRole,
               valueColor: AppColors.ownerPrimary,
             ),
           ],
@@ -586,6 +588,7 @@ class _SignOutSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -616,7 +619,7 @@ class _SignOutSheet extends StatelessWidget {
                 color: AppColors.danger, size: 30),
           ),
           const SizedBox(height: 16),
-          Text('Sign out?', style: AppTextStyles.headingL),
+          Text(l10n.signOutQuestion, style: AppTextStyles.headingL),
           const SizedBox(height: 8),
           Text(
             subtitle,
@@ -636,7 +639,7 @@ class _SignOutSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: Text('Cancel',
+                  child: Text(l10n.cancel,
                       style: AppTextStyles.headingS
                           .copyWith(color: AppColors.textPrimary)),
                 ),
@@ -653,7 +656,7 @@ class _SignOutSheet extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     elevation: 0,
                   ),
-                  child: Text('Sign Out',
+                  child: Text(l10n.signOut,
                       style: AppTextStyles.headingS
                           .copyWith(color: Colors.white)),
                 ),
@@ -675,6 +678,7 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Material(
@@ -706,7 +710,7 @@ class _LogoutButton extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sign Out',
+                        l10n.signOut,
                         style: AppTextStyles.bodyM.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.danger,
@@ -714,7 +718,7 @@ class _LogoutButton extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Sign out of your ShopKeeper account',
+                        l10n.signOutDescription,
                         style: AppTextStyles.bodyS,
                       ),
                     ],

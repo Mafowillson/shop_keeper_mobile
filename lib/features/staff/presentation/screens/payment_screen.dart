@@ -9,6 +9,7 @@ import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.da
 import 'package:shopkeeper/features/debts/domain/entities/customer.dart';
 import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -26,11 +27,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void initState() {
     super.initState();
     final total = context.read<CartProvider>().total;
-    _amountController = TextEditingController(text: total.toStringAsFixed(0));
+    _amountController =
+        TextEditingController(text: total.toStringAsFixed(0));
 
-    // Pre-load customers so the picker is instant.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+      final shopId =
+          context.read<AuthProvider>().currentUser?.shopId ?? '';
       final provider = context.read<DebtProvider>();
       if (provider.customers.isEmpty) provider.loadCustomers(shopId);
     });
@@ -81,6 +83,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _openCreateCustomerSheet() {
+    final l10n = AppLocalizations.of(context)!;
     final nameCtrl = TextEditingController();
     final phoneCtrl = TextEditingController();
 
@@ -92,20 +95,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
-          left: 24, right: 24, top: 24,
+          left: 24,
+          right: 24,
+          top: 24,
           bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('New Customer', style: AppTextStyles.headingL),
+            Text(l10n.newCustomer, style: AppTextStyles.headingL),
             const SizedBox(height: 16),
-            AppTextField(controller: nameCtrl, label: 'Full Name', hintText: 'e.g. Jean-Pierre Foka'),
+            AppTextField(
+                controller: nameCtrl,
+                label: l10n.fullName,
+                hintText: 'e.g. Jean-Pierre Foka'),
             const SizedBox(height: 10),
             AppTextField(
               controller: phoneCtrl,
-              label: 'Phone (optional)',
+              label: l10n.phoneOptional,
               hintText: 'e.g. 677001122',
               keyboardType: TextInputType.phone,
             ),
@@ -119,9 +127,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       : () async {
                           final name = nameCtrl.text.trim();
                           if (name.isEmpty) return;
-                          final debtProvider = context.read<DebtProvider>();
-                          final shopId =
-                              context.read<AuthProvider>().currentUser?.shopId ?? '';
+                          final debtProvider =
+                              context.read<DebtProvider>();
+                          final shopId = context
+                                  .read<AuthProvider>()
+                                  .currentUser
+                                  ?.shopId ??
+                              '';
                           final customer = await debtProvider.createCustomer(
                             shopId: shopId,
                             name: name,
@@ -132,18 +144,22 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           if (!ctx.mounted) return;
                           Navigator.pop(ctx);
                           if (customer != null) {
-                            setState(() => _selectedCustomer = customer);
+                            setState(
+                                () => _selectedCustomer = customer);
                           }
                         },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.staffPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: provider.isSaving
                       ? const SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Save & Select'),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : Text(l10n.saveAndSelect),
                 ),
               ),
             ),
@@ -155,6 +171,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<CartProvider>(
       builder: (_, cart, __) {
         final total = cart.total;
@@ -164,9 +181,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           appBar: AppBar(
-            title: Text('Payment',
-                style:
-                    AppTextStyles.headingL.copyWith(color: Colors.white)),
+            title: Text(l10n.payment,
+                style: AppTextStyles.headingL
+                    .copyWith(color: Colors.white)),
             backgroundColor: AppColors.staffPrimary,
             foregroundColor: Colors.white,
             elevation: 0,
@@ -176,7 +193,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Total card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
@@ -191,12 +207,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Sale Total',
+                      Text(l10n.saleTotal,
                           style: AppTextStyles.bodyM
                               .copyWith(color: Colors.white70)),
                       const SizedBox(height: 6),
                       Text(
-                        'FCFA ${total.toStringAsFixed(0)}',
+                        '${l10n.fcfa} ${total.toStringAsFixed(0)}',
                         style: AppTextStyles.displayM
                             .copyWith(color: Colors.white),
                       ),
@@ -211,24 +227,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Payment type toggle
-                Text('Payment type', style: AppTextStyles.headingM),
+                Text(l10n.paymentType, style: AppTextStyles.headingM),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     _TypeChip(
-                      label: 'Cash',
+                      label: l10n.cash,
                       icon: Icons.money,
                       color: AppColors.success,
                       selected: !_isCredit,
                       onTap: () => setState(() {
                         _isCredit = false;
-                        _amountController.text = total.toStringAsFixed(0);
+                        _amountController.text =
+                            total.toStringAsFixed(0);
                       }),
                     ),
                     const SizedBox(width: 12),
                     _TypeChip(
-                      label: 'Credit',
+                      label: l10n.credit,
                       icon: Icons.account_balance_wallet_outlined,
                       color: AppColors.danger,
                       selected: _isCredit,
@@ -242,7 +258,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 const SizedBox(height: 24),
 
                 if (!_isCredit) ...[
-                  Text('Amount paid', style: AppTextStyles.headingM),
+                  Text(l10n.amountPaid, style: AppTextStyles.headingM),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _amountController,
@@ -250,7 +266,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: AppTextStyles.headingL,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      prefixText: 'FCFA ',
+                      prefixText: '${l10n.fcfa} ',
                       prefixStyle: AppTextStyles.headingM
                           .copyWith(color: AppColors.textSecondary),
                       filled: true,
@@ -270,8 +286,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Change summary
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -281,25 +295,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     child: Column(
                       children: [
-                        _SummaryRow('Total', total),
+                        _SummaryRow(l10n.total, total, l10n: l10n),
                         const Divider(height: 20),
-                        _SummaryRow('Paid', entered),
+                        _SummaryRow(l10n.paid, entered, l10n: l10n),
                         const Divider(height: 20),
                         _SummaryRow(
-                          'Change',
+                          l10n.change,
                           change,
                           color: change >= 0
                               ? AppColors.success
                               : AppColors.danger,
                           bold: true,
+                          l10n: l10n,
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
                 ] else ...[
-                  // ── Customer selector (required for credit) ──────────────
-                  Text('Customer', style: AppTextStyles.headingM),
+                  Text(l10n.customers, style: AppTextStyles.headingM),
                   const SizedBox(height: 10),
                   GestureDetector(
                     onTap: _openCustomerPicker,
@@ -330,19 +344,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           Expanded(
                             child: _selectedCustomer != null
                                 ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(_selectedCustomer!.name,
-                                          style: AppTextStyles.bodyM.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.staffPrimary)),
+                                          style: AppTextStyles.bodyM
+                                              .copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.staffPrimary)),
                                       if (_selectedCustomer!.phone.isNotEmpty)
                                         Text(_selectedCustomer!.phone,
                                             style: AppTextStyles.bodyS.copyWith(
                                                 color: AppColors.textSecondary)),
                                     ],
                                   )
-                                : Text('Select customer…',
+                                : Text(l10n.selectCustomerHint,
                                     style: AppTextStyles.bodyM.copyWith(
                                         color: AppColors.textSecondary)),
                           ),
@@ -354,7 +370,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   if (_selectedCustomer == null) ...[
                     const SizedBox(height: 6),
-                    Text('A customer is required for credit sales.',
+                    Text(l10n.customerRequiredForCredit,
                         style: AppTextStyles.bodyS
                             .copyWith(color: AppColors.danger)),
                   ],
@@ -374,7 +390,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Full amount will be recorded as debt.',
+                            l10n.fullAmountAsDebt,
                             style: AppTextStyles.bodyS
                                 .copyWith(color: AppColors.danger),
                           ),
@@ -389,15 +405,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   children: [
                     Expanded(
                       child: AppButton.outlined(
-                        label: 'Back',
+                        label: l10n.back,
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: AppButton.primary(
-                        label: 'Confirm',
-                        onPressed: _canProceed ? () => _proceed(total) : null,
+                        label: l10n.confirm,
+                        onPressed:
+                            _canProceed ? () => _proceed(total) : null,
                       ),
                     ),
                   ],
@@ -448,7 +465,8 @@ class _TypeChip extends StatelessWidget {
               Text(
                 label,
                 style: AppTextStyles.headingS.copyWith(
-                    color: selected ? color : AppColors.textPrimary),
+                    color:
+                        selected ? color : AppColors.textPrimary),
               ),
             ],
           ),
@@ -463,9 +481,10 @@ class _SummaryRow extends StatelessWidget {
   final double amount;
   final Color? color;
   final bool bold;
+  final AppLocalizations l10n;
 
   const _SummaryRow(this.label, this.amount,
-      {this.color, this.bold = false});
+      {this.color, this.bold = false, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -480,7 +499,7 @@ class _SummaryRow extends StatelessWidget {
           ),
         ),
         Text(
-          'FCFA ${amount.toStringAsFixed(0)}',
+          '${l10n.fcfa} ${amount.toStringAsFixed(0)}',
           style: AppTextStyles.bodyM.copyWith(
             color: color ?? AppColors.textPrimary,
             fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
@@ -490,8 +509,6 @@ class _SummaryRow extends StatelessWidget {
     );
   }
 }
-
-// ── Customer picker bottom sheet ──────────────────────────────────────────────
 
 class _CustomerPickerSheet extends StatefulWidget {
   final ValueChanged<Customer> onSelected;
@@ -503,7 +520,8 @@ class _CustomerPickerSheet extends StatefulWidget {
   });
 
   @override
-  State<_CustomerPickerSheet> createState() => _CustomerPickerSheetState();
+  State<_CustomerPickerSheet> createState() =>
+      _CustomerPickerSheetState();
 }
 
 class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
@@ -526,6 +544,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<DebtProvider>(
       builder: (_, provider, __) {
         final customers = _filtered(provider.customers);
@@ -537,7 +556,6 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
           expand: false,
           builder: (_, scrollController) => Column(
             children: [
-              // Handle
               Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 40,
@@ -552,13 +570,13 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text('Select Customer',
+                      child: Text(l10n.selectCustomer,
                           style: AppTextStyles.headingL),
                     ),
                     TextButton.icon(
                       onPressed: widget.onCreateNew,
                       icon: const Icon(Icons.add, size: 18),
-                      label: const Text('New'),
+                      label: Text(l10n.newButton),
                       style: TextButton.styleFrom(
                           foregroundColor: AppColors.staffPrimary),
                     ),
@@ -571,9 +589,10 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                   controller: _searchCtrl,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: 'Search by name or phone…',
+                    hintText: l10n.searchByNameOrPhone,
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
                     filled: true,
@@ -587,38 +606,43 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                     : customers.isEmpty
                         ? Center(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.people_outline,
                                     size: 48, color: Colors.grey[300]),
                                 const SizedBox(height: 12),
-                                Text('No customers found',
+                                Text(l10n.noCustomersFound,
                                     style: AppTextStyles.bodyM.copyWith(
                                         color: Colors.grey[500])),
                                 const SizedBox(height: 12),
                                 TextButton(
                                   onPressed: widget.onCreateNew,
-                                  child: const Text('Create new customer'),
+                                  child:
+                                      Text(l10n.createNewCustomer),
                                 ),
                               ],
                             ),
                           )
                         : ListView.builder(
                             controller: scrollController,
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                            padding: const EdgeInsets.fromLTRB(
+                                16, 0, 16, 24),
                             itemCount: customers.length,
                             itemBuilder: (_, i) {
                               final c = customers[i];
                               return ListTile(
                                 onTap: () => widget.onSelected(c),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
+                                    borderRadius:
+                                        BorderRadius.circular(10)),
                                 leading: CircleAvatar(
-                                  backgroundColor:
-                                      AppColors.accent.withValues(alpha: 0.15),
+                                  backgroundColor: AppColors.accent
+                                      .withValues(alpha: 0.15),
                                   child: Text(c.initials,
                                       style: AppTextStyles.headingS
-                                          .copyWith(color: AppColors.accent)),
+                                          .copyWith(
+                                              color: AppColors.accent)),
                                 ),
                                 title: Text(c.name,
                                     style: AppTextStyles.bodyM.copyWith(
@@ -629,9 +653,10 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                                     : null,
                                 trailing: c.totalDebt > 0
                                     ? Text(
-                                        'FCFA ${c.totalDebt.toStringAsFixed(0)} debt',
+                                        '${l10n.fcfa} ${c.totalDebt.toStringAsFixed(0)} ${l10n.debtLabel}',
                                         style: AppTextStyles.bodyS
-                                            .copyWith(color: AppColors.danger),
+                                            .copyWith(
+                                                color: AppColors.danger),
                                       )
                                     : null,
                               );

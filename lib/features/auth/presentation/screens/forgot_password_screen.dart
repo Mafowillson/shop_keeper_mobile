@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
-import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -33,19 +33,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  String? _emailValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
-    }
-    return null;
-  }
-
   Future<void> _handleResetPassword() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final authProvider = context.read<AuthProvider>();
     final success =
@@ -59,8 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } else {
         SnackBarHelper.showError(
           context,
-          authProvider.errorMessage ??
-              'Password reset failed. Please try again.',
+          authProvider.errorMessage ?? l10n.passwordResetFailed,
         );
       }
     }
@@ -68,6 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -104,13 +94,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      AppStrings.appName,
+                      l10n.appName,
                       style:
                           AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Recover your password securely',
+                      l10n.recoverPasswordSecurely,
                       style:
                           AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
@@ -141,8 +131,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: _submittedSuccessfully
-                      ? _buildSuccessWidget()
-                      : _buildFormWidget(),
+                      ? _buildSuccessWidget(l10n)
+                      : _buildFormWidget(l10n),
                 ),
               ),
             ),
@@ -152,7 +142,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildFormWidget() {
+  Widget _buildFormWidget(AppLocalizations l10n) {
     return Form(
       key: _formKey,
       child: Consumer<AuthProvider>(
@@ -160,29 +150,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Forgot Password',
+              l10n.forgotPasswordTitle,
               style: AppTextStyles.displayS.copyWith(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 6),
-            Text(
-              'Enter your email address and we will send you instructions to reset your password.',
-              style: AppTextStyles.bodyS,
-            ),
+            Text(l10n.forgotPasswordDescription, style: AppTextStyles.bodyS),
             const SizedBox(height: 28),
             AppTextField(
-              label: 'Email Address',
+              label: l10n.emailAddress,
               hintText: 'e.g. yourname@shopkeeper.cm',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator,
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return l10n.fieldRequired;
+                final emailRegex =
+                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                if (!emailRegex.hasMatch(v.trim())) {
+                  return l10n.enterValidEmail;
+                }
+                return null;
+              },
               prefixIcon: const Icon(Icons.email_outlined, size: 22),
             ),
             const SizedBox(height: 36),
             AppButton.primary(
-              label: 'Send Recovery Email',
+              label: l10n.sendRecoveryEmail,
               isLoading: authProvider.isLoading,
               onPressed: _handleResetPassword,
             ),
@@ -196,7 +191,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 GestureDetector(
                   onTap: () => context.go('/login'),
                   child: Text(
-                    'Back to Sign In',
+                    l10n.backToSignIn,
                     style: AppTextStyles.bodyM.copyWith(
                       color: AppColors.ownerPrimary,
                       fontWeight: FontWeight.w700,
@@ -211,7 +206,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget _buildSuccessWidget() {
+  Widget _buildSuccessWidget(AppLocalizations l10n) {
     return Column(
       key: const ValueKey('forgot_password_success'),
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -231,7 +226,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 24),
         Text(
-          'Check Your Inbox',
+          l10n.checkYourInbox,
           style: AppTextStyles.displayS.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
@@ -241,7 +236,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'We\'ve sent password recovery instructions to:\n${_emailController.text}',
+            '${l10n.passwordRecoveryInstructions}\n${_emailController.text}',
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyM.copyWith(
               color: AppColors.textSecondary,
@@ -251,7 +246,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         const SizedBox(height: 36),
         AppButton.primary(
-          label: 'Enter Reset Code',
+          label: l10n.enterResetCode,
           onPressed: () => context.go(
             '/reset-password',
             extra: _emailController.text.trim(),
@@ -261,7 +256,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         TextButton(
           onPressed: () => context.go('/login'),
           child: Text(
-            'Back to Sign In',
+            l10n.backToSignIn,
             style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
           ),
         ),

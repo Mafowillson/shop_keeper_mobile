@@ -1,9 +1,11 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/enums/notification_type.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 import 'package:shopkeeper/core/router/app_router.dart';
 import 'package:shopkeeper/core/services/fcm_service.dart';
 import 'package:shopkeeper/core/theme/app_theme.dart';
@@ -145,6 +147,16 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         routerConfig: _router,
         debugShowCheckedModeBanner: false,
         restorationScopeId: 'app',
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('fr'),
+          Locale('en'),
+        ],
       ),
     );
   }

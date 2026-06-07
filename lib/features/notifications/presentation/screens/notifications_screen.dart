@@ -7,6 +7,7 @@ import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/notifications/domain/entities/app_notification.dart';
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -27,7 +28,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().loadNotifications(isStaff: _isStaff);
+      context
+          .read<NotificationProvider>()
+          .loadNotifications(isStaff: _isStaff);
     });
   }
 
@@ -37,21 +40,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   List<AppNotification> _filtered(List<AppNotification> all) {
     if (_selectedFilter == 'All') return all;
-    if (_selectedFilter == 'Unread') return all.where((n) => !n.isRead).toList();
+    if (_selectedFilter == 'Unread') {
+      return all.where((n) => !n.isRead).toList();
+    }
     final type = _filterToType(_selectedFilter);
     return type == null ? all : all.where((n) => n.type == type).toList();
   }
 
   NotificationType? _filterToType(String filter) {
     switch (filter) {
-      case 'Stock':   return NotificationType.lowStock;
-      case 'Sale':    return NotificationType.largeSale;
-      case 'Payment': return NotificationType.debtPayment;
-      case 'Staff':   return NotificationType.staffLogin;
-      case 'Added':   return NotificationType.productAdded;
-      case 'Updated': return NotificationType.productUpdated;
-      case 'Deleted': return NotificationType.productDeleted;
-      default:        return null;
+      case 'Stock':
+        return NotificationType.lowStock;
+      case 'Sale':
+        return NotificationType.largeSale;
+      case 'Payment':
+        return NotificationType.debtPayment;
+      case 'Staff':
+        return NotificationType.staffLogin;
+      case 'Added':
+        return NotificationType.productAdded;
+      case 'Updated':
+        return NotificationType.productUpdated;
+      case 'Deleted':
+        return NotificationType.productDeleted;
+      default:
+        return null;
     }
   }
 
@@ -103,6 +116,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final primaryColor =
         _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
 
@@ -122,13 +136,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 _NotificationsHeader(
                   unreadCount: provider.unreadCount,
                   primaryColor: primaryColor,
-                  onMarkAllRead:
-                      provider.unreadCount > 0 ? provider.markAllAsRead : null,
+                  onMarkAllRead: provider.unreadCount > 0
+                      ? provider.markAllAsRead
+                      : null,
+                  l10n: l10n,
                 ),
                 if (provider.isLoading && provider.notifications.isEmpty)
                   SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: primaryColor),
+                      child:
+                          CircularProgressIndicator(color: primaryColor),
                     ),
                   )
                 else ...[
@@ -137,7 +154,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       selected: _selectedFilter,
                       filters: _filters,
                       primaryColor: primaryColor,
-                      onSelect: (f) => setState(() => _selectedFilter = f),
+                      onSelect: (f) =>
+                          setState(() => _selectedFilter = f),
                     ),
                   ),
                   if (provider.errorMessage != null)
@@ -148,9 +166,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ),
                     ),
                   if (items.isEmpty)
-                    const SliverFillRemaining(
+                    SliverFillRemaining(
                       hasScrollBody: false,
-                      child: _EmptyState(),
+                      child: _EmptyState(l10n: l10n),
                     )
                   else
                     SliverPadding(
@@ -161,9 +179,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             notification: items[i],
                             icon: _iconFor(items[i].type),
                             color: _colorFor(items[i].type),
+                            l10n: l10n,
                             onTap: items[i].isRead
                                 ? null
-                                : () => provider.markAsRead(items[i].id),
+                                : () =>
+                                    provider.markAsRead(items[i].id),
                           ),
                           childCount: items.length,
                         ),
@@ -179,16 +199,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────────
-
 class _NotificationsHeader extends StatelessWidget {
   final int unreadCount;
   final Color primaryColor;
   final VoidCallback? onMarkAllRead;
+  final AppLocalizations l10n;
   const _NotificationsHeader(
       {required this.unreadCount,
       required this.primaryColor,
-      required this.onMarkAllRead});
+      required this.onMarkAllRead,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
@@ -201,7 +221,7 @@ class _NotificationsHeader extends StatelessWidget {
             TextButton(
               onPressed: onMarkAllRead,
               child: Text(
-                'Mark all read',
+                l10n.markAllRead,
                 style: AppTextStyles.labelL.copyWith(color: Colors.white),
               ),
             ),
@@ -212,7 +232,10 @@ class _NotificationsHeader extends StatelessWidget {
           background: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryColor.withValues(alpha: 0.85), primaryColor],
+                colors: [
+                  primaryColor.withValues(alpha: 0.85),
+                  primaryColor
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -225,9 +248,9 @@ class _NotificationsHeader extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Notifications',
-                      style:
-                          AppTextStyles.headingL.copyWith(color: Colors.white),
+                      l10n.notifications,
+                      style: AppTextStyles.headingL
+                          .copyWith(color: Colors.white),
                     ),
                     if (unreadCount > 0) ...[
                       const SizedBox(width: 10),
@@ -249,8 +272,11 @@ class _NotificationsHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  unreadCount == 0 ? 'All caught up' : '$unreadCount unread',
-                  style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
+                  unreadCount == 0
+                      ? l10n.allCaughtUp
+                      : l10n.unreadCount(unreadCount),
+                  style:
+                      AppTextStyles.bodyS.copyWith(color: Colors.white60),
                 ),
               ],
             ),
@@ -258,8 +284,6 @@ class _NotificationsHeader extends StatelessWidget {
         ),
       );
 }
-
-// ── Filter bar ─────────────────────────────────────────────────────────────────
 
 class _FilterBar extends StatelessWidget {
   final String selected;
@@ -278,7 +302,8 @@ class _FilterBar extends StatelessWidget {
         color: Colors.white,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: filters.map((f) {
               final isActive = f == selected;
@@ -288,17 +313,20 @@ class _FilterBar extends StatelessWidget {
                   onTap: () => onSelect(f),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: isActive ? primaryColor : AppColors.background,
+                      color: isActive
+                          ? primaryColor
+                          : AppColors.background,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       f,
                       style: AppTextStyles.labelL.copyWith(
-                        color:
-                            isActive ? Colors.white : AppColors.textSecondary,
+                        color: isActive
+                            ? Colors.white
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -310,19 +338,19 @@ class _FilterBar extends StatelessWidget {
       );
 }
 
-// ── Notification tile ──────────────────────────────────────────────────────────
-
 class _NotificationTile extends StatelessWidget {
   final AppNotification notification;
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
+  final AppLocalizations l10n;
 
   const _NotificationTile({
     required this.notification,
     required this.icon,
     required this.color,
     required this.onTap,
+    required this.l10n,
   });
 
   @override
@@ -358,12 +386,14 @@ class _NotificationTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: isRead ? 0.06 : 0.12),
+                  color: color
+                      .withValues(alpha: isRead ? 0.06 : 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  color: color.withValues(alpha: isRead ? 0.45 : 1.0),
+                  color: color
+                      .withValues(alpha: isRead ? 0.45 : 1.0),
                   size: 20,
                 ),
               ),
@@ -382,8 +412,9 @@ class _NotificationTile extends StatelessWidget {
                               color: isRead
                                   ? AppColors.textSecondary
                                   : AppColors.textPrimary,
-                              fontWeight:
-                                  isRead ? FontWeight.w500 : FontWeight.w700,
+                              fontWeight: isRead
+                                  ? FontWeight.w500
+                                  : FontWeight.w700,
                             ),
                           ),
                         ),
@@ -409,7 +440,7 @@ class _NotificationTile extends StatelessWidget {
                     if (!isRead) ...[
                       const SizedBox(height: 8),
                       Text(
-                        'Tap to dismiss',
+                        l10n.tapToDismiss,
                         style: AppTextStyles.labelS.copyWith(color: color),
                       ),
                     ],
@@ -432,10 +463,9 @@ class _NotificationTile extends StatelessWidget {
   }
 }
 
-// ── Empty state ────────────────────────────────────────────────────────────────
-
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  final AppLocalizations l10n;
+  const _EmptyState({required this.l10n});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -459,22 +489,17 @@ class _EmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'No notifications',
+                l10n.noNotifications,
                 style: AppTextStyles.headingS
                     .copyWith(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 6),
-              Text(
-                "You're all caught up.",
-                style: AppTextStyles.bodyS,
-              ),
+              Text(l10n.allCaughtUpPeriod, style: AppTextStyles.bodyS),
             ],
           ),
         ),
       );
 }
-
-// ── Error banner ───────────────────────────────────────────────────────────────
 
 class _ErrorBanner extends StatelessWidget {
   final String message;
@@ -482,24 +507,27 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(
+              color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline,
+                color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 message,
-                style: AppTextStyles.bodyS.copyWith(color: AppColors.danger),
+                style:
+                    AppTextStyles.bodyS.copyWith(color: AppColors.danger),
               ),
             ),
           ],
         ),
       );
 }
-

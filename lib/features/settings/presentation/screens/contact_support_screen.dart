@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactSupportScreen extends StatelessWidget {
@@ -8,24 +9,25 @@ class ContactSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          const _SupportHeader(),
+          _SupportHeader(l10n: l10n),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const _SectionLabel('Get in touch'),
+                _SectionLabel(l10n.getInTouch),
                 const SizedBox(height: 10),
-                const _ContactCard(),
+                _ContactCard(l10n: l10n),
                 const SizedBox(height: 24),
-                const _ResponseTimeCard(),
+                _ResponseTimeCard(l10n: l10n),
                 const SizedBox(height: 24),
-                const _SectionLabel('Frequently asked questions'),
+                _SectionLabel(l10n.frequentlyAskedQuestions),
                 const SizedBox(height: 10),
-                const _FaqCard(),
+                _FaqCard(l10n: l10n),
               ]),
             ),
           ),
@@ -35,20 +37,20 @@ class ContactSupportScreen extends StatelessWidget {
   }
 }
 
-// ── URL actions (file-level so all widgets can call them) ──────────────────────
+// ── URL actions ────────────────────────────────────────────────────────────────
 
-Future<void> _launchEmail(BuildContext context) async {
+Future<void> _launchEmail(BuildContext context, AppLocalizations l10n) async {
   final subject = Uri.encodeComponent('ShopKeeper Support Request');
   final uri = Uri.parse('mailto:support@shopkeeper.cm?subject=$subject');
   if (!await launchUrl(uri)) {
-    if (context.mounted) _showError(context, 'Could not open email app.');
+    if (context.mounted) _showError(context, l10n.couldNotOpenEmail);
   }
 }
 
-Future<void> _openWhatsApp(BuildContext context) async {
+Future<void> _openWhatsApp(BuildContext context, AppLocalizations l10n) async {
   final uri = Uri.parse('https://wa.me/237672635068');
   if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    if (context.mounted) _showError(context, 'Could not open WhatsApp.');
+    if (context.mounted) _showError(context, l10n.couldNotOpenWhatsApp);
   }
 }
 
@@ -98,6 +100,7 @@ class _BugReportSheetState extends State<_BugReportSheet> {
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
+    final l10n = AppLocalizations.of(context)!;
     setState(() => _submitting = true);
 
     final subject =
@@ -105,8 +108,8 @@ class _BugReportSheetState extends State<_BugReportSheet> {
     final body = Uri.encodeComponent(
       'Description:\n${_descController.text.trim()}\n\n---\nSent from ShopKeeper app',
     );
-    final uri = Uri.parse(
-        'mailto:support@shopkeeper.cm?subject=$subject&body=$body');
+    final uri =
+        Uri.parse('mailto:support@shopkeeper.cm?subject=$subject&body=$body');
 
     final launched = await launchUrl(uri);
     if (mounted) {
@@ -116,10 +119,10 @@ class _BugReportSheetState extends State<_BugReportSheet> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Could not open email app.'),
+            content: Text(l10n.couldNotOpenEmail),
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -128,6 +131,7 @@ class _BugReportSheetState extends State<_BugReportSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + keyboardHeight),
@@ -139,7 +143,6 @@ class _BugReportSheetState extends State<_BugReportSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── drag handle ──────────────────────────────────────
           Center(
             child: Container(
               width: 40,
@@ -151,8 +154,6 @@ class _BugReportSheetState extends State<_BugReportSheet> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // ── sheet header ─────────────────────────────────────
           Row(
             children: [
               Container(
@@ -169,8 +170,8 @@ class _BugReportSheetState extends State<_BugReportSheet> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Report a Bug', style: AppTextStyles.headingS),
-                  Text("We'll get back to you within 24 hours",
+                  Text(l10n.reportABug, style: AppTextStyles.headingS),
+                  Text(l10n.wellGetBackWithin24h,
                       style: AppTextStyles.bodyS),
                 ],
               ),
@@ -178,28 +179,22 @@ class _BugReportSheetState extends State<_BugReportSheet> {
           ),
           const SizedBox(height: 6),
           const Divider(height: 28, color: AppColors.border),
-
-          // ── title field ──────────────────────────────────────
           _SheetField(
             controller: _titleController,
-            label: 'Bug title',
-            hint: 'e.g. App crashes when adding a product',
+            label: l10n.bugTitle,
+            hint: l10n.bugTitleHint,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 14),
-
-          // ── description field ────────────────────────────────
           _SheetField(
             controller: _descController,
-            label: 'Description',
-            hint: 'Describe what happened and steps to reproduce it…',
+            label: l10n.description,
+            hint: l10n.bugDescriptionHint,
             maxLines: 4,
             alignLabelWithHint: true,
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 20),
-
-          // ── action buttons ───────────────────────────────────
           Row(
             children: [
               Expanded(
@@ -212,7 +207,7 @@ class _BugReportSheetState extends State<_BugReportSheet> {
                     side: const BorderSide(color: AppColors.border),
                   ),
                   child: Text(
-                    'Cancel',
+                    l10n.cancel,
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.textSecondary),
                   ),
@@ -238,9 +233,9 @@ class _BugReportSheetState extends State<_BugReportSheet> {
                               strokeWidth: 2, color: Colors.white),
                         )
                       : Text(
-                          'Send Report',
-                          style: AppTextStyles.labelL
-                              .copyWith(color: Colors.white),
+                          l10n.sendReport,
+                          style:
+                              AppTextStyles.labelL.copyWith(color: Colors.white),
                         ),
                 ),
               ),
@@ -279,7 +274,8 @@ class _SheetField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          hintStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
+          hintStyle:
+              AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
           alignLabelWithHint: alignLabelWithHint,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -291,8 +287,8 @@ class _SheetField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: AppColors.ownerPrimary, width: 2),
+            borderSide: const BorderSide(
+                color: AppColors.ownerPrimary, width: 2),
           ),
         ),
       );
@@ -301,7 +297,8 @@ class _SheetField extends StatelessWidget {
 // ── Header ─────────────────────────────────────────────────────────────────────
 
 class _SupportHeader extends StatelessWidget {
-  const _SupportHeader();
+  final AppLocalizations l10n;
+  const _SupportHeader({required this.l10n});
 
   @override
   Widget build(BuildContext context) => SliverAppBar(
@@ -349,23 +346,20 @@ class _SupportHeader extends StatelessWidget {
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.headset_mic_outlined,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                        child: const Icon(Icons.headset_mic_outlined,
+                            color: Colors.white, size: 22),
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Contact Support',
+                        l10n.contactSupport,
                         style: AppTextStyles.headingL
                             .copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        "We're here to help — reach out any time",
-                        style:
-                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
+                        l10n.weAreHereToHelp,
+                        style: AppTextStyles.bodyS
+                            .copyWith(color: Colors.white60),
                       ),
                     ],
                   ),
@@ -386,14 +380,16 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: AppTextStyles.headingS.copyWith(color: AppColors.textSecondary),
+        style: AppTextStyles.headingS
+            .copyWith(color: AppColors.textSecondary),
       );
 }
 
 // ── Contact card ───────────────────────────────────────────────────────────────
 
 class _ContactCard extends StatelessWidget {
-  const _ContactCard();
+  final AppLocalizations l10n;
+  const _ContactCard({required this.l10n});
 
   @override
   Widget build(BuildContext context) => _Card(
@@ -401,26 +397,26 @@ class _ContactCard extends StatelessWidget {
           _ContactTile(
             icon: Icons.email_outlined,
             color: AppColors.ownerPrimary,
-            label: 'Email Support',
+            label: l10n.emailSupport,
             subtitle: 'support@shopkeeper.cm',
             badge: null,
-            onTap: () => _launchEmail(context),
+            onTap: () => _launchEmail(context, l10n),
           ),
           const _Divider(),
           _ContactTile(
             icon: Icons.chat_bubble_outline_rounded,
             color: const Color(0xFF25D366),
-            label: 'WhatsApp',
+            label: l10n.whatsApp,
             subtitle: '+237 672 635 068',
-            badge: 'Fastest',
-            onTap: () => _openWhatsApp(context),
+            badge: l10n.fastestBadge,
+            onTap: () => _openWhatsApp(context, l10n),
           ),
           const _Divider(),
           _ContactTile(
             icon: Icons.bug_report_outlined,
             color: AppColors.danger,
-            label: 'Report a Bug',
-            subtitle: 'Help us improve the app',
+            label: l10n.reportABug,
+            subtitle: l10n.helpUsImprove,
             badge: null,
             onTap: () => _openBugReport(context),
           ),
@@ -510,7 +506,8 @@ class _ContactTile extends StatelessWidget {
 // ── Response time card ─────────────────────────────────────────────────────────
 
 class _ResponseTimeCard extends StatelessWidget {
-  const _ResponseTimeCard();
+  final AppLocalizations l10n;
+  const _ResponseTimeCard({required this.l10n});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -518,8 +515,8 @@ class _ResponseTimeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.ownerPrimary.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
+          border: Border.all(
+              color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -539,15 +536,13 @@ class _ResponseTimeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Average response time',
+                    l10n.averageResponseTime,
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.ownerPrimary),
                   ),
                   const SizedBox(height: 3),
-                  Text(
-                    'Email: within 24 hours  ·  WhatsApp: within 2 hours',
-                    style: AppTextStyles.bodyS,
-                  ),
+                  Text(l10n.responseTimeDetails,
+                      style: AppTextStyles.bodyS),
                 ],
               ),
             ),
@@ -559,7 +554,8 @@ class _ResponseTimeCard extends StatelessWidget {
 // ── FAQ card ───────────────────────────────────────────────────────────────────
 
 class _FaqCard extends StatefulWidget {
-  const _FaqCard();
+  final AppLocalizations l10n;
+  const _FaqCard({required this.l10n});
 
   @override
   State<_FaqCard> createState() => _FaqCardState();
@@ -568,114 +564,97 @@ class _FaqCard extends StatefulWidget {
 class _FaqCardState extends State<_FaqCard> {
   int? _expanded;
 
-  static const _faqs = [
-    (
-      q: 'How do I add a product with multiple units?',
-      a:
-          'Go to Products → Add Product. In the Units section, add each unit (e.g. carton, pack) with its price and quantity relative to the base unit. The unit with "Qty in base = 1" is your base unit — all stock is tracked in this unit.',
-    ),
-    (
-      q: 'Why is a staff login notification not showing?',
-      a:
-          'Make sure "Staff login alerts" is enabled in Settings → Alert Preferences. Also ensure the staff member is assigned a Shop ID and that your FCM device token is registered.',
-    ),
-    (
-      q: 'How is my stock calculated?',
-      a:
-          'Stock is always stored in base units. When you record a sale, the sold quantity (in the chosen unit) is multiplied by that unit\'s "quantity in base" and subtracted from stock. The dashboard shows how much is available in each unit.',
-    ),
-    (
-      q: 'Can I change the large sale threshold?',
-      a:
-          'Yes — go to Settings → Alert Preferences and tap the "Large sale threshold" row. Enter the FCFA amount above which a sale should trigger an alert.',
-    ),
-    (
-      q: 'How do I create a staff account?',
-      a:
-          'From your profile screen, tap "Add Staff Member". Fill in their name, email, and phone number. Their phone number is their login password.',
-    ),
-  ];
+  List<({String q, String a})> get _faqs => [
+        (q: widget.l10n.faq1Q, a: widget.l10n.faq1A),
+        (q: widget.l10n.faq2Q, a: widget.l10n.faq2A),
+        (q: widget.l10n.faq3Q, a: widget.l10n.faq3A),
+        (q: widget.l10n.faq4Q, a: widget.l10n.faq4A),
+        (q: widget.l10n.faq5Q, a: widget.l10n.faq5A),
+      ];
 
   @override
-  Widget build(BuildContext context) => _Card(
-        children: List.generate(_faqs.length, (i) {
-          final faq = _faqs[i];
-          final isOpen = _expanded == i;
-          return Column(
-            children: [
-              InkWell(
-                onTap: () =>
-                    setState(() => _expanded = isOpen ? null : i),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color:
-                              AppColors.ownerPrimary.withValues(alpha: 0.08),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${i + 1}',
-                            style: AppTextStyles.labelS.copyWith(
-                              color: AppColors.ownerPrimary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
+  Widget build(BuildContext context) {
+    final faqs = _faqs;
+    return _Card(
+      children: List.generate(faqs.length, (i) {
+        final faq = faqs[i];
+        final isOpen = _expanded == i;
+        return Column(
+          children: [
+            InkWell(
+              onTap: () =>
+                  setState(() => _expanded = isOpen ? null : i),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.ownerPrimary
+                            .withValues(alpha: 0.08),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
+                      child: Center(
                         child: Text(
-                          faq.q,
-                          style: AppTextStyles.labelL.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: isOpen
-                                ? FontWeight.w700
-                                : FontWeight.w500,
+                          '${i + 1}',
+                          style: AppTextStyles.labelS.copyWith(
+                            color: AppColors.ownerPrimary,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      AnimatedRotation(
-                        turns: isOpen ? 0.25 : 0,
-                        duration: const Duration(milliseconds: 200),
-                        child: Icon(Icons.arrow_forward_ios_rounded,
-                            size: 13, color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              AnimatedCrossFade(
-                firstChild: const SizedBox(width: double.infinity),
-                secondChild: Container(
-                  width: double.infinity,
-                  color: AppColors.ownerPrimary.withValues(alpha: 0.03),
-                  padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
-                  child: Text(
-                    faq.a,
-                    style: AppTextStyles.bodyM.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.55,
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        faq.q,
+                        style: AppTextStyles.labelL.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: isOpen
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AnimatedRotation(
+                      turns: isOpen ? 0.25 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(Icons.arrow_forward_ios_rounded,
+                          size: 13, color: Colors.grey[400]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            AnimatedCrossFade(
+              firstChild: const SizedBox(width: double.infinity),
+              secondChild: Container(
+                width: double.infinity,
+                color: AppColors.ownerPrimary.withValues(alpha: 0.03),
+                padding: const EdgeInsets.fromLTRB(52, 0, 16, 16),
+                child: Text(
+                  faq.a,
+                  style: AppTextStyles.bodyM.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.55,
                   ),
                 ),
-                crossFadeState: isOpen
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 200),
               ),
-              if (i < _faqs.length - 1) const _Divider(),
-            ],
-          );
-        }),
-      );
+              crossFadeState: isOpen
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 200),
+            ),
+            if (i < faqs.length - 1) const _Divider(),
+          ],
+        );
+      }),
+    );
+  }
 }
 
 // ── Shared ─────────────────────────────────────────────────────────────────────

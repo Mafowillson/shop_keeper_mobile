@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shopkeeper/core/config/app_config.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
 
@@ -34,6 +34,11 @@ class _AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Attach Accept-Language so the Go backend responds in the device language.
+    final langCode =
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    options.headers['Accept-Language'] = langCode;
+
     try {
       final token = await _tokenStorage.getAccessToken();
       if (token != null) {

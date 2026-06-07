@@ -1,0 +1,72 @@
+name: PR Quality Checks
+
+# Runs on every pull request targeting main or develop.
+# All steps must pass before the PR can be merged.
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality:
+    name: Analyze · Format · Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # ── Dependencies ──────────────────────────────────────────────────────
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # ── Quality gates ─────────────────────────────────────────────────────
+
+      - name: Static analysis
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Formatting check
+        run: dart format --output=none --set-exit-if-changed .
+
+      # ── Tests & coverage ──────────────────────────────────────────────────
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Check 70% line-coverage threshold
+        run: |
+          LCOV="coverage/lcov.info"
+          if [ ! -f "$LCOV" ]; then
+            echo "No coverage file found — skipping threshold check."
+            exit 0
+          fi
+
+          TOTAL=$(awk -F: '/^LF/{s+=$2} END{print s+0}' "$LCOV")
+          HITS=$(awk -F: '/^LH/{s+=$2} END{print s+0}' "$LCOV")
+
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "No coverable lines found — skipping threshold check."
+            exit 0
+          fi
+
+          PCT=$(( HITS * 100 / TOTAL ))
+          echo "Line coverage: $HITS / $TOTAL lines ($PCT%)"
+
+          if [ "$PCT" -lt 70 ]; then
+            echo "❌ Coverage $PCT% is below the 70% threshold."
+            exit 1
+          fi
+
+          echo "✅ Coverage $PCT% — threshold met."
