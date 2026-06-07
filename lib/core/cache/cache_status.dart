@@ -12,7 +12,7 @@ enum CacheStatus {
   empty,
 }
 
-/// Per-box staleness thresholds used by [CacheMetadataService.isStale].
+/// Per-box staleness thresholds used by CacheMetadataService.isStale.
 abstract final class StaleThresholds {
   static const products = Duration(minutes: 5);
   static const sales = Duration(minutes: 10);

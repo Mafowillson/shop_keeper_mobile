@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
-import 'package:shopkeeper/core/cache/cache_status.dart';
 import 'package:shopkeeper/core/enums/sync_state.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/offline/connectivity_service.dart';

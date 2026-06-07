@@ -8,8 +8,8 @@ import 'package:shopkeeper/features/sales/data/datasources/sale_local_datasource
 
 /// Central coordinator for all Hive cache operations.
 ///
-/// Use the domain-specific [invalidateForXxx] methods after write operations
-/// to keep related boxes consistent.  Call [invalidateAll] on logout to clear
+/// Use the domain-specific invalidateForXxx methods after write operations
+/// to keep related boxes consistent.  Call invalidateAll on logout to clear
 /// sensitive data.
 class CacheService {
   final ProductLocalDataSource products;
