@@ -9,6 +9,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({super.key});
@@ -36,17 +37,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   void dispose() {
-    for (final c in _controllers) {
-      c.dispose();
-    }
-    for (final f in _focusNodes) {
-      f.dispose();
-    }
+    for (final c in _controllers) { c.dispose(); }
+    for (final f in _focusNodes) { f.dispose(); }
     _timer?.cancel();
     super.dispose();
   }
-
-  // ── Resend countdown ────────────────────────────────────────────────────
 
   void _startResendCountdown() {
     setState(() => _resendCountdown = 60);
@@ -61,28 +56,21 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     });
   }
 
-  // ── Code helpers ────────────────────────────────────────────────────────
-
-  String get _enteredCode =>
-      _controllers.map((c) => c.text).join();
-
+  String get _enteredCode => _controllers.map((c) => c.text).join();
   bool get _isCodeComplete => _enteredCode.length == _codeLength;
 
   void _onDigitChanged(int index, String value) {
     if (value.length > 1) {
-      // Handle paste: spread digits across boxes.
       final digits = value.replaceAll(RegExp(r'\D'), '');
       for (int i = 0; i < _codeLength && i < digits.length; i++) {
         _controllers[i].text = digits[i];
       }
-      final nextEmpty =
-          _controllers.indexWhere((c) => c.text.isEmpty);
+      final nextEmpty = _controllers.indexWhere((c) => c.text.isEmpty);
       final target = nextEmpty == -1 ? _codeLength - 1 : nextEmpty;
       _focusNodes[target].requestFocus();
       setState(() {});
       return;
     }
-
     if (value.isNotEmpty && index < _codeLength - 1) {
       _focusNodes[index + 1].requestFocus();
     }
@@ -99,17 +87,14 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   void _clearCode() {
-    for (final c in _controllers) {
-      c.clear();
-    }
+    for (final c in _controllers) { c.clear(); }
     _focusNodes[0].requestFocus();
     setState(() {});
   }
 
-  // ── Actions ─────────────────────────────────────────────────────────────
-
   Future<void> _handleVerify() async {
     if (!_isCodeComplete) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final auth = context.read<AuthProvider>();
     final success = await auth.verifyEmail(_enteredCode);
@@ -118,12 +103,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     if (!success) {
       SnackBarHelper.showError(
-          context, auth.errorMessage ?? 'Invalid code. Please try again.');
+          context, auth.errorMessage ?? l10n.invalidCodeTryAgain);
       _clearCode();
       return;
     }
 
-    // Router redirect will send owner to /register-shop or /owner/dashboard.
     final user = auth.currentUser!;
     final isOwner = user.role.name == 'owner';
     context.go(isOwner
@@ -133,6 +117,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   Future<void> _handleResend() async {
     if (_resendCountdown > 0) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final auth = context.read<AuthProvider>();
     final success = await auth.resendVerificationCode();
@@ -141,17 +126,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     if (success) {
       _startResendCountdown();
-      SnackBarHelper.showSuccess(context, 'A new code has been sent.');
+      SnackBarHelper.showSuccess(context, l10n.newCodeSent);
     } else {
       SnackBarHelper.showError(
-          context, auth.errorMessage ?? 'Could not send code. Try again.');
+          context, auth.errorMessage ?? l10n.couldNotSendCode);
     }
   }
 
-  // ── Build ────────────────────────────────────────────────────────────────
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final auth = context.watch<AuthProvider>();
     final email = auth.currentUser?.email ?? '';
 
@@ -175,7 +159,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Verify Your Email',
+                l10n.verifyYourEmail,
                 style: AppTextStyles.displayS.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -184,7 +168,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Enter the 6-digit code sent to',
+                l10n.enterCodeSentTo,
                 style: AppTextStyles.bodyM
                     .copyWith(color: AppColors.textSecondary),
                 textAlign: TextAlign.center,
@@ -207,7 +191,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               ),
               const SizedBox(height: 40),
               AppButton.primary(
-                label: 'Verify Email',
+                label: l10n.verifyEmailButton,
                 isLoading: auth.isLoading,
                 onPressed: _isCodeComplete && !auth.isLoading
                     ? _handleVerify
@@ -218,6 +202,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 countdown: _resendCountdown,
                 isLoading: auth.isLoading,
                 onResend: _handleResend,
+                l10n: l10n,
               ),
               const SizedBox(height: 16),
               TextButton(
@@ -226,7 +211,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   context.go('/login');
                 },
                 child: Text(
-                  'Use a different account',
+                  l10n.useDifferentAccount,
                   style: AppTextStyles.bodyM
                       .copyWith(color: AppColors.textSecondary),
                 ),
@@ -238,8 +223,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     );
   }
 }
-
-// ── Sub-widgets ──────────────────────────────────────────────────────────────
 
 class _OtpRow extends StatelessWidget {
   final List<TextEditingController> controllers;
@@ -298,7 +281,7 @@ class _OtpBox extends StatelessWidget {
           focusNode: focusNode,
           textAlign: TextAlign.center,
           keyboardType: TextInputType.number,
-          maxLength: 6, // allows paste of full code
+          maxLength: 6,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           style: AppTextStyles.displayS.copyWith(
             color: AppColors.textPrimary,
@@ -320,8 +303,8 @@ class _OtpBox extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                  color: AppColors.ownerPrimary, width: 2),
+              borderSide:
+                  const BorderSide(color: AppColors.ownerPrimary, width: 2),
             ),
           ),
           onChanged: onChanged,
@@ -335,11 +318,13 @@ class _ResendRow extends StatelessWidget {
   final int countdown;
   final bool isLoading;
   final VoidCallback onResend;
+  final AppLocalizations l10n;
 
   const _ResendRow({
     required this.countdown,
     required this.isLoading,
     required this.onResend,
+    required this.l10n,
   });
 
   @override
@@ -348,20 +333,19 @@ class _ResendRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "Didn't receive the code? ",
-          style:
-              AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
+          '${l10n.didntReceiveCode} ',
+          style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
         ),
         countdown > 0
             ? Text(
-                'Resend in ${countdown}s',
+                l10n.resendInSeconds(countdown),
                 style: AppTextStyles.bodyM
                     .copyWith(color: AppColors.textSecondary),
               )
             : GestureDetector(
                 onTap: isLoading ? null : onResend,
                 child: Text(
-                  'Resend',
+                  l10n.resend,
                   style: AppTextStyles.bodyM.copyWith(
                     color: AppColors.ownerPrimary,
                     fontWeight: FontWeight.w700,

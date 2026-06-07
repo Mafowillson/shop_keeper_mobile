@@ -8,6 +8,7 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/onboarding/presentation/providers/onboarding_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -58,6 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -95,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                   // App name
                   Text(
-                    'ShopKeeper',
+                    l10n.appName,
                     style: AppTextStyles.displayL.copyWith(
                       color: Colors.white,
                       letterSpacing: 1.5,
@@ -137,7 +139,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                   // Tagline
                   Text(
-                    'Manage your shop,\ngrow your business',
+                    l10n.tagline,
                     style: AppTextStyles.bodyM.copyWith(
                       color: Colors.white.withValues(alpha: 0.65),
                       letterSpacing: 0.5,

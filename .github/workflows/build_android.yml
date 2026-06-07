@@ -1,0 +1,132 @@
+name: Build Android
+
+# Triggers on pushes to develop (unsigned APK) and main (signed AAB).
+on:
+  push:
+    branches: [main, develop]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Job 1 — develop branch → unsigned debug APK
+# Useful for quickly sharing internal builds without signing setup.
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+  build-dev:
+    name: Dev Build (unsigned APK)
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopkeeper-dev-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Job 2 — main branch → signed release AAB
+# Requires four GitHub Secrets to be set (see README / plan doc):
+#   ANDROID_KEYSTORE_BASE64, ANDROID_STORE_PASSWORD,
+#   ANDROID_KEY_PASSWORD, ANDROID_KEY_ALIAS
+#
+# Optional Play Store upload:
+#   Set repository variable ENABLE_PLAY_DEPLOY = true in
+#   GitHub → Settings → Variables → Actions to activate the upload step.
+#   Also requires secret: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+# ─────────────────────────────────────────────────────────────────────────────
+  build-release:
+    name: Release Build (signed AAB)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # ── Signing setup ──────────────────────────────────────────────────────
+
+      - name: Decode keystore from secret
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" \
+            | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Write key.properties
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=app/upload-keystore.jks
+          EOF
+
+      # ── Build ──────────────────────────────────────────────────────────────
+
+      - name: Build signed release AAB
+        run: flutter build appbundle --release
+
+      # ── Artifacts ─────────────────────────────────────────────────────────
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopkeeper-release-${{ github.sha }}
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      # ── Play Store upload (disabled until ENABLE_PLAY_DEPLOY = true) ───────
+      # To enable:
+      #   1. Complete Google Cloud + Play Console setup (see setup guide)
+      #   2. Add secret: GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
+      #   3. Go to GitHub → Settings → Variables → Actions
+      #      Add variable: ENABLE_PLAY_DEPLOY = true
+
+      - name: Upload to Google Play (Closed Testing)
+        if: vars.ENABLE_PLAY_DEPLOY == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: cm.shopkeeper.app
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: completed
+          # To switch tracks, change the two lines above:
+          #   Closed testing  → track: alpha,      status: completed
+          #   Open testing    → track: beta,        status: completed
+          #   Production      → track: production,  status: completed
+          #   Staged rollout  → track: production,  status: inProgress, userFraction: '0.1'

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
-import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class RegisterShopScreen extends StatefulWidget {
   const RegisterShopScreen({super.key});
@@ -35,15 +35,9 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
     super.dispose();
   }
 
-  String? _requiredValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'This field is required';
-    }
-    return null;
-  }
-
   Future<void> _handleRegisterShop() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
 
     final authProvider = context.read<AuthProvider>();
     await authProvider.registerShop(_shopNameController.text.trim());
@@ -52,7 +46,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
       if (authProvider.errorMessage != null) {
         SnackBarHelper.showError(context, authProvider.errorMessage!);
       } else {
-        SnackBarHelper.showSuccess(context, 'Shop registered successfully!');
+        SnackBarHelper.showSuccess(context, l10n.shopRegisteredSuccessfully);
         context.go('/owner/dashboard');
       }
     }
@@ -60,6 +54,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -96,13 +91,13 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Welcome to ${AppStrings.appName}',
+                      l10n.welcomeToShopKeeper,
                       style:
                           AppTextStyles.displayL.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Let\'s set up your business details',
+                      l10n.setUpBusinessDetails,
                       style:
                           AppTextStyles.bodyM.copyWith(color: Colors.white70),
                     ),
@@ -137,7 +132,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Register Your Shop',
+                          l10n.registerYourShop,
                           style: AppTextStyles.displayS.copyWith(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w700,
@@ -145,21 +140,26 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Fill in details for the business you will be managing',
+                          l10n.setUpBusinessDetails,
                           style: AppTextStyles.bodyS,
                         ),
                         const SizedBox(height: 28),
                         AppTextField(
-                          label: 'Shop Name',
+                          label: l10n.shopName,
                           hintText: 'e.g. Willson\'s Boutique',
                           controller: _shopNameController,
-                          validator: _requiredValidator,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return l10n.fieldRequired;
+                            }
+                            return null;
+                          },
                           prefixIcon:
                               const Icon(Icons.storefront_outlined, size: 22),
                         ),
                         const SizedBox(height: 20),
                         AppTextField(
-                          label: 'Shop Location / Address (Optional)',
+                          label: l10n.shopLocation,
                           hintText: 'e.g. Bamenda, Cameroon',
                           controller: _locationController,
                           prefixIcon:
@@ -167,7 +167,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                         ),
                         const SizedBox(height: 36),
                         AppButton.primary(
-                          label: 'Complete Onboarding',
+                          label: l10n.completeOnboarding,
                           isLoading: authProvider.isLoading,
                           onPressed: _handleRegisterShop,
                         ),

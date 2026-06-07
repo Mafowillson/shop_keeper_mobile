@@ -7,6 +7,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class SalesHistoryScreen extends StatefulWidget {
   const SalesHistoryScreen({super.key});
@@ -16,7 +17,7 @@ class SalesHistoryScreen extends StatefulWidget {
 }
 
 class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
-  String _filter = 'All'; // All | Cash | Credit
+  String _filter = 'All';
 
   @override
   void initState() {
@@ -38,10 +39,11 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Sales History',
+        title: Text(l10n.salesHistory,
             style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
@@ -61,15 +63,15 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                 child: Row(
                   children: [
                     _SummaryCard(
-                      label: 'Total Revenue',
+                      label: l10n.totalRevenue,
                       value:
-                          'FCFA ${provider.totalRevenue.toStringAsFixed(0)}',
+                          '${l10n.fcfa} ${provider.totalRevenue.toStringAsFixed(0)}',
                       icon: Icons.trending_up,
                       color: Colors.white,
                     ),
                     const SizedBox(width: 12),
                     _SummaryCard(
-                      label: 'Transactions',
+                      label: l10n.transactions,
                       value: '${all.length}',
                       icon: Icons.receipt_long_outlined,
                       color: Colors.white,
@@ -81,8 +83,8 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
               // ── Filter chips ─────────────────────────────────────────
               Container(
                 color: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 10),
                 child: Row(
                   children: ['All', 'Cash', 'Credit'].map((f) {
                     final sel = _filter == f;
@@ -112,14 +114,14 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
 
               // ── Count bar ─────────────────────────────────────────────
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Text(
                       provider.isLoading
-                          ? 'Loading…'
-                          : '${filtered.length} transaction${filtered.length == 1 ? '' : 's'}',
+                          ? l10n.loadingEllipsis
+                          : '${filtered.length} ${l10n.transactions.toLowerCase()}',
                       style: AppTextStyles.bodyM
                           .copyWith(color: AppColors.textSecondary),
                     ),
@@ -181,7 +183,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                                 Icon(Icons.receipt_long,
                                     size: 64, color: Colors.grey[300]),
                                 const SizedBox(height: 16),
-                                Text('No sales found',
+                                Text(l10n.noSalesFound,
                                     style: AppTextStyles.bodyM.copyWith(
                                         color: AppColors.textSecondary)),
                               ],
@@ -195,7 +197,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                                   16, 4, 16, 24),
                               itemCount: filtered.length,
                               itemBuilder: (_, i) =>
-                                  _SaleCard(sale: filtered[i]),
+                                  _SaleCard(sale: filtered[i], l10n: l10n),
                             ),
                           ),
               ),
@@ -206,8 +208,6 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     );
   }
 }
-
-// ── Summary card ──────────────────────────────────────────────────────────────
 
 class _SummaryCard extends StatelessWidget {
   final String label;
@@ -230,8 +230,8 @@ class _SummaryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
-          border:
-              Border.all(color: Colors.white.withValues(alpha: 0.25)),
+          border: Border.all(
+              color: Colors.white.withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
@@ -247,8 +247,8 @@ class _SummaryCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                   Text(label,
-                      style: AppTextStyles.labelM
-                          .copyWith(color: color.withValues(alpha: 0.75))),
+                      style: AppTextStyles.labelM.copyWith(
+                          color: color.withValues(alpha: 0.75))),
                 ],
               ),
             ),
@@ -259,21 +259,19 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-// ── Sale card ─────────────────────────────────────────────────────────────────
-
 class _SaleCard extends StatelessWidget {
   final Sale sale;
+  final AppLocalizations l10n;
 
-  const _SaleCard({required this.sale});
+  const _SaleCard({required this.sale, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
     final fmt = DateFormat('dd MMM yyyy • HH:mm');
     final typeColor = sale.isCredit ? AppColors.warning : AppColors.success;
-    final typeLabel = sale.isCredit ? 'Credit' : 'Cash';
-    final statusColor =
-        sale.isPaid ? AppColors.success : AppColors.warning;
-    final statusLabel = sale.isPaid ? 'Paid' : 'Pending';
+    final typeLabel = sale.isCredit ? l10n.credit : l10n.cash;
+    final statusColor = sale.isPaid ? AppColors.success : AppColors.warning;
+    final statusLabel = sale.isPaid ? l10n.paid : l10n.pending;
 
     return GestureDetector(
       onTap: () => context.push('/owner/sales/${sale.id}'),
@@ -315,7 +313,7 @@ class _SaleCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'FCFA ${sale.totalAmount.toStringAsFixed(0)}',
+                  '${l10n.fcfa} ${sale.totalAmount.toStringAsFixed(0)}',
                   style: AppTextStyles.headingM
                       .copyWith(color: AppColors.ownerPrimary),
                 ),

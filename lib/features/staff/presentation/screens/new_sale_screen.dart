@@ -8,6 +8,7 @@ import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 import 'package:shopkeeper/features/sales/domain/entities/cart_item.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class NewSaleScreen extends StatefulWidget {
   const NewSaleScreen({super.key});
@@ -24,7 +25,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+      final shopId =
+          context.read<AuthProvider>().currentUser?.shopId ?? '';
       final provider = context.read<ProductProvider>();
       if (provider.products.isEmpty) provider.loadProducts(shopId);
     });
@@ -53,12 +55,13 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
     return ['All', ...cats];
   }
 
-  void _showCart(CartProvider cart) {
+  void _showCart(CartProvider cart, AppLocalizations l10n) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CartSheet(
+        l10n: l10n,
         onCheckout: () {
           Navigator.pop(context);
           context.push('/staff/sale/payment');
@@ -69,13 +72,14 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.staffPrimary,
         foregroundColor: Colors.white,
         elevation: 0,
-        title: Text('New Sale',
+        title: Text(l10n.newSale,
             style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         actions: [
           Consumer<CartProvider>(
@@ -84,7 +88,9 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: cart.isEmpty ? null : () => _showCart(cart),
+                  onPressed: cart.isEmpty
+                      ? null
+                      : () => _showCart(cart, l10n),
                 ),
                 if (cart.itemCount > 0)
                   Positioned(
@@ -121,7 +127,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               onChanged: (_) => setState(() {}),
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Search products…',
+                hintText: l10n.searchProductsHint,
                 hintStyle:
                     TextStyle(color: Colors.white.withValues(alpha: 0.55)),
                 prefixIcon: Icon(Icons.search,
@@ -154,7 +160,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               _CategoryBar(
                 categories: categories,
                 selected: _selectedCategory,
-                onSelect: (c) => setState(() => _selectedCategory = c),
+                onSelect: (c) =>
+                    setState(() => _selectedCategory = c),
               ),
               Expanded(
                 child: products.isEmpty
@@ -167,8 +174,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _searchController.text.isNotEmpty
-                                  ? 'No products match your search'
-                                  : 'No products in this category',
+                                  ? l10n.noProductsMatchSearch
+                                  : l10n.noProductsInCategory,
                               style: AppTextStyles.bodyM
                                   .copyWith(color: Colors.grey[500]),
                             ),
@@ -180,7 +187,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                             const EdgeInsets.fromLTRB(14, 8, 14, 120),
                         itemCount: products.length,
                         itemBuilder: (_, i) =>
-                            _ProductCard(product: products[i]),
+                            _ProductCard(product: products[i], l10n: l10n),
                       ),
               ),
             ],
@@ -190,14 +197,15 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
       bottomSheet: Consumer<CartProvider>(
         builder: (_, cart, __) {
           if (cart.isEmpty) return const SizedBox.shrink();
-          return _CheckoutBar(cart: cart, onTap: () => _showCart(cart));
+          return _CheckoutBar(
+              cart: cart,
+              l10n: l10n,
+              onTap: () => _showCart(cart, l10n));
         },
       ),
     );
   }
 }
-
-// ── Category bar ──────────────────────────────────────────────────────────────
 
 class _CategoryBar extends StatelessWidget {
   final List<String> categories;
@@ -216,7 +224,8 @@ class _CategoryBar extends StatelessWidget {
         height: 44,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           itemCount: categories.length,
           itemBuilder: (_, i) {
             final cat = categories[i];
@@ -259,24 +268,20 @@ class _CategoryBar extends StatelessWidget {
       );
 }
 
-// ── Product card ──────────────────────────────────────────────────────────────
-
 class _ProductCard extends StatelessWidget {
   final Product product;
-  const _ProductCard({required this.product});
+  final AppLocalizations l10n;
+  const _ProductCard({required this.product, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
-    // Sort units smallest → largest so retail/base appears first.
     final sortedUnits = [...product.units]
       ..sort((a, b) => a.quantityInBase.compareTo(b.quantityInBase));
 
     return Consumer<CartProvider>(
       builder: (_, cart, __) {
-        final productCartItems = cart.items
-            .where((i) => i.product.id == product.id)
-            .toList();
-
+        final productCartItems =
+            cart.items.where((i) => i.product.id == product.id).toList();
         final inCart = productCartItems.isNotEmpty;
         final isOutOfStock = product.isOutOfStock;
 
@@ -306,7 +311,6 @@ class _ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name + badges
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -329,7 +333,7 @@ class _ProductCard extends StatelessWidget {
                               children: [
                                 _CategoryPill(product.category),
                                 const SizedBox(width: 6),
-                                _StockChip(product),
+                                _StockChip(product, l10n: l10n),
                               ],
                             ),
                           ],
@@ -341,8 +345,6 @@ class _ProductCard extends StatelessWidget {
                   const Divider(
                       height: 1, thickness: 1, color: AppColors.border),
                   const SizedBox(height: 10),
-
-                  // One row per unit (smallest → largest)
                   for (int i = 0; i < sortedUnits.length; i++) ...[
                     if (i > 0) const SizedBox(height: 8),
                     Builder(builder: (_) {
@@ -363,8 +365,8 @@ class _ProductCard extends StatelessWidget {
                         item: cartItem,
                         disabled: isOutOfStock,
                         accentColor: color,
-                        onAdd: () =>
-                            cart.addToCart(product, unit: unit),
+                        l10n: l10n,
+                        onAdd: () => cart.addToCart(product, unit: unit),
                         onInc: () => cartItem != null
                             ? cart.updateQuantity(
                                 cartItem.id, cartItem.quantity + 1)
@@ -386,14 +388,13 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-// ── Price row ─────────────────────────────────────────────────────────────────
-
 class _PriceRow extends StatelessWidget {
   final String label;
   final double price;
   final CartItem? item;
   final bool disabled;
   final Color accentColor;
+  final AppLocalizations l10n;
   final VoidCallback onAdd;
   final VoidCallback? onInc;
   final VoidCallback? onDec;
@@ -404,6 +405,7 @@ class _PriceRow extends StatelessWidget {
     required this.item,
     required this.disabled,
     required this.accentColor,
+    required this.l10n,
     required this.onAdd,
     required this.onInc,
     required this.onDec,
@@ -420,9 +422,9 @@ class _PriceRow extends StatelessWidget {
                     style: AppTextStyles.labelL
                         .copyWith(color: AppColors.textSecondary)),
                 Text(
-                  'FCFA ${price.toStringAsFixed(0)}',
-                  style: AppTextStyles.headingS.copyWith(
-                      color: accentColor, fontSize: 15),
+                  '${l10n.fcfa} ${price.toStringAsFixed(0)}',
+                  style: AppTextStyles.headingS
+                      .copyWith(color: accentColor, fontSize: 15),
                 ),
               ],
             ),
@@ -439,9 +441,7 @@ class _PriceRow extends StatelessWidget {
                       : accentColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: disabled
-                        ? Colors.grey.shade300
-                        : accentColor,
+                    color: disabled ? Colors.grey.shade300 : accentColor,
                   ),
                 ),
                 child: Row(
@@ -451,7 +451,7 @@ class _PriceRow extends StatelessWidget {
                         size: 16,
                         color: disabled ? Colors.grey : accentColor),
                     const SizedBox(width: 4),
-                    Text('Add',
+                    Text(l10n.add,
                         style: AppTextStyles.labelL.copyWith(
                           color: disabled ? Colors.grey : accentColor,
                           fontWeight: FontWeight.w600,
@@ -513,8 +513,6 @@ class _QtyBtn extends StatelessWidget {
       );
 }
 
-// ── Small helpers ─────────────────────────────────────────────────────────────
-
 class _CategoryPill extends StatelessWidget {
   final String category;
   const _CategoryPill(this.category);
@@ -534,37 +532,37 @@ class _CategoryPill extends StatelessWidget {
 
 class _StockChip extends StatelessWidget {
   final Product product;
-  const _StockChip(this.product);
+  final AppLocalizations l10n;
+  const _StockChip(this.product, {required this.l10n});
 
   @override
   Widget build(BuildContext context) {
     if (product.isOutOfStock) {
-      return _pill('Out of Stock', AppColors.danger, AppColors.dangerLight);
+      return _pill(l10n.outOfStock, AppColors.danger, AppColors.dangerLight);
     }
     if (product.isLowStock) {
-      return _pill('Low (${product.stockQty})', AppColors.warning,
+      return _pill(l10n.lowStockLabel(product.stockQty), AppColors.warning,
           AppColors.warningLight);
     }
-    return _pill('In Stock', AppColors.success, AppColors.successLight);
+    return _pill(l10n.inStock, AppColors.success, AppColors.successLight);
   }
 
   Widget _pill(String label, Color fg, Color bg) => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-            color: bg, borderRadius: BorderRadius.circular(4)),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+        decoration:
+            BoxDecoration(color: bg, borderRadius: BorderRadius.circular(4)),
         child: Text(label,
             style: AppTextStyles.labelS
                 .copyWith(color: fg, fontWeight: FontWeight.w600)),
       );
 }
 
-// ── Checkout bar ──────────────────────────────────────────────────────────────
-
 class _CheckoutBar extends StatelessWidget {
   final CartProvider cart;
+  final AppLocalizations l10n;
   final VoidCallback onTap;
-  const _CheckoutBar({required this.cart, required this.onTap});
+  const _CheckoutBar(
+      {required this.cart, required this.l10n, required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -599,11 +597,12 @@ class _CheckoutBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
+              Text(
+                  '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
                   style: AppTextStyles.bodyM
                       .copyWith(color: Colors.white70)),
               const Spacer(),
-              Text('FCFA ${cart.total.toStringAsFixed(0)}',
+              Text('${l10n.fcfa} ${cart.total.toStringAsFixed(0)}',
                   style: AppTextStyles.headingM
                       .copyWith(color: Colors.white)),
               const SizedBox(width: 12),
@@ -616,7 +615,7 @@ class _CheckoutBar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Text('Checkout',
+                    Text(l10n.checkout,
                         style: AppTextStyles.labelL.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700)),
@@ -632,11 +631,10 @@ class _CheckoutBar extends StatelessWidget {
       );
 }
 
-// ── Cart bottom sheet ─────────────────────────────────────────────────────────
-
 class _CartSheet extends StatelessWidget {
   final VoidCallback onCheckout;
-  const _CartSheet({required this.onCheckout});
+  final AppLocalizations l10n;
+  const _CartSheet({required this.onCheckout, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -644,15 +642,13 @@ class _CartSheet extends StatelessWidget {
       builder: (_, cart, __) => Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.75),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle
             Container(
               margin: const EdgeInsets.only(top: 12, bottom: 4),
               width: 40,
@@ -661,20 +657,18 @@ class _CartSheet extends StatelessWidget {
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(2)),
             ),
-
-            // Header
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  Text('Cart', style: AppTextStyles.headingL),
+                  Text(l10n.cart, style: AppTextStyles.headingL),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: cart.isEmpty ? null : cart.clear,
                     icon: const Icon(Icons.delete_outline,
                         size: 16, color: AppColors.danger),
-                    label: Text('Clear all',
+                    label: Text(l10n.clearAll,
                         style: AppTextStyles.bodyM
                             .copyWith(color: AppColors.danger)),
                   ),
@@ -682,8 +676,6 @@ class _CartSheet extends StatelessWidget {
               ),
             ),
             const Divider(height: 1),
-
-            // Items
             Flexible(
               child: cart.isEmpty
                   ? Padding(
@@ -693,7 +685,7 @@ class _CartSheet extends StatelessWidget {
                           Icon(Icons.shopping_cart_outlined,
                               size: 48, color: Colors.grey[300]),
                           const SizedBox(height: 10),
-                          Text('Cart is empty',
+                          Text(l10n.cartIsEmpty,
                               style: AppTextStyles.bodyM.copyWith(
                                   color: AppColors.textSecondary)),
                         ],
@@ -701,31 +693,25 @@ class _CartSheet extends StatelessWidget {
                     )
                   : ListView.separated(
                       shrinkWrap: true,
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: cart.items.length,
                       separatorBuilder: (_, __) => const Divider(
                           height: 1, indent: 16, endIndent: 16),
                       itemBuilder: (_, i) =>
-                          _CartLineItem(item: cart.items[i]),
+                          _CartLineItem(item: cart.items[i], l10n: l10n),
                     ),
             ),
-
-            // Footer
             const Divider(height: 1),
             Padding(
               padding: EdgeInsets.fromLTRB(
-                  16,
-                  14,
-                  16,
-                  14 + MediaQuery.of(context).padding.bottom),
+                  16, 14, 16, 14 + MediaQuery.of(context).padding.bottom),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total', style: AppTextStyles.headingM),
-                      Text('FCFA ${cart.total.toStringAsFixed(0)}',
+                      Text(l10n.total, style: AppTextStyles.headingM),
+                      Text('${l10n.fcfa} ${cart.total.toStringAsFixed(0)}',
                           style: AppTextStyles.headingM.copyWith(
                               color: AppColors.staffPrimary)),
                     ],
@@ -737,12 +723,11 @@ class _CartSheet extends StatelessWidget {
                       onPressed: cart.isEmpty ? null : onCheckout,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.staffPrimary,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text('Proceed to Payment',
+                      child: Text(l10n.proceedToPayment,
                           style: AppTextStyles.headingS
                               .copyWith(color: Colors.white)),
                     ),
@@ -757,11 +742,10 @@ class _CartSheet extends StatelessWidget {
   }
 }
 
-// ── Cart line item ────────────────────────────────────────────────────────────
-
 class _CartLineItem extends StatelessWidget {
   final CartItem item;
-  const _CartLineItem({required this.item});
+  final AppLocalizations l10n;
+  const _CartLineItem({required this.item, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -770,8 +754,7 @@ class _CartLineItem extends StatelessWidget {
     final color = isBase ? AppColors.staffPrimary : AppColors.accent;
 
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           Expanded(
@@ -803,7 +786,7 @@ class _CartLineItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'FCFA ${item.unitPrice.toStringAsFixed(0)} each',
+                      '${l10n.fcfa} ${item.unitPrice.toStringAsFixed(0)} each',
                       style: AppTextStyles.bodyS,
                     ),
                   ],
@@ -840,7 +823,7 @@ class _CartLineItem extends StatelessWidget {
           SizedBox(
             width: 68,
             child: Text(
-              'FCFA\n${item.subtotal.toStringAsFixed(0)}',
+              '${l10n.fcfa}\n${item.subtotal.toStringAsFixed(0)}',
               style: AppTextStyles.bodyM.copyWith(
                   fontWeight: FontWeight.w600, color: color),
               textAlign: TextAlign.right,

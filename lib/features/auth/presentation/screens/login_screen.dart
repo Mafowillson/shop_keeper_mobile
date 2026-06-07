@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
-import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -67,11 +67,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.ownerPrimary,
       body: Column(
         children: [
-          const Expanded(flex: 2, child: _HeroPanel()),
+          Expanded(flex: 2, child: _HeroPanel()),
           Expanded(
             flex: 3,
             child: Container(
@@ -86,25 +87,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   builder: (context, auth, _) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppStrings.welcomeBack,
-                          style: AppTextStyles.headingL),
+                      Text(l10n.welcomeBack, style: AppTextStyles.headingL),
                       const SizedBox(height: 4),
-                      Text(
-                        'Sign in to continue',
-                        style: AppTextStyles.bodyS,
-                      ),
+                      Text(l10n.signInToContinue, style: AppTextStyles.bodyS),
                       const SizedBox(height: 24),
 
                       // ── Role toggle ─────────────────────────────────
                       _RoleToggle(
                         selected: _role,
                         onSelect: _switchRole,
+                        l10n: l10n,
                       ),
                       const SizedBox(height: 20),
 
                       // ── Email ───────────────────────────────────────
                       AppTextField(
-                        label: AppStrings.email,
+                        label: l10n.email,
                         hintText: 'your@email.com',
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -115,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // ── Password / Phone ────────────────────────────
                       AppTextField(
-                        label: _isStaff ? 'Phone Number' : AppStrings.password,
+                        label: _isStaff ? l10n.phoneNumber : l10n.password,
                         hintText: _isStaff ? 'e.g. 677 000 000' : '••••••••',
                         controller: _credentialController,
                         keyboardType: _isStaff
@@ -152,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: EdgeInsets.zero,
                                 minimumSize: const Size(0, 40)),
                             child: Text(
-                              AppStrings.forgotPassword,
+                              l10n.forgotPassword,
                               style: AppTextStyles.labelL
                                   .copyWith(color: AppColors.accent),
                             ),
@@ -165,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // ── Sign in button ──────────────────────────────
                       AppButton.primary(
-                        label: 'Sign In',
+                        label: l10n.signIn,
                         isLoading: auth.isLoading,
                         onPressed: auth.isLoading ? null : _submit,
                       ),
@@ -177,14 +175,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'New here?  ',
+                            '${l10n.newHere}  ',
                             style: AppTextStyles.bodyM
                                 .copyWith(color: AppColors.textSecondary),
                           ),
                           GestureDetector(
                             onTap: () => context.go('/register'),
                             child: Text(
-                              'Create an account',
+                              l10n.createAnAccount,
                               style: AppTextStyles.bodyM.copyWith(
                                 color: AppColors.accent,
                                 fontWeight: FontWeight.w700,
@@ -208,44 +206,45 @@ class _LoginScreenState extends State<LoginScreen> {
 // ── Hero panel ─────────────────────────────────────────────────────────────────
 
 class _HeroPanel extends StatelessWidget {
-  const _HeroPanel();
-
   @override
-  Widget build(BuildContext context) => Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.ownerPrimaryDark, AppColors.ownerPrimary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.ownerPrimaryDark, AppColors.ownerPrimary],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.storefront_rounded,
+                size: 38, color: Colors.white),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.storefront_rounded,
-                  size: 38, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppStrings.appName,
-              style: AppTextStyles.displayM.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              AppStrings.tagline,
-              style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
-            ),
-          ],
-        ),
-      );
+          const SizedBox(height: 16),
+          Text(
+            l10n.appName,
+            style: AppTextStyles.displayM.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.tagline,
+            style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Role toggle ────────────────────────────────────────────────────────────────
@@ -253,7 +252,11 @@ class _HeroPanel extends StatelessWidget {
 class _RoleToggle extends StatelessWidget {
   final UserRole selected;
   final ValueChanged<UserRole> onSelect;
-  const _RoleToggle({required this.selected, required this.onSelect});
+  final AppLocalizations l10n;
+  const _RoleToggle(
+      {required this.selected,
+      required this.onSelect,
+      required this.l10n});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -265,13 +268,13 @@ class _RoleToggle extends StatelessWidget {
         child: Row(
           children: [
             _RoleTab(
-              label: 'Owner',
+              label: l10n.ownerRole,
               icon: Icons.storefront_outlined,
               isSelected: selected == UserRole.owner,
               onTap: () => onSelect(UserRole.owner),
             ),
             _RoleTab(
-              label: 'Staff',
+              label: l10n.staffRole,
               icon: Icons.badge_outlined,
               isSelected: selected == UserRole.staff,
               onTap: () => onSelect(UserRole.staff),
