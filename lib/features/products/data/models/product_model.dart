@@ -84,6 +84,26 @@ class ProductModel {
         'low_stock_threshold': lowStockThreshold,
       };
 
+  // ── JSON serialisation (used by Hive cache) ───────────────────────────────
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'shop_id': shopId,
+        'name': name,
+        'category': category,
+        'base_unit': baseUnit,
+        'units': units
+            .map((u) => {
+                  'name': u.name,
+                  'quantity_in_base': u.quantityInBase,
+                  'price': u.price,
+                })
+            .toList(),
+        'stock_qty': stockQty,
+        'low_stock_threshold': lowStockThreshold,
+        'is_active': isActive,
+      };
+
   // ── Entity ↔ model ────────────────────────────────────────────────────────
 
   factory ProductModel.fromEntity(Product entity) => ProductModel(

@@ -9,26 +9,27 @@ class SyncStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color;
-    IconData icon;
-    String label;
+    final Color color;
+    final IconData icon;
+    final String label;
 
     switch (state) {
       case SyncState.synced:
         color = AppColors.success;
         icon = Icons.check_circle;
         label = 'Synced';
-        break;
       case SyncState.pending:
         color = AppColors.warning;
         icon = Icons.sync;
         label = 'Syncing...';
-        break;
+      case SyncState.conflict:
+        color = Colors.orange;
+        icon = Icons.warning_amber_rounded;
+        label = 'Conflicts';
       case SyncState.error:
         color = AppColors.danger;
         icon = Icons.error;
         label = 'Sync Error';
-        break;
     }
 
     return Container(
