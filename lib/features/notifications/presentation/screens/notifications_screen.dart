@@ -28,9 +28,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<NotificationProvider>()
-          .loadNotifications(isStaff: _isStaff);
+      context.read<NotificationProvider>().loadNotifications(isStaff: _isStaff);
     });
   }
 
@@ -127,8 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: RefreshIndicator(
-            onRefresh: () =>
-                provider.loadNotifications(isStaff: _isStaff),
+            onRefresh: () => provider.loadNotifications(isStaff: _isStaff),
             color: primaryColor,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -136,16 +133,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 _NotificationsHeader(
                   unreadCount: provider.unreadCount,
                   primaryColor: primaryColor,
-                  onMarkAllRead: provider.unreadCount > 0
-                      ? provider.markAllAsRead
-                      : null,
+                  onMarkAllRead:
+                      provider.unreadCount > 0 ? provider.markAllAsRead : null,
                   l10n: l10n,
                 ),
                 if (provider.isLoading && provider.notifications.isEmpty)
                   SliverFillRemaining(
                     child: Center(
-                      child:
-                          CircularProgressIndicator(color: primaryColor),
+                      child: CircularProgressIndicator(color: primaryColor),
                     ),
                   )
                 else ...[
@@ -154,8 +149,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       selected: _selectedFilter,
                       filters: _filters,
                       primaryColor: primaryColor,
-                      onSelect: (f) =>
-                          setState(() => _selectedFilter = f),
+                      onSelect: (f) => setState(() => _selectedFilter = f),
                     ),
                   ),
                   if (provider.errorMessage != null)
@@ -182,8 +176,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             l10n: l10n,
                             onTap: items[i].isRead
                                 ? null
-                                : () =>
-                                    provider.markAsRead(items[i].id),
+                                : () => provider.markAsRead(items[i].id),
                           ),
                           childCount: items.length,
                         ),
@@ -232,10 +225,7 @@ class _NotificationsHeader extends StatelessWidget {
           background: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  primaryColor.withValues(alpha: 0.85),
-                  primaryColor
-                ],
+                colors: [primaryColor.withValues(alpha: 0.85), primaryColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -249,8 +239,8 @@ class _NotificationsHeader extends StatelessWidget {
                   children: [
                     Text(
                       l10n.notifications,
-                      style: AppTextStyles.headingL
-                          .copyWith(color: Colors.white),
+                      style:
+                          AppTextStyles.headingL.copyWith(color: Colors.white),
                     ),
                     if (unreadCount > 0) ...[
                       const SizedBox(width: 10),
@@ -275,8 +265,7 @@ class _NotificationsHeader extends StatelessWidget {
                   unreadCount == 0
                       ? l10n.allCaughtUp
                       : l10n.unreadCount(unreadCount),
-                  style:
-                      AppTextStyles.bodyS.copyWith(color: Colors.white60),
+                  style: AppTextStyles.bodyS.copyWith(color: Colors.white60),
                 ),
               ],
             ),
@@ -302,8 +291,7 @@ class _FilterBar extends StatelessWidget {
         color: Colors.white,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: filters.map((f) {
               final isActive = f == selected;
@@ -313,20 +301,17 @@ class _FilterBar extends StatelessWidget {
                   onTap: () => onSelect(f),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? primaryColor
-                          : AppColors.background,
+                      color: isActive ? primaryColor : AppColors.background,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       f,
                       style: AppTextStyles.labelL.copyWith(
-                        color: isActive
-                            ? Colors.white
-                            : AppColors.textSecondary,
+                        color:
+                            isActive ? Colors.white : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -386,14 +371,12 @@ class _NotificationTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color
-                      .withValues(alpha: isRead ? 0.06 : 0.12),
+                  color: color.withValues(alpha: isRead ? 0.06 : 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
-                  color: color
-                      .withValues(alpha: isRead ? 0.45 : 1.0),
+                  color: color.withValues(alpha: isRead ? 0.45 : 1.0),
                   size: 20,
                 ),
               ),
@@ -412,9 +395,8 @@ class _NotificationTile extends StatelessWidget {
                               color: isRead
                                   ? AppColors.textSecondary
                                   : AppColors.textPrimary,
-                              fontWeight: isRead
-                                  ? FontWeight.w500
-                                  : FontWeight.w700,
+                              fontWeight:
+                                  isRead ? FontWeight.w500 : FontWeight.w700,
                             ),
                           ),
                         ),
@@ -507,24 +489,20 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 message,
-                style:
-                    AppTextStyles.bodyS.copyWith(color: AppColors.danger),
+                style: AppTextStyles.bodyS.copyWith(color: AppColors.danger),
               ),
             ),
           ],

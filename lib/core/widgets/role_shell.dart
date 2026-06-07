@@ -203,15 +203,13 @@ class _BadgeIcon extends StatelessWidget {
             right: -8,
             top: -6,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
                 color: AppColors.danger,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.white, width: 1.5),
               ),
-              constraints:
-                  const BoxConstraints(minWidth: 18, minHeight: 18),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               child: Text(
                 count > 99 ? '99+' : '$count',
                 style: const TextStyle(

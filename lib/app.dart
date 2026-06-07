@@ -102,10 +102,14 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
 
   NotificationType _notifTypeFromString(String s) {
     switch (s) {
-      case 'product_added':   return NotificationType.productAdded;
-      case 'product_updated': return NotificationType.productUpdated;
-      case 'product_deleted': return NotificationType.productDeleted;
-      default:                return NotificationType.lowStock;
+      case 'product_added':
+        return NotificationType.productAdded;
+      case 'product_updated':
+        return NotificationType.productUpdated;
+      case 'product_deleted':
+        return NotificationType.productDeleted;
+      default:
+        return NotificationType.lowStock;
     }
   }
 

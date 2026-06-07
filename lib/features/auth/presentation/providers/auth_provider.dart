@@ -55,8 +55,13 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('[Auth] login → $email ${role.name}');
       final result = await _login(email, password, role).run();
       result.fold(
-        (f) { _errorMessage = f.message; _currentUser = null; },
-        (u) { _currentUser = u; },
+        (f) {
+          _errorMessage = f.message;
+          _currentUser = null;
+        },
+        (u) {
+          _currentUser = u;
+        },
       );
     } catch (e, st) {
       debugPrint('[Auth] login uncaught: $e\n$st');
@@ -73,7 +78,10 @@ class AuthProvider extends ChangeNotifier {
       final result = await _logout().run();
       result.fold(
         (f) => _errorMessage = f.message,
-        (_) { _currentUser = null; _errorMessage = null; },
+        (_) {
+          _currentUser = null;
+          _errorMessage = null;
+        },
       );
     } catch (e) {
       debugPrint('[Auth] logout uncaught: $e');
@@ -89,8 +97,13 @@ class AuthProvider extends ChangeNotifier {
       final result =
           await _register(name: name, email: email, password: password).run();
       result.fold(
-        (f) { _errorMessage = f.message; _currentUser = null; },
-        (u) { _currentUser = u; },
+        (f) {
+          _errorMessage = f.message;
+          _currentUser = null;
+        },
+        (u) {
+          _currentUser = u;
+        },
       );
     } catch (e, st) {
       debugPrint('[Auth] register uncaught: $e\n$st');
@@ -179,8 +192,13 @@ class AuthProvider extends ChangeNotifier {
     try {
       final result = await _restoreSession().run();
       result.fold(
-        (_) { _currentUser = null; },
-        (u) { _currentUser = u; restored = true; },
+        (_) {
+          _currentUser = null;
+        },
+        (u) {
+          _currentUser = u;
+          restored = true;
+        },
       );
     } catch (e, st) {
       debugPrint('[Auth] restore uncaught: $e\n$st');
@@ -198,7 +216,10 @@ class AuthProvider extends ChangeNotifier {
       final result = await _verifyEmail(code).run();
       result.fold(
         (f) => _errorMessage = f.message,
-        (u) { _currentUser = u; success = true; },
+        (u) {
+          _currentUser = u;
+          success = true;
+        },
       );
     } catch (e, st) {
       debugPrint('[Auth] verifyEmail uncaught: $e\n$st');
@@ -233,7 +254,9 @@ class AuthProvider extends ChangeNotifier {
       final result = await _getShopInfo().run();
       result.fold(
         (_) {},
-        (u) { _currentUser = u; },
+        (u) {
+          _currentUser = u;
+        },
       );
     } catch (_) {}
     _notify();

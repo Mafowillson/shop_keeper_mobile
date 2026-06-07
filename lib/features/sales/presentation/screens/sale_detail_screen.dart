@@ -19,8 +19,8 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        context.read<SalesProvider>().loadSaleDetail(widget.saleId));
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => context.read<SalesProvider>().loadSaleDetail(widget.saleId));
   }
 
   @override
@@ -39,8 +39,8 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
         builder: (_, provider, __) {
           if (provider.isLoading) {
             return const Center(
-                child: CircularProgressIndicator(
-                    color: AppColors.ownerPrimary));
+                child:
+                    CircularProgressIndicator(color: AppColors.ownerPrimary));
           }
 
           if (provider.errorMessage != null) {
@@ -52,8 +52,8 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                       color: AppColors.danger, size: 48),
                   const SizedBox(height: 12),
                   Text(provider.errorMessage!,
-                      style: AppTextStyles.bodyM
-                          .copyWith(color: AppColors.danger),
+                      style:
+                          AppTextStyles.bodyM.copyWith(color: AppColors.danger),
                       textAlign: TextAlign.center),
                 ],
               ),
@@ -95,8 +95,8 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                       const SizedBox(height: 6),
                       Text(
                         fmt.format(sale.createdAt.toLocal()),
-                        style: AppTextStyles.bodyM
-                            .copyWith(color: Colors.white70),
+                        style:
+                            AppTextStyles.bodyM.copyWith(color: Colors.white70),
                       ),
                       const SizedBox(height: 12),
                       Row(
@@ -110,9 +110,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                           const SizedBox(width: 8),
                           _Chip(
                             sale.isPaid ? l10n.paid : l10n.pending,
-                            sale.isPaid
-                                ? AppColors.success
-                                : AppColors.warning,
+                            sale.isPaid ? AppColors.success : AppColors.warning,
                           ),
                         ],
                       ),
@@ -120,7 +118,6 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 Text(l10n.items, style: AppTextStyles.headingM),
                 const SizedBox(height: 10),
                 Container(
@@ -141,20 +138,17 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: AppColors.accent
-                                      .withValues(alpha: 0.1),
+                                  color:
+                                      AppColors.accent.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Icon(
-                                    Icons.inventory_2_outlined,
-                                    size: 18,
-                                    color: AppColors.accent),
+                                child: const Icon(Icons.inventory_2_outlined,
+                                    size: 18, color: AppColors.accent),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       '${sale.items[i].quantity}× ${sale.items[i].unit}',
@@ -170,21 +164,19 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                               ),
                               Text(
                                 '${l10n.fcfa} ${sale.items[i].totalPrice.toStringAsFixed(0)}',
-                                style: AppTextStyles.bodyM.copyWith(
-                                    fontWeight: FontWeight.w600),
+                                style: AppTextStyles.bodyM
+                                    .copyWith(fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
                         ),
                         if (i < sale.items.length - 1)
-                          const Divider(
-                              height: 1, indent: 64, endIndent: 0),
+                          const Divider(height: 1, indent: 64, endIndent: 0),
                       ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 Text(l10n.payment, style: AppTextStyles.headingM),
                 const SizedBox(height: 10),
                 Container(
@@ -256,8 +248,8 @@ class _PayRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textSecondary)),
+            style:
+                AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
         Text(value,
             style: AppTextStyles.bodyM.copyWith(
               fontWeight: FontWeight.w700,

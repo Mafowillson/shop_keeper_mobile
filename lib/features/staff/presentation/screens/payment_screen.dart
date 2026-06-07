@@ -27,12 +27,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void initState() {
     super.initState();
     final total = context.read<CartProvider>().total;
-    _amountController =
-        TextEditingController(text: total.toStringAsFixed(0));
+    _amountController = TextEditingController(text: total.toStringAsFixed(0));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final shopId =
-          context.read<AuthProvider>().currentUser?.shopId ?? '';
+      final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
       final provider = context.read<DebtProvider>();
       if (provider.customers.isEmpty) provider.loadCustomers(shopId);
     });
@@ -127,8 +125,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       : () async {
                           final name = nameCtrl.text.trim();
                           if (name.isEmpty) return;
-                          final debtProvider =
-                              context.read<DebtProvider>();
+                          final debtProvider = context.read<DebtProvider>();
                           final shopId = context
                                   .read<AuthProvider>()
                                   .currentUser
@@ -144,14 +141,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           if (!ctx.mounted) return;
                           Navigator.pop(ctx);
                           if (customer != null) {
-                            setState(
-                                () => _selectedCustomer = customer);
+                            setState(() => _selectedCustomer = customer);
                           }
                         },
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.staffPrimary,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: provider.isSaving
                       ? const SizedBox(
@@ -182,8 +177,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           backgroundColor: AppColors.background,
           appBar: AppBar(
             title: Text(l10n.payment,
-                style: AppTextStyles.headingL
-                    .copyWith(color: Colors.white)),
+                style: AppTextStyles.headingL.copyWith(color: Colors.white)),
             backgroundColor: AppColors.staffPrimary,
             foregroundColor: Colors.white,
             elevation: 0,
@@ -219,14 +213,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       const SizedBox(height: 6),
                       Text(
                         '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
-                        style: AppTextStyles.bodyS
-                            .copyWith(color: Colors.white60),
+                        style:
+                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 Text(l10n.paymentType, style: AppTextStyles.headingM),
                 const SizedBox(height: 12),
                 Row(
@@ -238,8 +231,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       selected: !_isCredit,
                       onTap: () => setState(() {
                         _isCredit = false;
-                        _amountController.text =
-                            total.toStringAsFixed(0);
+                        _amountController.text = total.toStringAsFixed(0);
                       }),
                     ),
                     const SizedBox(width: 12),
@@ -256,7 +248,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
                 if (!_isCredit) ...[
                   Text(l10n.amountPaid, style: AppTextStyles.headingM),
                   const SizedBox(height: 12),
@@ -273,8 +264,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.border),
+                        borderSide: const BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -348,14 +338,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(_selectedCustomer!.name,
-                                          style: AppTextStyles.bodyM
-                                              .copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.staffPrimary)),
+                                          style: AppTextStyles.bodyM.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.staffPrimary)),
                                       if (_selectedCustomer!.phone.isNotEmpty)
                                         Text(_selectedCustomer!.phone,
                                             style: AppTextStyles.bodyS.copyWith(
-                                                color: AppColors.textSecondary)),
+                                                color:
+                                                    AppColors.textSecondary)),
                                     ],
                                   )
                                 : Text(l10n.selectCustomerHint,
@@ -400,7 +390,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 24),
                 ],
-
                 Row(
                   children: [
                     Expanded(
@@ -413,8 +402,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     Expanded(
                       child: AppButton.primary(
                         label: l10n.confirm,
-                        onPressed:
-                            _canProceed ? () => _proceed(total) : null,
+                        onPressed: _canProceed ? () => _proceed(total) : null,
                       ),
                     ),
                   ],
@@ -464,9 +452,8 @@ class _TypeChip extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 label,
-                style: AppTextStyles.headingS.copyWith(
-                    color:
-                        selected ? color : AppColors.textPrimary),
+                style: AppTextStyles.headingS
+                    .copyWith(color: selected ? color : AppColors.textPrimary),
               ),
             ],
           ),
@@ -520,8 +507,7 @@ class _CustomerPickerSheet extends StatefulWidget {
   });
 
   @override
-  State<_CustomerPickerSheet> createState() =>
-      _CustomerPickerSheetState();
+  State<_CustomerPickerSheet> createState() => _CustomerPickerSheetState();
 }
 
 class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
@@ -537,8 +523,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
     final q = _searchCtrl.text.toLowerCase();
     if (q.isEmpty) return all;
     return all
-        .where((c) =>
-            c.name.toLowerCase().contains(q) || c.phone.contains(q))
+        .where((c) => c.name.toLowerCase().contains(q) || c.phone.contains(q))
         .toList();
   }
 
@@ -591,8 +576,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                   decoration: InputDecoration(
                     hintText: l10n.searchByNameOrPhone,
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
                     filled: true,
@@ -606,57 +590,50 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                     : customers.isEmpty
                         ? Center(
                             child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.people_outline,
                                     size: 48, color: Colors.grey[300]),
                                 const SizedBox(height: 12),
                                 Text(l10n.noCustomersFound,
-                                    style: AppTextStyles.bodyM.copyWith(
-                                        color: Colors.grey[500])),
+                                    style: AppTextStyles.bodyM
+                                        .copyWith(color: Colors.grey[500])),
                                 const SizedBox(height: 12),
                                 TextButton(
                                   onPressed: widget.onCreateNew,
-                                  child:
-                                      Text(l10n.createNewCustomer),
+                                  child: Text(l10n.createNewCustomer),
                                 ),
                               ],
                             ),
                           )
                         : ListView.builder(
                             controller: scrollController,
-                            padding: const EdgeInsets.fromLTRB(
-                                16, 0, 16, 24),
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                             itemCount: customers.length,
                             itemBuilder: (_, i) {
                               final c = customers[i];
                               return ListTile(
                                 onTap: () => widget.onSelected(c),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(10)),
+                                    borderRadius: BorderRadius.circular(10)),
                                 leading: CircleAvatar(
-                                  backgroundColor: AppColors.accent
-                                      .withValues(alpha: 0.15),
+                                  backgroundColor:
+                                      AppColors.accent.withValues(alpha: 0.15),
                                   child: Text(c.initials,
                                       style: AppTextStyles.headingS
-                                          .copyWith(
-                                              color: AppColors.accent)),
+                                          .copyWith(color: AppColors.accent)),
                                 ),
                                 title: Text(c.name,
-                                    style: AppTextStyles.bodyM.copyWith(
-                                        fontWeight: FontWeight.w600)),
+                                    style: AppTextStyles.bodyM
+                                        .copyWith(fontWeight: FontWeight.w600)),
                                 subtitle: c.phone.isNotEmpty
-                                    ? Text(c.phone,
-                                        style: AppTextStyles.bodyS)
+                                    ? Text(c.phone, style: AppTextStyles.bodyS)
                                     : null,
                                 trailing: c.totalDebt > 0
                                     ? Text(
                                         '${l10n.fcfa} ${c.totalDebt.toStringAsFixed(0)} ${l10n.debtLabel}',
                                         style: AppTextStyles.bodyS
-                                            .copyWith(
-                                                color: AppColors.danger),
+                                            .copyWith(color: AppColors.danger),
                                       )
                                     : null,
                               );

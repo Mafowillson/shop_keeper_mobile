@@ -5,18 +5,24 @@ import 'package:shopkeeper/features/notifications/data/datasources/i_notificatio
 import 'package:shopkeeper/features/notifications/data/models/notification_model.dart';
 
 @LazySingleton(as: INotificationRemoteDataSource)
-class NotificationRemoteDataSourceImpl implements INotificationRemoteDataSource {
+class NotificationRemoteDataSourceImpl
+    implements INotificationRemoteDataSource {
   final Dio _dio;
 
-  NotificationRemoteDataSourceImpl(DioClient dioClient) : _dio = dioClient.client;
+  NotificationRemoteDataSourceImpl(DioClient dioClient)
+      : _dio = dioClient.client;
 
   @override
-  Future<List<NotificationModel>> getNotifications({bool isStaff = false}) async {
+  Future<List<NotificationModel>> getNotifications(
+      {bool isStaff = false}) async {
     try {
       final endpoint = isStaff ? '/staff/notifications' : '/notifications';
       final res = await _dio.get(endpoint);
       final list = res.data['notifications'] as List<dynamic>? ?? [];
-      return list.cast<Map<String, dynamic>>().map(NotificationModel.fromJson).toList();
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(NotificationModel.fromJson)
+          .toList();
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }

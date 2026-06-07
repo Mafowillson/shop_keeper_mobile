@@ -33,8 +33,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
-  String get _shopId =>
-      context.read<AuthProvider>().currentUser?.shopId ?? '';
+  String get _shopId => context.read<AuthProvider>().currentUser?.shopId ?? '';
 
   Future<void> _load({String? category}) => context
       .read<ProductProvider>()
@@ -49,8 +48,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     _load(category: category);
   }
 
-  Future<void> _confirmDeactivate(
-      BuildContext context, Product product) async {
+  Future<void> _confirmDeactivate(BuildContext context, Product product) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -80,7 +78,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
         await context.read<ProductProvider>().deactivateProduct(product.id);
     if (!context.mounted) return;
     if (ok) {
-      SnackBarHelper.showSuccess(context, '${product.name} ${l10n.remove.toLowerCase()}d');
+      SnackBarHelper.showSuccess(
+          context, '${product.name} ${l10n.remove.toLowerCase()}d');
     } else {
       final err = context.read<ProductProvider>().errorMessage ?? l10n.error;
       SnackBarHelper.showError(context, err);
@@ -132,8 +131,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         color: Colors.white.withValues(alpha: 0.8)),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon:
-                                const Icon(Icons.clear, color: Colors.white),
+                            icon: const Icon(Icons.clear, color: Colors.white),
                             onPressed: () {
                               _searchController.clear();
                               _load(category: _selectedCategory);
@@ -142,8 +140,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         : null,
                     filled: true,
                     fillColor: Colors.white.withValues(alpha: 0.15),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -174,9 +171,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
                               color: selected
                                   ? Colors.white
                                   : AppColors.textPrimary,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              fontWeight:
+                                  selected ? FontWeight.w600 : FontWeight.w400,
                             ),
                             backgroundColor: AppColors.background,
                             side: BorderSide(
@@ -193,8 +189,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
               // ── Count bar ──────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   children: [
                     Text(
@@ -242,8 +238,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       IconButton(
                         icon: const Icon(Icons.refresh,
                             color: AppColors.danger, size: 18),
-                        onPressed: () =>
-                            _load(category: _selectedCategory),
+                        onPressed: () => _load(category: _selectedCategory),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
@@ -259,11 +254,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                             color: AppColors.ownerPrimary))
                     : products.isEmpty
                         ? _EmptyState(
-                            hasSearch:
-                                _searchController.text.isNotEmpty,
+                            hasSearch: _searchController.text.isNotEmpty,
                             onAdd: () async {
-                              await context
-                                  .push('/owner/products/add');
+                              await context.push('/owner/products/add');
                               if (mounted) {
                                 _load(category: _selectedCategory);
                               }
@@ -272,11 +265,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           )
                         : RefreshIndicator(
                             color: AppColors.ownerPrimary,
-                            onRefresh: () =>
-                                _load(category: _selectedCategory),
+                            onRefresh: () => _load(category: _selectedCategory),
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(
-                                  16, 4, 16, 24),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                               itemCount: products.length,
                               itemBuilder: (ctx, i) => _ProductCard(
                                 product: products[i],
@@ -289,8 +280,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   }
                                 },
                                 onDeactivate: () =>
-                                    _confirmDeactivate(
-                                        context, products[i]),
+                                    _confirmDeactivate(context, products[i]),
                               ),
                             ),
                           ),
@@ -381,8 +371,7 @@ class _ProductCard extends StatelessWidget {
                 ),
               ),
               PopupMenuButton<String>(
-                icon: Icon(Icons.more_vert,
-                    color: Colors.grey[400], size: 20),
+                icon: Icon(Icons.more_vert, color: Colors.grey[400], size: 20),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 onSelected: (v) {
@@ -425,9 +414,7 @@ class _EmptyState extends StatelessWidget {
   final AppLocalizations l10n;
 
   const _EmptyState(
-      {required this.hasSearch,
-      required this.onAdd,
-      required this.l10n});
+      {required this.hasSearch, required this.onAdd, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -437,13 +424,10 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined,
-                size: 72, color: Colors.grey[300]),
+            Icon(Icons.inventory_2_outlined, size: 72, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              hasSearch
-                  ? l10n.noProductsMatchSearch
-                  : l10n.noProductsYet,
+              hasSearch ? l10n.noProductsMatchSearch : l10n.noProductsYet,
               style: AppTextStyles.headingM
                   .copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,

@@ -18,8 +18,8 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
   Future<UserModel> login(String email, String password, UserRole role) async {
     try {
       if (role == UserRole.owner) {
-        final res = await _dio.post('/auth/login',
-            data: {'email': email, 'password': password});
+        final res = await _dio
+            .post('/auth/login', data: {'email': email, 'password': password});
         await _saveTokens(res.data);
         await _tokenStorage.saveRole('owner');
         return UserModel.fromOwnerLoginResponse(res.data);
@@ -118,8 +118,7 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
   @override
   Future<UserModel> verifyEmail(String code) async {
     try {
-      final res =
-          await _dio.post('/auth/verify-email', data: {'code': code});
+      final res = await _dio.post('/auth/verify-email', data: {'code': code});
       await _saveTokens(res.data);
       return UserModel.fromOwnerLoginResponse(res.data);
     } on DioException catch (e) {

@@ -9,6 +9,5 @@ class VerifyEmailUseCase {
   final IAuthRepository _repository;
   const VerifyEmailUseCase(this._repository);
 
-  TaskEither<Failure, User> call(String code) =>
-      _repository.verifyEmail(code);
+  TaskEither<Failure, User> call(String code) => _repository.verifyEmail(code);
 }

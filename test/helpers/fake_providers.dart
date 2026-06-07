@@ -26,46 +26,63 @@ import 'package:shopkeeper/features/products/presentation/providers/product_prov
 
 class _StubAuthRepo implements IAuthRepository {
   @override
-  TaskEither<Failure, User> login(String email, String password, UserRole role) =>
+  TaskEither<Failure, User> login(
+          String email, String password, UserRole role) =>
       throw UnimplementedError();
   @override
   TaskEither<Failure, Unit> logout() => throw UnimplementedError();
   @override
-  TaskEither<Failure, User> register({required String name, required String email, required String password}) =>
+  TaskEither<Failure, User> register(
+          {required String name,
+          required String email,
+          required String password}) =>
       throw UnimplementedError();
   @override
-  TaskEither<Failure, User> registerShop({required String shopName, required String ownerId}) =>
+  TaskEither<Failure, User> registerShop(
+          {required String shopName, required String ownerId}) =>
       throw UnimplementedError();
   @override
-  TaskEither<Failure, Unit> forgotPassword(String email) => throw UnimplementedError();
+  TaskEither<Failure, Unit> forgotPassword(String email) =>
+      throw UnimplementedError();
   @override
-  TaskEither<Failure, Unit> resetPassword({required String email, required String code, required String newPassword}) =>
+  TaskEither<Failure, Unit> resetPassword(
+          {required String email,
+          required String code,
+          required String newPassword}) =>
       throw UnimplementedError();
   @override
   TaskEither<Failure, User> restoreSession() => throw UnimplementedError();
   @override
-  TaskEither<Failure, User> verifyEmail(String code) => throw UnimplementedError();
+  TaskEither<Failure, User> verifyEmail(String code) =>
+      throw UnimplementedError();
   @override
-  TaskEither<Failure, Unit> resendVerificationCode() => throw UnimplementedError();
+  TaskEither<Failure, Unit> resendVerificationCode() =>
+      throw UnimplementedError();
   @override
   TaskEither<Failure, User> fetchShopInfo() => throw UnimplementedError();
 }
 
 class _StubProductRepo implements IProductRepository {
   @override
-  TaskEither<Failure, List<Product>> getProducts({required String shopId, String? search, String? category}) =>
+  TaskEither<Failure, List<Product>> getProducts(
+          {required String shopId, String? search, String? category}) =>
       throw UnimplementedError();
   @override
-  TaskEither<Failure, Product> getProductById(String id) => throw UnimplementedError();
-  @override
-  TaskEither<Failure, Product> saveProduct(Product product) => throw UnimplementedError();
-  @override
-  TaskEither<Failure, Unit> deactivateProduct(String id) => throw UnimplementedError();
-  @override
-  TaskEither<Failure, List<Product>> searchProducts(String query, {required String shopId}) =>
+  TaskEither<Failure, Product> getProductById(String id) =>
       throw UnimplementedError();
   @override
-  TaskEither<Failure, Unit> decrementStock(String productId, int qty) => throw UnimplementedError();
+  TaskEither<Failure, Product> saveProduct(Product product) =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, Unit> deactivateProduct(String id) =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, List<Product>> searchProducts(String query,
+          {required String shopId}) =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, Unit> decrementStock(String productId, int qty) =>
+      throw UnimplementedError();
 }
 
 // ── FakeAuthProvider ──────────────────────────────────────────────────────────

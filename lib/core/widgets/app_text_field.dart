@@ -78,7 +78,8 @@ class _AppTextFieldState extends State<AppTextField> {
                 (_errorText != null
                     ? const Icon(Icons.error_outline, color: AppColors.danger)
                     : (_focusNode.hasFocus
-                        ? const Icon(Icons.check_circle_outline, color: AppColors.success)
+                        ? const Icon(Icons.check_circle_outline,
+                            color: AppColors.success)
                         : null)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -90,13 +91,15 @@ class _AppTextFieldState extends State<AppTextField> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.ownerPrimary, width: 2),
+              borderSide:
+                  const BorderSide(color: AppColors.ownerPrimary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.danger),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
         ),
         if (_errorText != null) ...[

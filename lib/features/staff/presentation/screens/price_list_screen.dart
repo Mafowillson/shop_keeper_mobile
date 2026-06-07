@@ -117,12 +117,10 @@ class _SearchAppBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(l10n.priceList,
-                style: AppTextStyles.headingM
-                    .copyWith(color: Colors.white)),
+                style: AppTextStyles.headingM.copyWith(color: Colors.white)),
             Text(
               '$resultCount ${l10n.products.toLowerCase()}',
-              style: AppTextStyles.labelM
-                  .copyWith(color: Colors.white60),
+              style: AppTextStyles.labelM.copyWith(color: Colors.white60),
             ),
           ],
         ),
@@ -137,11 +135,10 @@ class _SearchAppBar extends StatelessWidget {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: l10n.searchProductsHint,
-                hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5)),
+                hintStyle:
+                    TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                 prefixIcon: Icon(Icons.search,
-                    color: Colors.white.withValues(alpha: 0.75),
-                    size: 20),
+                    color: Colors.white.withValues(alpha: 0.75), size: 20),
                 suffixIcon: controller.text.isNotEmpty
                     ? GestureDetector(
                         onTap: () {
@@ -219,8 +216,7 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
         height: 44,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           itemCount: categories.length,
           itemBuilder: (_, i) {
             final cat = categories[i];
@@ -231,8 +227,8 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
                 onTap: () => onSelect(cat),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.staffPrimary
@@ -247,12 +243,10 @@ class _CategoryDelegate extends SliverPersistentHeaderDelegate {
                   child: Text(
                     cat,
                     style: AppTextStyles.labelL.copyWith(
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      color:
+                          isSelected ? Colors.white : AppColors.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -321,8 +315,7 @@ class _Body extends StatelessWidget {
             Icon(Icons.search_off, size: 52, color: Colors.grey[300]),
             const SizedBox(height: 12),
             Text(l10n.noProductsMatchSearch,
-                style: AppTextStyles.bodyM
-                    .copyWith(color: Colors.grey[500])),
+                style: AppTextStyles.bodyM.copyWith(color: Colors.grey[500])),
           ],
         ),
       );
@@ -371,8 +364,8 @@ class _PriceCard extends StatelessWidget {
         ),
       ));
     }
-    priceCells.add(const VerticalDivider(
-        width: 1, thickness: 1, color: AppColors.border));
+    priceCells.add(
+        const VerticalDivider(width: 1, thickness: 1, color: AppColors.border));
     priceCells.add(Expanded(
       child: _PriceCell(
         icon: Icons.layers_outlined,
@@ -412,9 +405,8 @@ class _PriceCard extends StatelessWidget {
                     width: 4,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: isOut
-                          ? Colors.grey.shade300
-                          : AppColors.staffPrimary,
+                      color:
+                          isOut ? Colors.grey.shade300 : AppColors.staffPrimary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -517,8 +509,7 @@ class _StockBar extends StatelessWidget {
     final max = (threshold * 3).clamp(1.0, double.infinity);
     final ratio = (stock / max).clamp(0.0, 1.0);
 
-    final barColor =
-        product.isLowStock ? AppColors.warning : AppColors.success;
+    final barColor = product.isLowStock ? AppColors.warning : AppColors.success;
 
     return Container(
       decoration: const BoxDecoration(
@@ -526,8 +517,7 @@ class _StockBar extends StatelessWidget {
         color: Colors.white,
       ),
       child: ClipRRect(
-        borderRadius:
-            const BorderRadius.vertical(bottom: Radius.circular(14)),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
         child: LinearProgressIndicator(
           value: ratio,
           minHeight: 4,

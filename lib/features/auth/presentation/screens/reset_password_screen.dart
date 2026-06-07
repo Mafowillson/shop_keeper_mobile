@@ -45,8 +45,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   void dispose() {
-    for (final c in _codeControllers) { c.dispose(); }
-    for (final f in _codeFocusNodes) { f.dispose(); }
+    for (final c in _codeControllers) {
+      c.dispose();
+    }
+    for (final f in _codeFocusNodes) {
+      f.dispose();
+    }
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _timer?.cancel();
@@ -96,7 +100,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   void _clearCode() {
-    for (final c in _codeControllers) { c.clear(); }
+    for (final c in _codeControllers) {
+      c.clear();
+    }
     _codeFocusNodes[0].requestFocus();
     setState(() {});
   }
@@ -156,8 +162,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         elevation: 0,
         leading: const BackButton(color: AppColors.textPrimary),
         title: Text(l10n.resetPasswordTitle,
-            style: AppTextStyles.headingM
-                .copyWith(color: AppColors.textPrimary)),
+            style:
+                AppTextStyles.headingM.copyWith(color: AppColors.textPrimary)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -239,8 +245,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       size: 20,
                       color: AppColors.textSecondary,
                     ),
-                    onPressed: () =>
-                        setState(() => _obscureNew = !_obscureNew),
+                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
@@ -284,9 +289,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 AppButton.primary(
                   label: l10n.resetPasswordTitle,
                   isLoading: auth.isLoading,
-                  onPressed: (_codeComplete && !auth.isLoading)
-                      ? _handleReset
-                      : null,
+                  onPressed:
+                      (_codeComplete && !auth.isLoading) ? _handleReset : null,
                 ),
               ],
             ),
@@ -346,8 +350,8 @@ class _OtpBox extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                  color: AppColors.ownerPrimary, width: 2),
+              borderSide:
+                  const BorderSide(color: AppColors.ownerPrimary, width: 2),
             ),
           ),
           onChanged: onChanged,

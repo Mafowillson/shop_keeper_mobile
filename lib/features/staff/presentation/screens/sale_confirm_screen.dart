@@ -32,8 +32,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
     setState(() => _isSubmitting = true);
 
     final cart = context.read<CartProvider>();
-    final authShopId =
-        context.read<AuthProvider>().currentUser?.shopId ?? '';
+    final authShopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
     final shopId = authShopId.isNotEmpty
         ? authShopId
         : cart.items.firstOrNull?.product.shopId ?? '';
@@ -56,8 +55,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
       });
     } else {
       setState(() => _isSubmitting = false);
-      final err =
-          context.read<SalesProvider>().errorMessage ?? 'Sale failed';
+      final err = context.read<SalesProvider>().errorMessage ?? 'Sale failed';
       SnackBarHelper.showError(context, err);
     }
   }
@@ -79,8 +77,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(
-                  color: AppColors.staffPrimary),
+              const CircularProgressIndicator(color: AppColors.staffPrimary),
               const SizedBox(height: 16),
               Text(l10n.recordingEllipsis),
             ],
@@ -110,15 +107,12 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
                 Text(
                   context.read<SalesProvider>().errorMessage ??
                       l10n.somethingWentWrong,
-                  style: AppTextStyles.bodyM
-                      .copyWith(color: AppColors.danger),
+                  style: AppTextStyles.bodyM.copyWith(color: AppColors.danger),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 AppButton.outlined(
-                    label: l10n.tryAgain,
-                    onPressed: _submit,
-                    width: 180),
+                    label: l10n.tryAgain, onPressed: _submit, width: 180),
               ],
             ),
           ),
@@ -148,8 +142,8 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
               decoration: BoxDecoration(
                 color: AppColors.successLight,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                    color: AppColors.success.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.success.withValues(alpha: 0.3)),
               ),
               child: Column(
                 children: [
@@ -169,7 +163,6 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -195,8 +188,8 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
                               children: [
                                 Text(
                                   l10n.products,
-                                  style: AppTextStyles.bodyM.copyWith(
-                                      fontWeight: FontWeight.w600),
+                                  style: AppTextStyles.bodyM
+                                      .copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 Text(
                                   '${item.quantity}× ${item.unit}  •  ${l10n.fcfa} ${item.unitPrice.toStringAsFixed(0)}',
@@ -224,15 +217,12 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
                     sale.isCredit
                         ? '${l10n.fcfa} ${sale.dueAmount.toStringAsFixed(0)}'
                         : '${l10n.fcfa} ${sale.paidAmount.toStringAsFixed(0)}',
-                    color: sale.isCredit
-                        ? AppColors.danger
-                        : AppColors.success,
+                    color: sale.isCredit ? AppColors.danger : AppColors.success,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-
             AppButton.primary(
               label: l10n.newSale,
               onPressed: () => context.go('/staff/home'),
@@ -257,8 +247,8 @@ class _Row extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textSecondary)),
+            style:
+                AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
         Text(value,
             style: AppTextStyles.bodyM.copyWith(
               fontWeight: FontWeight.w700,

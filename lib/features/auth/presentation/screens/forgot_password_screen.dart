@@ -166,8 +166,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               keyboardType: TextInputType.emailAddress,
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return l10n.fieldRequired;
-                final emailRegex =
-                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                 if (!emailRegex.hasMatch(v.trim())) {
                   return l10n.enterValidEmail;
                 }

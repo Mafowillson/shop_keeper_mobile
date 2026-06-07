@@ -240,28 +240,23 @@ class _ErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(message,
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.danger)),
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
             ),
             GestureDetector(
               onTap: onDismiss,
-              child: const Icon(Icons.close,
-                  color: AppColors.danger, size: 16),
+              child: const Icon(Icons.close, color: AppColors.danger, size: 16),
             ),
           ],
         ),
@@ -281,8 +276,7 @@ class _LoadingCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(
-          child:
-              CircularProgressIndicator(color: AppColors.ownerPrimary),
+          child: CircularProgressIndicator(color: AppColors.ownerPrimary),
         ),
       );
 }
@@ -307,8 +301,7 @@ class _SavingIndicator extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           l10n.savingEllipsis,
-          style: AppTextStyles.labelS
-              .copyWith(color: AppColors.textSecondary),
+          style: AppTextStyles.labelS.copyWith(color: AppColors.textSecondary),
         ),
       ],
     );
@@ -322,9 +315,7 @@ class _NotificationPrefsCard extends StatelessWidget {
   final Color primary;
   final AppLocalizations l10n;
   const _NotificationPrefsCard(
-      {required this.provider,
-      required this.primary,
-      required this.l10n});
+      {required this.provider, required this.primary, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -385,8 +376,8 @@ class _NotificationPrefsCard extends StatelessWidget {
     );
   }
 
-  Future<void> _editThreshold(BuildContext context,
-      SettingsProvider provider, AppLocalizations l10n) async {
+  Future<void> _editThreshold(BuildContext context, SettingsProvider provider,
+      AppLocalizations l10n) async {
     final result = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
@@ -620,8 +611,7 @@ class _SettingsCard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: children),
+              crossAxisAlignment: CrossAxisAlignment.start, children: children),
         ),
       );
 }
@@ -714,8 +704,7 @@ class _NavTile extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
         onTap: onTap,
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Container(
@@ -772,8 +761,7 @@ class _ValueTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
             Container(
@@ -793,8 +781,8 @@ class _ValueTile extends StatelessWidget {
             ),
             Text(
               value,
-              style: AppTextStyles.labelL
-                  .copyWith(color: AppColors.textSecondary),
+              style:
+                  AppTextStyles.labelL.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -806,8 +794,7 @@ class _ValueTile extends StatelessWidget {
 class _ThresholdSheet extends StatefulWidget {
   final double currentValue;
   final AppLocalizations l10n;
-  const _ThresholdSheet(
-      {required this.currentValue, required this.l10n});
+  const _ThresholdSheet({required this.currentValue, required this.l10n});
 
   @override
   State<_ThresholdSheet> createState() => _ThresholdSheetState();
@@ -833,8 +820,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
   }
 
   bool get _isValid {
-    final v =
-        double.tryParse(_controller.text.replaceAll(',', '').trim());
+    final v = double.tryParse(_controller.text.replaceAll(',', '').trim());
     return v != null && v > 0;
   }
 
@@ -844,8 +830,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
   }
 
   void _save() {
-    final v =
-        double.tryParse(_controller.text.replaceAll(',', '').trim());
+    final v = double.tryParse(_controller.text.replaceAll(',', '').trim());
     if (v != null && v > 0) Navigator.pop(context, v);
   }
 
@@ -910,8 +895,8 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
           const SizedBox(height: 4),
           Text(
             formatFCFA(widget.currentValue),
-            style: AppTextStyles.headingL
-                .copyWith(color: AppColors.ownerPrimary),
+            style:
+                AppTextStyles.headingL.copyWith(color: AppColors.ownerPrimary),
           ),
           const SizedBox(height: 20),
           Text(l10n.quickSelect,
@@ -922,30 +907,27 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             spacing: 8,
             runSpacing: 8,
             children: _presets.map((p) {
-              final selected =
-                  _controller.text.trim() == p.toStringAsFixed(0);
+              final selected = _controller.text.trim() == p.toStringAsFixed(0);
               return GestureDetector(
                 onTap: () => _selectPreset(p),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: selected
                         ? AppColors.ownerPrimary
                         : AppColors.background,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: selected
-                          ? AppColors.ownerPrimary
-                          : AppColors.border,
+                      color:
+                          selected ? AppColors.ownerPrimary : AppColors.border,
                     ),
                   ),
                   child: Text(
                     formatFCFA(p),
                     style: AppTextStyles.labelL.copyWith(
-                      color:
-                          selected ? Colors.white : AppColors.textPrimary,
+                      color: selected ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -961,13 +943,12 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
             controller: _controller,
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
             decoration: InputDecoration(
               hintText: '50000',
               suffixText: l10n.fcfa,
-              suffixStyle: AppTextStyles.labelL
-                  .copyWith(color: AppColors.textSecondary),
+              suffixStyle:
+                  AppTextStyles.labelL.copyWith(color: AppColors.textSecondary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: AppColors.border),
@@ -978,8 +959,8 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                    color: AppColors.ownerPrimary, width: 2),
+                borderSide:
+                    const BorderSide(color: AppColors.ownerPrimary, width: 2),
               ),
             ),
           ),
@@ -1016,8 +997,7 @@ class _ThresholdSheetState extends State<_ThresholdSheet> {
                   ),
                   child: Text(
                     l10n.save,
-                    style:
-                        AppTextStyles.labelL.copyWith(color: Colors.white),
+                    style: AppTextStyles.labelL.copyWith(color: Colors.white),
                   ),
                 ),
               ),

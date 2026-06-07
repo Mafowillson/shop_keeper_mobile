@@ -23,8 +23,7 @@ class SaleRepositoryImpl implements ISaleRepository {
       );
 
   @override
-  TaskEither<Failure, Sale> getSaleById(String id) =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, Sale> getSaleById(String id) => TaskEither.tryCatch(
         () async {
           final model = await _remote.getSaleById(id);
           return model.toEntity();
@@ -42,11 +41,13 @@ class SaleRepositoryImpl implements ISaleRepository {
   }) =>
       TaskEither.tryCatch(
         () async {
-          final items = cartItems.map((c) => {
-            'product_id': c.product.id,
-            'unit': c.unit.name,
-            'quantity': c.quantity,
-          }).toList();
+          final items = cartItems
+              .map((c) => {
+                    'product_id': c.product.id,
+                    'unit': c.unit.name,
+                    'quantity': c.quantity,
+                  })
+              .toList();
 
           final body = <String, dynamic>{
             'shop_id': shopId,

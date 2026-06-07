@@ -132,8 +132,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   controller: _scrollController,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  itemCount: provider.messages.length +
-                      (provider.isSending ? 1 : 0),
+                  itemCount:
+                      provider.messages.length + (provider.isSending ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index == provider.messages.length) {
                       return const _TypingIndicator();
@@ -459,8 +459,8 @@ class _AiAvatar extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
-        child: Icon(Icons.auto_awesome_rounded,
-            size: 15, color: AppColors.accent),
+        child:
+            Icon(Icons.auto_awesome_rounded, size: 15, color: AppColors.accent),
       ),
     );
   }
@@ -578,8 +578,7 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
-    final isSending =
-        context.select<ChatProvider, bool>((p) => p.isSending);
+    final isSending = context.select<ChatProvider, bool>((p) => p.isSending);
 
     return Container(
       padding: EdgeInsets.fromLTRB(16, 10, 16, 10 + bottom),
@@ -611,15 +610,15 @@ class _InputBar extends StatelessWidget {
                 maxLines: null,
                 textInputAction: TextInputAction.send,
                 onSubmitted: onSend,
-                style: AppTextStyles.bodyM
-                    .copyWith(color: AppColors.textPrimary),
+                style:
+                    AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: l10n.askAnything,
-                  hintStyle: AppTextStyles.bodyM
-                      .copyWith(color: AppColors.textHint),
+                  hintStyle:
+                      AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ),
@@ -664,8 +663,7 @@ class _SendButton extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   )
-                : const Icon(Icons.send_rounded,
-                    color: Colors.white, size: 20),
+                : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
           ),
         ),
       ),
@@ -678,9 +676,7 @@ class _ErrorState extends StatelessWidget {
   final VoidCallback onRetry;
   final AppLocalizations l10n;
   const _ErrorState(
-      {required this.message,
-      required this.onRetry,
-      required this.l10n});
+      {required this.message, required this.onRetry, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -715,8 +711,8 @@ class _ErrorState extends StatelessWidget {
                 backgroundColor: AppColors.ownerPrimary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),

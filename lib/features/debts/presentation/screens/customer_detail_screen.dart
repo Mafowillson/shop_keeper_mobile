@@ -131,9 +131,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                           style: AppTextStyles.headingL),
                                       if (customer.phone.isNotEmpty)
                                         Text(customer.phone,
-                                            style: AppTextStyles.bodyM
-                                                .copyWith(
-                                                    color: Colors.grey[600])),
+                                            style: AppTextStyles.bodyM.copyWith(
+                                                color: Colors.grey[600])),
                                       const SizedBox(height: 6),
                                       Row(
                                         children: [
@@ -141,10 +140,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                           const SizedBox(width: 8),
                                           Text(
                                             'Since ${DateFormat('MMM y').format(customer.createdAt)}',
-                                            style: AppTextStyles.bodyM
-                                                .copyWith(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 11),
+                                            style: AppTextStyles.bodyM.copyWith(
+                                                color: Colors.grey[600],
+                                                fontSize: 11),
                                           ),
                                         ],
                                       ),
@@ -155,7 +153,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-
                           Row(
                             children: [
                               Expanded(
@@ -178,12 +175,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ],
                           ),
                           const SizedBox(height: 24),
-
                           if (customer.totalDebt > 0) ...[
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: AppColors.success.withValues(alpha: 0.05),
+                                color:
+                                    AppColors.success.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                     color: AppColors.success
@@ -206,8 +203,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                               BorderRadius.circular(8)),
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 12),
+                                              horizontal: 12, vertical: 12),
                                     ),
                                   ),
                                   const SizedBox(height: 10),
@@ -220,8 +216,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                               BorderRadius.circular(8)),
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 12),
+                                              horizontal: 12, vertical: 12),
                                     ),
                                   ),
                                   const SizedBox(height: 12),
@@ -238,7 +233,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                             ),
                             const SizedBox(height: 24),
                           ],
-
                           Text(l10n.transactionHistory,
                               style: AppTextStyles.headingM),
                           const SizedBox(height: 12),
@@ -249,8 +243,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
                                       .copyWith(color: Colors.grey[500])),
                             )
                           else
-                            ...provider.debtHistory
-                                .map((r) => _DebtRecordTile(record: r, l10n: l10n)),
+                            ...provider.debtHistory.map(
+                                (r) => _DebtRecordTile(record: r, l10n: l10n)),
                         ],
                       ),
                     ),
@@ -282,8 +276,7 @@ class _StatCard extends StatelessWidget {
                 style: AppTextStyles.bodyM
                     .copyWith(color: Colors.grey[600], fontSize: 12)),
             const SizedBox(height: 6),
-            Text(value,
-                style: AppTextStyles.headingS.copyWith(color: color)),
+            Text(value, style: AppTextStyles.headingS.copyWith(color: color)),
           ],
         ),
       );

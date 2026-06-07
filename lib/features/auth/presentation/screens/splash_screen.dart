@@ -102,10 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
                       color: Colors.white,
                       letterSpacing: 1.5,
                     ),
-                  )
-                      .animate(delay: 500.ms)
-                      .fadeIn(duration: 600.ms)
-                      .slideY(
+                  ).animate(delay: 500.ms).fadeIn(duration: 600.ms).slideY(
                         begin: 0.4,
                         end: 0,
                         duration: 600.ms,
@@ -154,9 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
                   const Spacer(flex: 3),
 
                   // Loading dots
-                  _PulseDots()
-                      .animate(delay: 1200.ms)
-                      .fadeIn(duration: 400.ms),
+                  _PulseDots().animate(delay: 1200.ms).fadeIn(duration: 400.ms),
 
                   const SizedBox(height: 48),
                 ],
@@ -196,8 +191,8 @@ class _RotatingRing extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withValues(
-                          alpha: 0.04 + controller.value * 0.03),
+                      color: Colors.white
+                          .withValues(alpha: 0.04 + controller.value * 0.03),
                       width: 1,
                     ),
                   ),
@@ -328,8 +323,7 @@ class _LogoSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color:
-                        Colors.white.withValues(alpha: 0.10 + pulse * 0.06),
+                    color: Colors.white.withValues(alpha: 0.10 + pulse * 0.06),
                     width: 1,
                   ),
                   color: Colors.white.withValues(alpha: 0.03),
@@ -342,8 +336,8 @@ class _LogoSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.accent
-                        .withValues(alpha: 0.30 + pulse * 0.20),
+                    color:
+                        AppColors.accent.withValues(alpha: 0.30 + pulse * 0.20),
                     width: 1.5,
                   ),
                   color: Colors.transparent,

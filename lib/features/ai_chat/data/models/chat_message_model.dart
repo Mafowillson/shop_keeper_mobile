@@ -14,12 +14,13 @@ class ChatMessageModel {
     required this.timestamp,
   });
 
-  factory ChatMessageModel.fromJson(Map<String, dynamic> json) => ChatMessageModel(
-    id: json['id'],
-    role: _parseRole(json['role'] as String),
-    text: json['text'],
-    timestamp: DateTime.parse(json['created_at'] ?? json['timestamp']),
-  );
+  factory ChatMessageModel.fromJson(Map<String, dynamic> json) =>
+      ChatMessageModel(
+        id: json['id'],
+        role: _parseRole(json['role'] as String),
+        text: json['text'],
+        timestamp: DateTime.parse(json['created_at'] ?? json['timestamp']),
+      );
 
   static MessageRole _parseRole(String raw) {
     if (raw == 'model') return MessageRole.assistant;
@@ -30,25 +31,25 @@ class ChatMessageModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'role': role.toString().split('.').last,
-    'text': text,
-    'timestamp': timestamp.toIso8601String(),
-  };
+        'id': id,
+        'role': role.toString().split('.').last,
+        'text': text,
+        'timestamp': timestamp.toIso8601String(),
+      };
 
   factory ChatMessageModel.fromEntity(ChatMessage entity) => ChatMessageModel(
-    id: entity.id,
-    role: entity.role,
-    text: entity.text,
-    timestamp: entity.timestamp,
-  );
+        id: entity.id,
+        role: entity.role,
+        text: entity.text,
+        timestamp: entity.timestamp,
+      );
 
   ChatMessage toEntity() => ChatMessage(
-    id: id,
-    role: role,
-    text: text,
-    timestamp: timestamp,
-  );
+        id: id,
+        role: role,
+        text: text,
+        timestamp: timestamp,
+      );
 
   ChatMessageModel copyWith({
     String? id,

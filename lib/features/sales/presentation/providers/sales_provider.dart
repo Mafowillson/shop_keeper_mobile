@@ -26,8 +26,7 @@ class SalesProvider extends ChangeNotifier {
   bool get isRecording => _isRecording;
   String? get errorMessage => _errorMessage;
 
-  double get totalRevenue =>
-      _sales.fold(0, (sum, s) => sum + s.totalAmount);
+  double get totalRevenue => _sales.fold(0, (sum, s) => sum + s.totalAmount);
 
   // ── Load sales history ────────────────────────────────────────────────────
 

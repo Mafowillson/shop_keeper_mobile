@@ -358,7 +358,8 @@ class _StatCell extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: AppTextStyles.labelM.copyWith(color: AppColors.textSecondary),
+            style:
+                AppTextStyles.labelM.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -461,8 +462,8 @@ class _InfoTile extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   row.value,
-                  style: AppTextStyles.bodyM
-                      .copyWith(fontWeight: FontWeight.w600),
+                  style:
+                      AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -550,14 +551,16 @@ class _ActionTile extends StatelessWidget {
                 children: [
                   Text(
                     data.label,
-                    style: AppTextStyles.bodyM.copyWith(fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyM
+                        .copyWith(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 2),
                   Text(data.subtitle, style: AppTextStyles.bodyS),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.grey[350], size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: Colors.grey[350], size: 20),
           ],
         ),
       ),
@@ -608,8 +611,7 @@ class _SignOutSheet extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
@@ -642,8 +644,8 @@ class _SignOutSheet extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Text(l10n.signOut,
-                      style: AppTextStyles.headingS
-                          .copyWith(color: Colors.white)),
+                      style:
+                          AppTextStyles.headingS.copyWith(color: Colors.white)),
                 ),
               ),
             ],

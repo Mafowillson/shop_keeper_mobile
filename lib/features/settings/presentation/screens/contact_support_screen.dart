@@ -121,8 +121,8 @@ class _BugReportSheetState extends State<_BugReportSheet> {
           SnackBar(
             content: Text(l10n.couldNotOpenEmail),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -171,8 +171,7 @@ class _BugReportSheetState extends State<_BugReportSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(l10n.reportABug, style: AppTextStyles.headingS),
-                  Text(l10n.wellGetBackWithin24h,
-                      style: AppTextStyles.bodyS),
+                  Text(l10n.wellGetBackWithin24h, style: AppTextStyles.bodyS),
                 ],
               ),
             ],
@@ -234,8 +233,8 @@ class _BugReportSheetState extends State<_BugReportSheet> {
                         )
                       : Text(
                           l10n.sendReport,
-                          style:
-                              AppTextStyles.labelL.copyWith(color: Colors.white),
+                          style: AppTextStyles.labelL
+                              .copyWith(color: Colors.white),
                         ),
                 ),
               ),
@@ -274,8 +273,7 @@ class _SheetField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          hintStyle:
-              AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
+          hintStyle: AppTextStyles.bodyM.copyWith(color: AppColors.textHint),
           alignLabelWithHint: alignLabelWithHint,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -287,8 +285,8 @@ class _SheetField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-                color: AppColors.ownerPrimary, width: 2),
+            borderSide:
+                const BorderSide(color: AppColors.ownerPrimary, width: 2),
           ),
         ),
       );
@@ -358,8 +356,8 @@ class _SupportHeader extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         l10n.weAreHereToHelp,
-                        style: AppTextStyles.bodyS
-                            .copyWith(color: Colors.white60),
+                        style:
+                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
                       ),
                     ],
                   ),
@@ -380,8 +378,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: AppTextStyles.headingS
-            .copyWith(color: AppColors.textSecondary),
+        style: AppTextStyles.headingS.copyWith(color: AppColors.textSecondary),
       );
 }
 
@@ -515,8 +512,8 @@ class _ResponseTimeCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.ownerPrimary.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-              color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
+          border:
+              Border.all(color: AppColors.ownerPrimary.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -541,8 +538,7 @@ class _ResponseTimeCard extends StatelessWidget {
                         .copyWith(color: AppColors.ownerPrimary),
                   ),
                   const SizedBox(height: 3),
-                  Text(l10n.responseTimeDetails,
-                      style: AppTextStyles.bodyS),
+                  Text(l10n.responseTimeDetails, style: AppTextStyles.bodyS),
                 ],
               ),
             ),
@@ -582,19 +578,17 @@ class _FaqCardState extends State<_FaqCard> {
         return Column(
           children: [
             InkWell(
-              onTap: () =>
-                  setState(() => _expanded = isOpen ? null : i),
+              onTap: () => setState(() => _expanded = isOpen ? null : i),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 child: Row(
                   children: [
                     Container(
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: AppColors.ownerPrimary
-                            .withValues(alpha: 0.08),
+                        color: AppColors.ownerPrimary.withValues(alpha: 0.08),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -613,9 +607,8 @@ class _FaqCardState extends State<_FaqCard> {
                         faq.q,
                         style: AppTextStyles.labelL.copyWith(
                           color: AppColors.textPrimary,
-                          fontWeight: isOpen
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                          fontWeight:
+                              isOpen ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),
                     ),
@@ -644,9 +637,8 @@ class _FaqCardState extends State<_FaqCard> {
                   ),
                 ),
               ),
-              crossFadeState: isOpen
-                  ? CrossFadeState.showSecond
-                  : CrossFadeState.showFirst,
+              crossFadeState:
+                  isOpen ? CrossFadeState.showSecond : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
             ),
             if (i < faqs.length - 1) const _Divider(),

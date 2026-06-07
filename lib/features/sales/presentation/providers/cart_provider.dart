@@ -17,8 +17,7 @@ class CartProvider extends ChangeNotifier {
   bool get isCredit => _isCredit;
   String? get customerId => _customerId;
 
-  double get total =>
-      _items.fold(0, (sum, item) => sum + item.subtotal);
+  double get total => _items.fold(0, (sum, item) => sum + item.subtotal);
 
   int get itemCount => _items.length;
 

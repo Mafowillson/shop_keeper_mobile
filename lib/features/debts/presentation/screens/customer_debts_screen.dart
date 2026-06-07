@@ -61,8 +61,7 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
     final q = _searchController.text.toLowerCase();
     if (q.isNotEmpty) {
       list = list
-          .where((c) =>
-              c.name.toLowerCase().contains(q) || c.phone.contains(q))
+          .where((c) => c.name.toLowerCase().contains(q) || c.phone.contains(q))
           .toList();
     }
     return list;
@@ -134,7 +133,8 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                           if (customer != null) {
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
-                                  content: Text('${customer.name} ${l10n.add.toLowerCase()}ed')),
+                                  content: Text(
+                                      '${customer.name} ${l10n.add.toLowerCase()}ed')),
                             );
                           }
                         },
@@ -192,7 +192,6 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                   l10n: l10n,
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: TextField(
@@ -201,8 +200,7 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                   decoration: InputDecoration(
                     hintText: l10n.searchByNameOrPhone,
                     prefixIcon: const Icon(Icons.search, size: 20),
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
                     filled: true,
@@ -210,21 +208,25 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                   ),
                 ),
               ),
-
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                 child: Row(
-                  children: ['All', 'With Debt', 'High', 'Medium', 'Low', 'Clear']
-                      .map((f) {
+                  children: [
+                    'All',
+                    'With Debt',
+                    'High',
+                    'Medium',
+                    'Low',
+                    'Clear'
+                  ].map((f) {
                     final selected = _selectedFilter == f;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: FilterChip(
                         label: Text(f),
                         selected: selected,
-                        onSelected: (_) =>
-                            setState(() => _selectedFilter = f),
+                        onSelected: (_) => setState(() => _selectedFilter = f),
                         backgroundColor: Colors.grey[200],
                         selectedColor: AppColors.ownerPrimary,
                         labelStyle: AppTextStyles.bodyM.copyWith(
@@ -236,7 +238,6 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                   }).toList(),
                 ),
               ),
-
               if (provider.errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -244,14 +245,14 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                       style: AppTextStyles.bodyM
                           .copyWith(color: AppColors.danger)),
                 ),
-
               Expanded(
                 child: filtered.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.people, size: 64, color: Colors.grey[300]),
+                            Icon(Icons.people,
+                                size: 64, color: Colors.grey[300]),
                             const SizedBox(height: 16),
                             Text(l10n.noCustomersFound,
                                 style: AppTextStyles.bodyM
@@ -276,8 +277,8 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
                           itemBuilder: (_, i) => _CustomerCard(
                             customer: filtered[i],
                             l10n: l10n,
-                            onTap: () => context.push(
-                                '/owner/debts/${filtered[i].id}'),
+                            onTap: () =>
+                                context.push('/owner/debts/${filtered[i].id}'),
                           ),
                         ),
                       ),
@@ -307,10 +308,7 @@ class _SummaryCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              AppColors.danger,
-              AppColors.danger.withValues(alpha: 0.7)
-            ],
+            colors: [AppColors.danger, AppColors.danger.withValues(alpha: 0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -320,16 +318,14 @@ class _SummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(l10n.totalOutstandingDebt,
-                style:
-                    AppTextStyles.bodyM.copyWith(color: Colors.white70)),
+                style: AppTextStyles.bodyM.copyWith(color: Colors.white70)),
             const SizedBox(height: 8),
             Text(formatFCFA(totalDebt),
                 style: AppTextStyles.displayM.copyWith(color: Colors.white)),
             const SizedBox(height: 8),
             Text(
               '$debtorCount debtor${debtorCount == 1 ? '' : 's'} out of $totalCount customer${totalCount == 1 ? '' : 's'}',
-              style:
-                  AppTextStyles.bodyM.copyWith(color: Colors.white70),
+              style: AppTextStyles.bodyM.copyWith(color: Colors.white70),
             ),
           ],
         ),
@@ -341,9 +337,7 @@ class _CustomerCard extends StatelessWidget {
   final VoidCallback onTap;
   final AppLocalizations l10n;
   const _CustomerCard(
-      {required this.customer,
-      required this.onTap,
-      required this.l10n});
+      {required this.customer, required this.onTap, required this.l10n});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -388,8 +382,8 @@ class _CustomerCard extends StatelessWidget {
                     ),
                     if (customer.phone.isNotEmpty)
                       Text(customer.phone,
-                          style: AppTextStyles.bodyM.copyWith(
-                              color: Colors.grey[600], fontSize: 12)),
+                          style: AppTextStyles.bodyM
+                              .copyWith(color: Colors.grey[600], fontSize: 12)),
                     const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

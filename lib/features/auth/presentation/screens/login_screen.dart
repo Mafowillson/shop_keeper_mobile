@@ -254,9 +254,7 @@ class _RoleToggle extends StatelessWidget {
   final ValueChanged<UserRole> onSelect;
   final AppLocalizations l10n;
   const _RoleToggle(
-      {required this.selected,
-      required this.onSelect,
-      required this.l10n});
+      {required this.selected, required this.onSelect, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Container(

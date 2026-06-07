@@ -67,7 +67,12 @@ class DebtProvider extends ChangeNotifier {
 
     final customerResult = await _getCustomerById(id).run();
     customerResult.fold(
-      (f) { _errorMessage = f.message; _isLoading = false; notifyListeners(); return; },
+      (f) {
+        _errorMessage = f.message;
+        _isLoading = false;
+        notifyListeners();
+        return;
+      },
       (c) => _selectedCustomer = c,
     );
 
@@ -94,7 +99,8 @@ class DebtProvider extends ChangeNotifier {
     notifyListeners();
 
     Customer? created;
-    final result = await _createCustomer(shopId: shopId, name: name, phone: phone).run();
+    final result =
+        await _createCustomer(shopId: shopId, name: name, phone: phone).run();
     result.fold(
       (f) => _errorMessage = f.message,
       (c) {
@@ -109,7 +115,8 @@ class DebtProvider extends ChangeNotifier {
   }
 
   /// Records a payment. Returns true on success.
-  Future<bool> recordPayment(String customerId, double amount, String? note) async {
+  Future<bool> recordPayment(
+      String customerId, double amount, String? note) async {
     _isSaving = true;
     _errorMessage = null;
     notifyListeners();
@@ -123,13 +130,15 @@ class DebtProvider extends ChangeNotifier {
         // Update local customer debt balance.
         _customers = _customers.map((c) {
           if (c.id == customerId) {
-            return c.copyWith(totalDebt: (c.totalDebt - amount).clamp(0, double.infinity));
+            return c.copyWith(
+                totalDebt: (c.totalDebt - amount).clamp(0, double.infinity));
           }
           return c;
         }).toList();
         if (_selectedCustomer?.id == customerId) {
           _selectedCustomer = _selectedCustomer!.copyWith(
-            totalDebt: (_selectedCustomer!.totalDebt - amount).clamp(0, double.infinity),
+            totalDebt: (_selectedCustomer!.totalDebt - amount)
+                .clamp(0, double.infinity),
           );
         }
       },

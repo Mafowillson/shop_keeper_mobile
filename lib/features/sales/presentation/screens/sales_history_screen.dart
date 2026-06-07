@@ -25,11 +25,9 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
-  String get _shopId =>
-      context.read<AuthProvider>().currentUser?.shopId ?? '';
+  String get _shopId => context.read<AuthProvider>().currentUser?.shopId ?? '';
 
-  Future<void> _load() =>
-      context.read<SalesProvider>().loadSales(_shopId);
+  Future<void> _load() => context.read<SalesProvider>().loadSales(_shopId);
 
   List<Sale> _filtered(List<Sale> all) {
     if (_filter == 'Cash') return all.where((s) => !s.isCredit).toList();
@@ -83,8 +81,8 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
               // ── Filter chips ─────────────────────────────────────────
               Container(
                 color: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   children: ['All', 'Cash', 'Credit'].map((f) {
                     final sel = _filter == f;
@@ -97,14 +95,12 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                         selectedColor: AppColors.ownerPrimary,
                         labelStyle: AppTextStyles.bodyM.copyWith(
                           color: sel ? Colors.white : AppColors.textPrimary,
-                          fontWeight:
-                              sel ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                         ),
                         backgroundColor: AppColors.background,
                         side: BorderSide(
-                          color: sel
-                              ? AppColors.ownerPrimary
-                              : AppColors.border,
+                          color:
+                              sel ? AppColors.ownerPrimary : AppColors.border,
                         ),
                       ),
                     );
@@ -114,8 +110,8 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
 
               // ── Count bar ─────────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Text(
@@ -131,8 +127,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.ownerPrimary),
+                            strokeWidth: 2, color: AppColors.ownerPrimary),
                       ),
                   ],
                 ),
@@ -193,8 +188,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                             color: AppColors.ownerPrimary,
                             onRefresh: _load,
                             child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(
-                                  16, 4, 16, 24),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                               itemCount: filtered.length,
                               itemBuilder: (_, i) =>
                                   _SaleCard(sale: filtered[i], l10n: l10n),
@@ -230,8 +224,7 @@ class _SummaryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
@@ -242,13 +235,12 @@ class _SummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(value,
-                      style: AppTextStyles.headingS
-                          .copyWith(color: color),
+                      style: AppTextStyles.headingS.copyWith(color: color),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
                   Text(label,
-                      style: AppTextStyles.labelM.copyWith(
-                          color: color.withValues(alpha: 0.75))),
+                      style: AppTextStyles.labelM
+                          .copyWith(color: color.withValues(alpha: 0.75))),
                 ],
               ),
             ),

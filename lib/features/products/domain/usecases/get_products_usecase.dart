@@ -15,5 +15,6 @@ class GetProductsUseCase {
     String? search,
     String? category,
   }) =>
-      _repository.getProducts(shopId: shopId, search: search, category: category);
+      _repository.getProducts(
+          shopId: shopId, search: search, category: category);
 }

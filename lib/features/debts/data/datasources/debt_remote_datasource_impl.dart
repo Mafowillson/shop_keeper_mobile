@@ -12,13 +12,17 @@ class DebtRemoteDataSourceImpl implements IDebtRemoteDataSource {
   DebtRemoteDataSourceImpl(DioClient dioClient) : _dio = dioClient.client;
 
   @override
-  Future<List<CustomerModel>> getCustomers({required String shopId, bool? hasDebt}) async {
+  Future<List<CustomerModel>> getCustomers(
+      {required String shopId, bool? hasDebt}) async {
     try {
       final params = <String, dynamic>{'shop_id': shopId};
       if (hasDebt != null) params['has_debt'] = hasDebt;
       final res = await _dio.get('/customers', queryParameters: params);
       final list = res.data['customers'] as List<dynamic>? ?? [];
-      return list.cast<Map<String, dynamic>>().map(CustomerModel.fromJson).toList();
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(CustomerModel.fromJson)
+          .toList();
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }
@@ -55,14 +59,18 @@ class DebtRemoteDataSourceImpl implements IDebtRemoteDataSource {
     try {
       final res = await _dio.get('/customers/$customerId/debts');
       final list = res.data['debt_records'] as List<dynamic>? ?? [];
-      return list.cast<Map<String, dynamic>>().map(DebtRecordModel.fromJson).toList();
+      return list
+          .cast<Map<String, dynamic>>()
+          .map(DebtRecordModel.fromJson)
+          .toList();
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }
   }
 
   @override
-  Future<DebtRecordModel> recordPayment(String customerId, double amount, String? note) async {
+  Future<DebtRecordModel> recordPayment(
+      String customerId, double amount, String? note) async {
     try {
       final body = <String, dynamic>{'amount': amount.toStringAsFixed(0)};
       if (note != null && note.isNotEmpty) body['note'] = note;

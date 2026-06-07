@@ -70,8 +70,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
 
   @override
-  TaskEither<Failure, Unit> forgotPassword(String email) =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, Unit> forgotPassword(String email) => TaskEither.tryCatch(
         () async {
           await _remote.forgotPassword(email);
           return unit;

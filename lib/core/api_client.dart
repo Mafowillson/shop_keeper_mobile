@@ -34,7 +34,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      _dio.post<T>(path, data: data, queryParameters: queryParameters, options: options);
+      _dio.post<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> put<T>(
     String path, {
@@ -42,7 +43,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      _dio.put<T>(path, data: data, queryParameters: queryParameters, options: options);
+      _dio.put<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> patch<T>(
     String path, {
@@ -50,7 +52,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      _dio.patch<T>(path, data: data, queryParameters: queryParameters, options: options);
+      _dio.patch<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> delete<T>(
     String path, {
@@ -58,7 +61,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      _dio.delete<T>(path, data: data, queryParameters: queryParameters, options: options);
+      _dio.delete<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 }
 
 class _LangAuthInterceptor extends Interceptor {

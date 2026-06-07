@@ -10,5 +10,6 @@ class GetProductByIdUseCase {
 
   const GetProductByIdUseCase(this._repository);
 
-  TaskEither<Failure, Product> call(String id) => _repository.getProductById(id);
+  TaskEither<Failure, Product> call(String id) =>
+      _repository.getProductById(id);
 }

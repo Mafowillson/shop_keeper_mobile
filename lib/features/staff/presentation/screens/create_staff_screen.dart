@@ -57,8 +57,7 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
       context.pop();
     } else {
       SnackBarHelper.showError(
-          context,
-          provider.errorMessage ?? l10n.failedCreateStaff);
+          context, provider.errorMessage ?? l10n.failedCreateStaff);
     }
   }
 
@@ -218,8 +217,7 @@ class _PhonePasswordNote extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.accentLight,
         borderRadius: BorderRadius.circular(14),
-        border:
-            Border.all(color: AppColors.accent.withValues(alpha: 0.35)),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.35)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

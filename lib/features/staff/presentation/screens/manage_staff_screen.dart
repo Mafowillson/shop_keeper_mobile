@@ -61,8 +61,8 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
 
     setState(() => _toggling.add(staff.id));
     try {
-      final updated = await _ds.toggleActive(staff.id,
-          isActive: !staff.isActive);
+      final updated =
+          await _ds.toggleActive(staff.id, isActive: !staff.isActive);
       if (mounted) {
         setState(() {
           final idx = _staff.indexWhere((s) => s.id == staff.id);
@@ -73,11 +73,10 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(e.toString().replaceFirst('Exception: ', '')),
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -97,14 +96,12 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
           if (_loading)
             const SliverFillRemaining(
               child: Center(
-                child: CircularProgressIndicator(
-                    color: AppColors.ownerPrimary),
+                child: CircularProgressIndicator(color: AppColors.ownerPrimary),
               ),
             )
           else if (_error != null)
             SliverFillRemaining(
-                child: _ErrorView(
-                    message: _error!, onRetry: _load, l10n: l10n))
+                child: _ErrorView(message: _error!, onRetry: _load, l10n: l10n))
           else if (_staff.isEmpty)
             SliverFillRemaining(child: _EmptyView(l10n: l10n))
           else
@@ -150,10 +147,7 @@ class _Header extends StatelessWidget {
           background: Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.ownerPrimaryDark,
-                  AppColors.ownerPrimary
-                ],
+                colors: [AppColors.ownerPrimaryDark, AppColors.ownerPrimary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -199,8 +193,8 @@ class _Header extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         l10n.activateOrDeactivateTeam,
-                        style: AppTextStyles.bodyS
-                            .copyWith(color: Colors.white60),
+                        style:
+                            AppTextStyles.bodyS.copyWith(color: Colors.white60),
                       ),
                     ],
                   ),
@@ -267,9 +261,7 @@ class _StaffCard extends StatelessWidget {
                 child: Text(
                   _initials,
                   style: AppTextStyles.headingS.copyWith(
-                    color: active
-                        ? AppColors.ownerPrimary
-                        : AppColors.danger,
+                    color: active ? AppColors.ownerPrimary : AppColors.danger,
                   ),
                 ),
               ),
@@ -346,8 +338,7 @@ class _StaffCard extends StatelessWidget {
                             ? Icons.person_off_outlined
                             : Icons.person_outlined,
                         size: 18,
-                        color:
-                            active ? AppColors.danger : AppColors.success,
+                        color: active ? AppColors.danger : AppColors.success,
                       ),
                     ),
                   ),
@@ -412,8 +403,7 @@ class _ToggleSheet extends StatelessWidget {
             deactivating
                 ? 'This staff member will no longer be able to log in or process sales.'
                 : 'This staff member will regain access to the app and can process sales.',
-            style: AppTextStyles.bodyM
-                .copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 28),
@@ -495,9 +485,7 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
   final AppLocalizations l10n;
   const _ErrorView(
-      {required this.message,
-      required this.onRetry,
-      required this.l10n});
+      {required this.message, required this.onRetry, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Center(

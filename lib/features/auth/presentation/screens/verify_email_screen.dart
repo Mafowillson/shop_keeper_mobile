@@ -37,8 +37,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   void dispose() {
-    for (final c in _controllers) { c.dispose(); }
-    for (final f in _focusNodes) { f.dispose(); }
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     _timer?.cancel();
     super.dispose();
   }
@@ -87,7 +91,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   void _clearCode() {
-    for (final c in _controllers) { c.clear(); }
+    for (final c in _controllers) {
+      c.clear();
+    }
     _focusNodes[0].requestFocus();
     setState(() {});
   }
@@ -193,9 +199,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
               AppButton.primary(
                 label: l10n.verifyEmailButton,
                 isLoading: auth.isLoading,
-                onPressed: _isCodeComplete && !auth.isLoading
-                    ? _handleVerify
-                    : null,
+                onPressed:
+                    _isCodeComplete && !auth.isLoading ? _handleVerify : null,
               ),
               const SizedBox(height: 24),
               _ResendRow(

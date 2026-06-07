@@ -53,8 +53,7 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
                   child: _HeroHeader(
                     greeting: _greeting(l10n),
                     firstName: firstName,
-                    onNotifications: () =>
-                        context.push('/staff/notifications'),
+                    onNotifications: () => context.push('/staff/notifications'),
                     onProfile: () => context.push('/staff/profile'),
                   ),
                 ),
@@ -85,12 +84,11 @@ class _StaffHomeScreenState extends State<StaffHomeScreen> {
                         children: [
                           Text(l10n.todayTransactions,
                               style: AppTextStyles.headingM),
-                          if ((provider.stats?.recentSales.isNotEmpty ??
-                              false))
+                          if ((provider.stats?.recentSales.isNotEmpty ?? false))
                             Text(
                               '${provider.stats!.mySalesToday} total',
-                              style: AppTextStyles.bodyS.copyWith(
-                                  color: AppColors.textSecondary),
+                              style: AppTextStyles.bodyS
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                         ],
                       ),
@@ -179,8 +177,7 @@ class _HeroHeader extends StatelessWidget {
                       onTap: onNotifications),
                   const SizedBox(height: 4),
                   _HeaderBtn(
-                      icon: Icons.account_circle_outlined,
-                      onTap: onProfile),
+                      icon: Icons.account_circle_outlined, onTap: onProfile),
                 ],
               ),
             ],
@@ -216,9 +213,7 @@ class _StatRow extends StatelessWidget {
   final bool isLoading;
   final AppLocalizations l10n;
   const _StatRow(
-      {required this.stats,
-      required this.isLoading,
-      required this.l10n});
+      {required this.stats, required this.isLoading, required this.l10n});
 
   @override
   Widget build(BuildContext context) => Row(
@@ -236,9 +231,7 @@ class _StatRow extends StatelessWidget {
             child: _StatCard(
               icon: Icons.payments_outlined,
               label: l10n.revenue,
-              value: isLoading
-                  ? '—'
-                  : formatFCFA(stats?.myRevenueToday ?? 0),
+              value: isLoading ? '—' : formatFCFA(stats?.myRevenueToday ?? 0),
               accent: AppColors.staffPrimary,
             ),
           ),
@@ -416,10 +409,8 @@ class _PriceListTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.priceList,
-                        style: AppTextStyles.headingS),
-                    Text(l10n.viewAllProducts,
-                        style: AppTextStyles.bodyS),
+                    Text(l10n.priceList, style: AppTextStyles.headingS),
+                    Text(l10n.viewAllProducts, style: AppTextStyles.bodyS),
                   ],
                 ),
               ),
@@ -451,11 +442,9 @@ class _TransactionList extends StatelessWidget {
                 size: 44, color: Colors.grey[300]),
             const SizedBox(height: 10),
             Text(l10n.noSalesYet,
-                style: AppTextStyles.bodyM
-                    .copyWith(color: Colors.grey[500])),
+                style: AppTextStyles.bodyM.copyWith(color: Colors.grey[500])),
             const SizedBox(height: 4),
-            Text(l10n.transactionsWillAppear,
-                style: AppTextStyles.bodyS),
+            Text(l10n.transactionsWillAppear, style: AppTextStyles.bodyS),
           ],
         ),
       );
@@ -518,8 +507,7 @@ class _TransactionTile extends StatelessWidget {
               child: Text(
                 '#${index + 1}',
                 style: AppTextStyles.labelM.copyWith(
-                    color: AppColors.staffPrimary,
-                    fontWeight: FontWeight.w700),
+                    color: AppColors.staffPrimary, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -563,8 +551,7 @@ class _TransactionTile extends StatelessWidget {
           Text(
             formatFCFA(sale.totalAmount),
             style: AppTextStyles.headingS.copyWith(
-                color:
-                    isCredit ? AppColors.danger : AppColors.staffPrimary),
+                color: isCredit ? AppColors.danger : AppColors.staffPrimary),
           ),
         ],
       ),
@@ -582,18 +569,15 @@ class _ErrorBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.dangerLight,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: AppColors.danger.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: AppColors.danger, size: 18),
+            const Icon(Icons.error_outline, color: AppColors.danger, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(message,
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.danger)),
+                  style: AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
             ),
           ],
         ),

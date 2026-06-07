@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shopkeeper/core/enums/sync_state.dart';
 import 'package:shopkeeper/core/widgets/sync_status_badge.dart';
 
-Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
+Widget _wrap(Widget child) =>
+    MaterialApp(home: Scaffold(body: Center(child: child)));
 
 void main() {
   group('SyncStatusBadge', () {

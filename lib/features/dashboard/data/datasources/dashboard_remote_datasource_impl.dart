@@ -17,7 +17,9 @@ class DashboardRemoteDataSourceImpl implements IDashboardRemoteDataSource {
       return DashboardStatsModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       final d = e.response?.data;
-      final msg = (d is Map ? d['error'] as String? : null) ?? e.message ?? 'Request failed';
+      final msg = (d is Map ? d['error'] as String? : null) ??
+          e.message ??
+          'Request failed';
       throw Exception(msg);
     }
   }

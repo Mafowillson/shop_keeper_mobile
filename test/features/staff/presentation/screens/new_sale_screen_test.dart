@@ -35,8 +35,7 @@ Widget _buildTestApp({
           value: auth ?? FakeAuthProvider(currentUser: testOwner)),
       ChangeNotifierProvider<ProductProvider>.value(
           value: products ?? FakeProductProvider()),
-      ChangeNotifierProvider<CartProvider>.value(
-          value: cart ?? CartProvider()),
+      ChangeNotifierProvider<CartProvider>.value(value: cart ?? CartProvider()),
     ],
     child: MaterialApp.router(routerConfig: _router()),
   );
@@ -67,7 +66,8 @@ void main() {
   });
 
   group('NewSaleScreen — loading state', () {
-    testWidgets('shows CircularProgressIndicator when products are loading', (tester) async {
+    testWidgets('shows CircularProgressIndicator when products are loading',
+        (tester) async {
       final pp = FakeProductProvider(isLoading: true);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pump(); // don't settle — spinner is live
@@ -77,21 +77,24 @@ void main() {
   });
 
   group('NewSaleScreen — empty state', () {
-    testWidgets('shows empty-state icon when product list is empty', (tester) async {
+    testWidgets('shows empty-state icon when product list is empty',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
     });
 
-    testWidgets('shows No products in this category when list is empty', (tester) async {
+    testWidgets('shows No products in this category when list is empty',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle();
 
       expect(find.text('No products in this category'), findsOneWidget);
     });
 
-    testWidgets('shows All category chip when products are present', (tester) async {
+    testWidgets('shows All category chip when products are present',
+        (tester) async {
       final pp = FakeProductProvider(products: [makeProduct()]);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pumpAndSettle();
@@ -102,7 +105,8 @@ void main() {
 
   group('NewSaleScreen — product cards', () {
     testWidgets('shows product name on card', (tester) async {
-      final pp = FakeProductProvider(products: [makeProduct(name: 'Fanta Orange')]);
+      final pp =
+          FakeProductProvider(products: [makeProduct(name: 'Fanta Orange')]);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pumpAndSettle();
 
@@ -117,7 +121,8 @@ void main() {
       expect(find.text('In Stock'), findsOneWidget);
     });
 
-    testWidgets('shows Out of Stock chip for product with zero stock', (tester) async {
+    testWidgets('shows Out of Stock chip for product with zero stock',
+        (tester) async {
       final pp = FakeProductProvider(products: [makeProduct(stock: 0)]);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pumpAndSettle();
@@ -143,7 +148,8 @@ void main() {
     });
 
     testWidgets('shows product category chip', (tester) async {
-      final pp = FakeProductProvider(products: [makeProduct(category: 'Drinks')]);
+      final pp =
+          FakeProductProvider(products: [makeProduct(category: 'Drinks')]);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pumpAndSettle();
 
@@ -153,8 +159,10 @@ void main() {
   });
 
   group('NewSaleScreen — search', () {
-    testWidgets('shows no-match empty state when search finds nothing', (tester) async {
-      final pp = FakeProductProvider(products: [makeProduct(name: 'Fanta Orange')]);
+    testWidgets('shows no-match empty state when search finds nothing',
+        (tester) async {
+      final pp =
+          FakeProductProvider(products: [makeProduct(name: 'Fanta Orange')]);
       await tester.pumpWidget(_buildTestApp(products: pp));
       await tester.pumpAndSettle();
 
@@ -166,14 +174,16 @@ void main() {
   });
 
   group('NewSaleScreen — cart integration', () {
-    testWidgets('checkout bar is not visible when cart is empty', (tester) async {
+    testWidgets('checkout bar is not visible when cart is empty',
+        (tester) async {
       await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle();
 
       expect(find.text('Checkout'), findsNothing);
     });
 
-    testWidgets('checkout bar appears after adding item to cart', (tester) async {
+    testWidgets('checkout bar appears after adding item to cart',
+        (tester) async {
       final cart = CartProvider();
       final product = makeProduct(stock: 10);
       cart.addToCart(product,
@@ -216,7 +226,8 @@ void main() {
       expect(find.textContaining('FCFA 500'), findsWidgets);
     });
 
-    testWidgets('cart icon badge shows count when cart is not empty', (tester) async {
+    testWidgets('cart icon badge shows count when cart is not empty',
+        (tester) async {
       final cart = CartProvider();
       final product = makeProduct(stock: 10);
       cart.addToCart(product,

@@ -12,15 +12,13 @@ class ChatRepositoryImpl implements IChatRepository {
   const ChatRepositoryImpl(this._remote);
 
   @override
-  TaskEither<Failure, String> sendMessage(String msg) =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, String> sendMessage(String msg) => TaskEither.tryCatch(
         () => _remote.sendMessage(msg),
         (e, _) => ServerFailure('$e'),
       );
 
   @override
-  TaskEither<Failure, List<ChatMessage>> loadHistory() =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, List<ChatMessage>> loadHistory() => TaskEither.tryCatch(
         () async {
           final models = await _remote.loadHistory();
           return models.map((m) => m.toEntity()).toList();
@@ -29,8 +27,7 @@ class ChatRepositoryImpl implements IChatRepository {
       );
 
   @override
-  TaskEither<Failure, Unit> clearHistory() =>
-      TaskEither.tryCatch(
+  TaskEither<Failure, Unit> clearHistory() => TaskEither.tryCatch(
         () async {
           await _remote.clearHistory();
           return unit;

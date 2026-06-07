@@ -49,8 +49,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
   bool _isLoadingProduct = false;
 
   static const _categories = [
-    'Beverages', 'Snacks & Sweets', 'Grains & Staples',
-    'Dairy & Eggs', 'Cleaning & Hygiene', 'Household', 'Toiletries', 'Other',
+    'Beverages',
+    'Snacks & Sweets',
+    'Grains & Staples',
+    'Dairy & Eggs',
+    'Cleaning & Hygiene',
+    'Household',
+    'Toiletries',
+    'Other',
   ];
 
   bool get _isNew => widget.productId == null;
@@ -90,7 +96,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void dispose() {
     _nameController.dispose();
     _thresholdController.dispose();
-    for (final e in _units) { e.dispose(); }
+    for (final e in _units) {
+      e.dispose();
+    }
     super.dispose();
   }
 
@@ -116,7 +124,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _nameController.text = p.name;
     _selectedCategory = p.category;
     _thresholdController.text = p.lowStockThreshold.toString();
-    for (final e in _units) { e.dispose(); }
+    for (final e in _units) {
+      e.dispose();
+    }
     _units = [];
     for (final u in p.units) {
       _addEntry(_UnitEntry(
@@ -147,8 +157,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     final baseCount = _units.where((e) => e.isBase).length;
     if (baseCount == 0) {
-      SnackBarHelper.showError(context,
-          'One unit must have quantity-in-base = 1 (the base unit).');
+      SnackBarHelper.showError(
+          context, 'One unit must have quantity-in-base = 1 (the base unit).');
       return;
     }
     if (baseCount > 1) {
@@ -157,8 +167,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       return;
     }
 
-    final names =
-        _units.map((e) => e.name.text.trim().toLowerCase()).toList();
+    final names = _units.map((e) => e.name.text.trim().toLowerCase()).toList();
     if (names.toSet().length != names.length) {
       SnackBarHelper.showError(context, 'Unit names must be unique.');
       return;
@@ -174,8 +183,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
             ))
         .toList();
 
-    final baseUnitName =
-        units.firstWhere((u) => u.quantityInBase == 1).name;
+    final baseUnitName = units.firstWhere((u) => u.quantityInBase == 1).name;
 
     Map<String, int>? initialStock;
     if (_isNew) {
@@ -187,8 +195,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       }
     }
 
-    final shopId =
-        context.read<AuthProvider>().currentUser?.shopId ?? '';
+    final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
 
     final product = Product(
       id: widget.productId ?? '',
@@ -198,28 +205,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
       baseUnit: baseUnitName,
       units: units,
       stockQty: 0,
-      lowStockThreshold:
-          int.tryParse(_thresholdController.text.trim()) ?? 0,
+      lowStockThreshold: int.tryParse(_thresholdController.text.trim()) ?? 0,
       isActive: true,
       initialStock: initialStock,
     );
 
-    final saved =
-        await context.read<ProductProvider>().saveProduct(product);
+    final saved = await context.read<ProductProvider>().saveProduct(product);
 
     if (!mounted) return;
 
     if (saved != null) {
       SnackBarHelper.showSuccess(
         context,
-        _isNew
-            ? l10n.productCreatedSuccessfully
-            : l10n.productUpdated,
+        _isNew ? l10n.productCreatedSuccessfully : l10n.productUpdated,
       );
       Navigator.of(context).pop();
     } else {
-      final err = context.read<ProductProvider>().errorMessage ??
-          l10n.error;
+      final err = context.read<ProductProvider>().errorMessage ?? l10n.error;
       SnackBarHelper.showError(context, err);
     }
   }
@@ -233,8 +235,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(title,
-            style:
-                AppTextStyles.headingL.copyWith(color: Colors.white)),
+            style: AppTextStyles.headingL.copyWith(color: Colors.white)),
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -258,29 +259,24 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     label: l10n.productName,
                     hintText: 'e.g. Top Cube Sugar',
                     controller: _nameController,
-                    prefixIcon: const Icon(Icons.storefront_outlined,
-                        size: 20),
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? l10n.required
-                        : null,
+                    prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? l10n.required : null,
                   ),
                   const SizedBox(height: 12),
                   _CategoryDropdown(
                     selected: _selectedCategory,
                     categories: _categories,
                     label: l10n.category,
-                    onChanged: (v) =>
-                        setState(() => _selectedCategory = v),
+                    onChanged: (v) => setState(() => _selectedCategory = v),
                   ),
                   const SizedBox(height: 24),
-
                   _SectionHeader(
                     icon: Icons.layers_outlined,
                     title: l10n.units,
                     subtitle: l10n.howManyBaseUnits,
                   ),
                   const SizedBox(height: 12),
-
                   ..._units.asMap().entries.map(
                         (e) => _UnitCard(
                           index: e.key,
@@ -292,14 +288,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           l10n: l10n,
                         ),
                       ),
-
                   if (_units.length < 5)
                     Padding(
                       padding: const EdgeInsets.only(top: 4, bottom: 8),
                       child: TextButton.icon(
                         onPressed: _addUnit,
-                        icon: const Icon(Icons.add_circle_outline,
-                            size: 18),
+                        icon: const Icon(Icons.add_circle_outline, size: 18),
                         label: Text(l10n.addAnotherUnit,
                             style: AppTextStyles.labelL),
                         style: TextButton.styleFrom(
@@ -310,7 +304,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       ),
                     ),
                   const SizedBox(height: 8),
-
                   if (_isNew) ...[
                     _SectionHeader(
                       icon: Icons.warehouse_outlined,
@@ -328,7 +321,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-
                   if (!_isNew) ...[
                     _SectionHeader(
                       icon: Icons.inventory_2_outlined,
@@ -343,7 +335,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-
                   _SectionHeader(
                     icon: Icons.warning_amber_outlined,
                     title: l10n.lowStockAlert,
@@ -356,15 +347,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     hintText: 'e.g. 5',
                     controller: _thresholdController,
                     keyboardType: TextInputType.number,
-                    prefixIcon: const Icon(Icons.notifications_outlined,
-                        size: 20),
-                    validator: (v) =>
-                        int.tryParse(v?.trim() ?? '') == null
-                            ? l10n.enterWholeNumber
-                            : null,
+                    prefixIcon:
+                        const Icon(Icons.notifications_outlined, size: 20),
+                    validator: (v) => int.tryParse(v?.trim() ?? '') == null
+                        ? l10n.enterWholeNumber
+                        : null,
                   ),
                   const SizedBox(height: 32),
-
                   Consumer<ProductProvider>(
                     builder: (_, provider, __) => Row(
                       children: [
@@ -381,8 +370,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           child: AppButton.primary(
                             label: l10n.save,
                             isLoading: provider.isSaving,
-                            onPressed:
-                                provider.isSaving ? null : _submit,
+                            onPressed: provider.isSaving ? null : _submit,
                           ),
                         ),
                       ],
@@ -398,8 +386,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
               child: Container(
                 color: Colors.black12,
                 child: const Center(
-                  child: CircularProgressIndicator(
-                      color: AppColors.ownerPrimary),
+                  child:
+                      CircularProgressIndicator(color: AppColors.ownerPrimary),
                 ),
               ),
             ),
@@ -455,8 +443,7 @@ class _UnitCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: isBase
                   ? AppColors.ownerPrimary.withValues(alpha: 0.06)
@@ -474,8 +461,8 @@ class _UnitCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 if (isBase)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.ownerPrimary,
                       borderRadius: BorderRadius.circular(6),
@@ -519,10 +506,9 @@ class _UnitCard extends StatelessWidget {
                         hintText: 'e.g. carton',
                         controller: entry.name,
                         onChanged: (_) => onChanged(),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty
-                                ? l10n.required
-                                : null,
+                        validator: (v) => v == null || v.trim().isEmpty
+                            ? l10n.required
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -549,22 +535,19 @@ class _UnitCard extends StatelessWidget {
                   hintText: 'e.g. 21000',
                   controller: entry.price,
                   keyboardType: TextInputType.number,
-                  prefixIcon:
-                      const Icon(Icons.sell_outlined, size: 18),
+                  prefixIcon: const Icon(Icons.sell_outlined, size: 18),
                   validator: (v) {
-                    final n = double.tryParse(
-                        v?.replaceAll(',', '').trim() ?? '');
+                    final n =
+                        double.tryParse(v?.replaceAll(',', '').trim() ?? '');
                     if (n == null || n <= 0) return l10n.mustBePositive;
                     return null;
                   },
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  isBase
-                      ? l10n.baseUnitHint
-                      : l10n.howManyBaseUnits,
-                  style: AppTextStyles.labelS
-                      .copyWith(color: AppColors.textHint),
+                  isBase ? l10n.baseUnitHint : l10n.howManyBaseUnits,
+                  style:
+                      AppTextStyles.labelS.copyWith(color: AppColors.textHint),
                 ),
               ],
             ),
@@ -604,8 +587,7 @@ class _OpeningStockSection extends StatelessWidget {
         children: [
           ...units.asMap().entries.map((e) {
             final unitName = e.value.name.text.trim();
-            final label =
-                unitName.isEmpty ? 'Unit ${e.key + 1}' : unitName;
+            final label = unitName.isEmpty ? 'Unit ${e.key + 1}' : unitName;
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
@@ -616,9 +598,8 @@ class _OpeningStockSection extends StatelessWidget {
                       label,
                       style: AppTextStyles.labelL.copyWith(
                         color: AppColors.textPrimary,
-                        fontWeight: e.value.isBase
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                        fontWeight:
+                            e.value.isBase ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -661,8 +642,7 @@ class _OpeningStockSection extends StatelessWidget {
 class _CurrentStockSection extends StatelessWidget {
   final String productId;
   final AppLocalizations l10n;
-  const _CurrentStockSection(
-      {required this.productId, required this.l10n});
+  const _CurrentStockSection({required this.productId, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -808,8 +788,7 @@ class _CategoryDropdown extends StatelessWidget {
                 isExpanded: true,
                 items: categories
                     .map((c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(c, style: AppTextStyles.bodyM)))
+                        value: c, child: Text(c, style: AppTextStyles.bodyM)))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) onChanged(v);
