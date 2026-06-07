@@ -1,6 +1,7 @@
 name: shopkeeper
 description: ShopKeeper - Mobile Shop Management System with Clean Architecture
 publish_to: 'none'
+version: 1.0.0+2
 
 environment:
   sdk: '>=3.5.0 <4.0.0'
