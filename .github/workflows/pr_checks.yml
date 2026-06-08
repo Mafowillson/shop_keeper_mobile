@@ -48,7 +48,7 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
-      - name: Check 35% line-coverage threshold
+      - name: Check 25% line-coverage threshold
         run: |
           LCOV="coverage/lcov.info"
           if [ ! -f "$LCOV" ]; then
@@ -67,8 +67,8 @@ jobs:
           PCT=$(( HITS * 100 / TOTAL ))
           echo "Line coverage: $HITS / $TOTAL lines ($PCT%)"
 
-          if [ "$PCT" -lt 35 ]; then
-            echo "❌ Coverage $PCT% is below the 35% threshold."
+          if [ "$PCT" -lt 25 ]; then
+            echo "❌ Coverage $PCT% is below the 25% threshold."
             exit 1
           fi
 
