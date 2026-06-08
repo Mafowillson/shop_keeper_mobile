@@ -6,6 +6,7 @@ import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
+import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/staff/presentation/providers/staff_provider.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
 
@@ -43,11 +44,13 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
     final l10n = AppLocalizations.of(context)!;
     FocusScope.of(context).unfocus();
 
+    final shopId = context.read<AuthProvider>().currentUser?.shopId;
     final provider = context.read<StaffProvider>();
     final success = await provider.createStaff(
       name: _nameController.text.trim(),
       email: _emailController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
+      shopId: shopId,
     );
 
     if (!mounted) return;
@@ -86,7 +89,7 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
               const SizedBox(height: 16),
               AppTextField(
                 label: l10n.fullName,
-                hintText: 'e.g. Jean-Paul Mbassi',
+                hintText: l10n.hintExFullName,
                 controller: _nameController,
                 prefixIcon: const Icon(Icons.badge_outlined,
                     color: AppColors.textSecondary),
@@ -100,7 +103,7 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
               const SizedBox(height: 16),
               AppTextField(
                 label: l10n.emailAddress,
-                hintText: 'e.g. staff@example.com',
+                hintText: l10n.hintExEmail,
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined,
@@ -115,7 +118,7 @@ class _CreateStaffScreenState extends State<CreateStaffScreen> {
               const SizedBox(height: 16),
               AppTextField(
                 label: l10n.phoneNumber,
-                hintText: 'e.g. 237612345678',
+                hintText: l10n.hintExPhoneIntl,
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 prefixIcon: const Icon(Icons.phone_outlined,

@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_remote_datasource.dart';
 import 'package:shopkeeper/features/auth/data/models/user_model.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
 
 @LazySingleton(as: IAuthRemoteDataSource)
 class AuthRemoteDataSource implements IAuthRemoteDataSource {
@@ -162,6 +163,58 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
         name: shop['name'] as String? ?? '',
         description: shop['description'] as String? ?? '',
       );
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
+  @override
+  Future<void> updateShop({
+    required String shopId,
+    required String name,
+    required String description,
+  }) async {
+    try {
+      await _dio.put(
+        '/shops/$shopId',
+        data: {'name': name, 'description': description},
+      );
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
+  @override
+  Future<({String name, String description})> fetchShopById(
+      String shopId) async {
+    try {
+      final res = await _dio.get('/shops/$shopId');
+      return (
+        name: res.data['name'] as String? ?? '',
+        description: res.data['description'] as String? ?? '',
+      );
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
+  @override
+  Future<List<ShopSummary>> fetchAllShops() async {
+    try {
+      final res = await _dio.get(
+        '/shops',
+        queryParameters: {'page': 1, 'page_size': 100},
+      );
+      final shops = res.data['shops'] as List<dynamic>? ?? [];
+      return shops.map((e) {
+        final m = e as Map<String, dynamic>;
+        return ShopSummary(
+          id: m['id'] as String? ?? '',
+          name: m['name'] as String? ?? '',
+          description: m['description'] as String? ?? '',
+          isActive: m['is_active'] as bool? ?? true,
+        );
+      }).toList();
     } on DioException catch (e) {
       throw _toException(e);
     }

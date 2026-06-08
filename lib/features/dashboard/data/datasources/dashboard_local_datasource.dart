@@ -12,10 +12,10 @@ class DashboardLocalDataSource {
 
   Box get _box => Hive.box(HiveBoxes.dashboard);
 
-  static const _key = 'stats';
+  String _key(String shopId) => 'stats:$shopId';
 
-  DashboardStatsModel? getStats() {
-    final raw = _box.get(_key) as String?;
+  DashboardStatsModel? getStats(String shopId) {
+    final raw = _box.get(_key(shopId)) as String?;
     if (raw == null) return null;
     try {
       return DashboardStatsModel.fromJson(
@@ -25,13 +25,17 @@ class DashboardLocalDataSource {
     }
   }
 
-  Future<void> saveStats(DashboardStatsModel model) async {
-    await _box.put(_key, jsonEncode(model.toJson()));
+  Future<void> saveStats(DashboardStatsModel model, String shopId) async {
+    await _box.put(_key(shopId), jsonEncode(model.toJson()));
     await _metadata.saveTimestamp(HiveBoxes.dashboard);
   }
 
-  Future<void> invalidate() async {
-    await _box.clear();
+  Future<void> invalidate({String? shopId}) async {
+    if (shopId == null || shopId.isEmpty) {
+      await _box.clear();
+    } else {
+      await _box.delete(_key(shopId));
+    }
     await _metadata.clearTimestamp(HiveBoxes.dashboard);
   }
 

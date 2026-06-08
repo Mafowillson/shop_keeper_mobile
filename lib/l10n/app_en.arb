@@ -44,6 +44,19 @@
   "enterValidEmailAddress": "Enter a valid email address",
   "enterValidPhone": "Enter a valid phone number (min 9 digits)",
 
+  "hintEmail": "your@email.com",
+  "hintExEmail": "e.g. your@email.com",
+  "hintExFullName": "e.g. Jean-Paul Mbassi",
+  "hintExPhone": "e.g. 677 000 000",
+  "hintExPhoneIntl": "e.g. 237612345678",
+  "hintExShopName": "e.g. Willson's Boutique",
+  "hintExShopLocation": "e.g. Bamenda, Cameroon",
+  "hintExProductName": "e.g. Top Cube Sugar",
+  "hintExUnitName": "e.g. carton",
+  "hintExThreshold": "e.g. 5",
+  "hintExQtyInBase": "e.g. 25",
+  "hintExPrice": "e.g. 21 000",
+
   "welcomeBack": "Welcome back",
   "signInToContinue": "Sign in to continue",
   "signIn": "Sign In",
@@ -124,6 +137,24 @@
   "quickActions": "Quick Actions",
   "recentActivity": "Recent Activity",
   "noRecentActivity": "No recent activity",
+  "timeAgoMinutes": "{count}m ago",
+  "@timeAgoMinutes": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoHours": "{count}h ago",
+  "@timeAgoHours": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "timeAgoDays": "{count}d ago",
+  "@timeAgoDays": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "stockOk": "Stock OK",
   "noDebts": "No debts",
   "addProduct": "Add Product",
@@ -137,12 +168,21 @@
   "productCreatedSuccessfully": "Product created successfully",
   "productUpdated": "Product updated",
   "category": "Category",
+  "categoryBeverages": "Beverages",
+  "categorySnacksSweets": "Snacks & Sweets",
+  "categoryGrainsStaples": "Grains & Staples",
+  "categoryDairyEggs": "Dairy & Eggs",
+  "categoryCleaningHygiene": "Cleaning & Hygiene",
+  "categoryHousehold": "Household",
+  "categoryToiletries": "Toiletries",
+  "categoryOther": "Other",
   "productInfo": "Product Info",
   "nameAndCategory": "Name and category",
   "units": "Units",
   "unitName": "Unit name",
   "qtyInBase": "Qty in base",
   "priceFCFA": "Price (FCFA)",
+  "perUnit": "/ unit",
   "addAnotherUnit": "Add another unit",
   "openingStock": "Opening Stock",
   "currentStock": "Current Stock",
@@ -169,6 +209,38 @@
       "name": { "type": "String" }
     }
   },
+  "unitsFallback": "units",
+  "baseUnitBadge": "BASE",
+  "openingStockSubtitle": "Enter how much you have now — leave blank if starting at zero",
+  "currentStockSubtitle": "Stock is updated automatically when sales are recorded",
+  "errorOneUnitMustBeBase": "One unit must have quantity-in-base = 1 (the base unit).",
+  "errorOnlyOneBase": "Only one unit can have quantity-in-base = 1.",
+  "errorUnitNamesUnique": "Unit names must be unique.",
+  "unitNumber": "Unit {number}",
+  "@unitNumber": {
+    "placeholders": {
+      "number": { "type": "int" }
+    }
+  },
+  "stockTotal": "Total: {count} {unit}",
+  "@stockTotal": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "unit": { "type": "String" }
+    }
+  },
+  "lowStockAlertSubtitle": "Alert when stock falls below this many {unit}",
+  "@lowStockAlertSubtitle": {
+    "placeholders": {
+      "unit": { "type": "String" }
+    }
+  },
+  "thresholdLabel": "Threshold (in {unit})",
+  "@thresholdLabel": {
+    "placeholders": {
+      "unit": { "type": "String" }
+    }
+  },
 
   "newSale": "New Sale",
   "salesHistory": "Sales History",
@@ -188,10 +260,23 @@
   "fullAmountAsDebt": "Full amount will be recorded as debt.",
   "checkout": "Checkout",
   "proceedToPayment": "Proceed to Payment",
+  "all": "All",
   "clearAll": "Clear all",
   "cart": "Cart",
   "cartIsEmpty": "Cart is empty",
   "noSalesFound": "No sales found",
+  "saleRef": "Sale #{ref}",
+  "@saleRef": {
+    "placeholders": {
+      "ref": { "type": "String" }
+    }
+  },
+  "itemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
   "saleRecorded": "Sale Recorded",
   "paymentSuccessful": "Payment Successful!",
   "receipt": "Receipt",
@@ -467,5 +552,28 @@
   "actions": "Actions",
   "createLoginCredentialsForNewStaff": "Create login credentials for new staff",
   "managePreferencesAndSecurity": "Manage preferences and security",
-  "manageAppPreferences": "Manage app preferences"
+  "manageAppPreferences": "Manage app preferences",
+
+  "editShopDetails": "Edit Shop Details",
+  "editShopSubtitle": "Update shop name and description",
+  "editShop": "Edit Shop",
+  "shopUpdatedSuccessfully": "Shop updated successfully",
+  "createNewShop": "Create New Shop",
+  "createNewShopSubtitle": "Register an additional shop for your account",
+  "hintExShopDescription": "e.g. Your everyday essentials store",
+
+  "yourShops": "Your Shops",
+  "switchShop": "Switch",
+  "switchedToShop": "Switched to {name}",
+  "@switchedToShop": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "switchingToShop": "Switching to {name}",
+  "@switchingToShop": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  }
 }

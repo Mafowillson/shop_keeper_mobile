@@ -60,6 +60,12 @@ import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.
     as _i1019;
 import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart'
     as _i579;
+import 'package:shopkeeper/features/auth/domain/usecases/fetch_all_shops_usecase.dart'
+    as _i482;
+import 'package:shopkeeper/features/auth/domain/usecases/switch_active_shop_usecase.dart'
+    as _i774;
+import 'package:shopkeeper/features/auth/domain/usecases/update_shop_usecase.dart'
+    as _i631;
 import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart'
     as _i414;
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart'
@@ -260,6 +266,12 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i751.ForgotPasswordUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i723.GetShopInfoUseCase>(
         () => _i723.GetShopInfoUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i631.UpdateShopUseCase>(
+        () => _i631.UpdateShopUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i482.FetchAllShopsUseCase>(
+        () => _i482.FetchAllShopsUseCase(gh<_i696.IAuthRepository>()));
+    gh.lazySingleton<_i774.SwitchActiveShopUseCase>(
+        () => _i774.SwitchActiveShopUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i917.LoginUseCase>(
         () => _i917.LoginUseCase(gh<_i696.IAuthRepository>()));
     gh.lazySingleton<_i894.LogoutUseCase>(
@@ -297,6 +309,9 @@ extension GetItInjectableX on _i174.GetIt {
           gh<_i414.VerifyEmailUseCase>(),
           gh<_i1025.ResendVerificationUseCase>(),
           gh<_i723.GetShopInfoUseCase>(),
+          gh<_i631.UpdateShopUseCase>(),
+          gh<_i482.FetchAllShopsUseCase>(),
+          gh<_i774.SwitchActiveShopUseCase>(),
         ));
     gh.factory<_i50.StaffDashboardProvider>(() =>
         _i50.StaffDashboardProvider(gh<_i454.GetStaffDashboardUseCase>()));

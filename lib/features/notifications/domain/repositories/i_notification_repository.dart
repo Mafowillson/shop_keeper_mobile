@@ -4,7 +4,8 @@ import 'package:shopkeeper/features/notifications/domain/entities/app_notificati
 
 abstract class INotificationRepository {
   TaskEither<Failure, List<AppNotification>> getNotifications(
-      {bool isStaff = false});
+      {bool isStaff = false, String? shopId});
   TaskEither<Failure, Unit> markAsRead(String id, {bool isStaff = false});
-  TaskEither<Failure, Unit> markAllAsRead({bool isStaff = false});
+  TaskEither<Failure, Unit> markAllAsRead(
+      {bool isStaff = false, String? shopId});
 }

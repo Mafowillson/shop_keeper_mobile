@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // ── Email ───────────────────────────────────────
                       AppTextField(
                         label: l10n.email,
-                        hintText: 'your@email.com',
+                        hintText: l10n.hintEmail,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: const Icon(Icons.email_outlined,
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // ── Password / Phone ────────────────────────────
                       AppTextField(
                         label: _isStaff ? l10n.phoneNumber : l10n.password,
-                        hintText: _isStaff ? 'e.g. 677 000 000' : '••••••••',
+                        hintText: _isStaff ? l10n.hintExPhone : '••••••••',
                         controller: _credentialController,
                         keyboardType: _isStaff
                             ? TextInputType.phone

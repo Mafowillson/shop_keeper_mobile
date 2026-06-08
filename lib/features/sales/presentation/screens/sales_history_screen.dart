@@ -40,6 +40,17 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     return all;
   }
 
+  String _filterLabel(String sentinel, AppLocalizations l10n) {
+    switch (sentinel) {
+      case 'Cash':
+        return l10n.cash;
+      case 'Credit':
+        return l10n.credit;
+      default:
+        return l10n.all;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -97,7 +108,7 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
-                        label: Text(f),
+                        label: Text(_filterLabel(f, l10n)),
                         selected: sel,
                         onSelected: (_) => setState(() => _filter = f),
                         selectedColor: AppColors.ownerPrimary,
@@ -274,7 +285,8 @@ class _SaleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fmt = DateFormat('dd MMM yyyy • HH:mm');
+    final locale = Localizations.localeOf(context).languageCode;
+    final fmt = DateFormat('dd MMM yyyy • HH:mm', locale);
     final typeColor = sale.isCredit ? AppColors.warning : AppColors.success;
     final typeLabel = sale.isCredit ? l10n.credit : l10n.cash;
     final statusColor = sale.isPaid ? AppColors.success : AppColors.warning;
@@ -300,7 +312,7 @@ class _SaleCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Sale #${sale.id.substring(0, 8).toUpperCase()}',
+                        l10n.saleRef(sale.id.substring(0, 8).toUpperCase()),
                         style: AppTextStyles.bodyM
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
@@ -325,7 +337,7 @@ class _SaleCard extends StatelessWidget {
                       .copyWith(color: AppColors.ownerPrimary),
                 ),
                 Text(
-                  '${sale.items.length} item${sale.items.length == 1 ? '' : 's'}',
+                  l10n.itemCount(sale.items.length),
                   style: AppTextStyles.bodyS,
                 ),
               ],

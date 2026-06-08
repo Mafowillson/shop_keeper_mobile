@@ -39,7 +39,7 @@ class NotificationLocalDataSource {
     if (raw == null) return;
     try {
       final json = jsonDecode(raw) as Map<String, dynamic>;
-      json['is_read'] = true;
+      json['read'] = true;
       await _box.put(id, jsonEncode(json));
     } catch (_) {}
   }
@@ -51,7 +51,7 @@ class NotificationLocalDataSource {
       if (raw == null) continue;
       try {
         final json = jsonDecode(raw) as Map<String, dynamic>;
-        json['is_read'] = true;
+        json['read'] = true;
         updates[key as String] = jsonEncode(json);
       } catch (_) {}
     }

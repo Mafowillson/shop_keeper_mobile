@@ -149,7 +149,6 @@ class DebtProvider extends ChangeNotifier {
       (c) {
         created = c;
         _customers = [c, ..._customers];
-        _metadata.saveTimestamp(HiveBoxes.customers);
       },
     );
 
@@ -183,7 +182,6 @@ class DebtProvider extends ChangeNotifier {
                 .clamp(0, double.infinity),
           );
         }
-        _metadata.saveTimestamp(HiveBoxes.customers);
       },
     );
 

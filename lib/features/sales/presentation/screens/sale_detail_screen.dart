@@ -63,7 +63,8 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
           final sale = provider.currentSale;
           if (sale == null) return const SizedBox();
 
-          final fmt = DateFormat('dd MMM yyyy • HH:mm');
+          final locale = Localizations.localeOf(context).languageCode;
+          final fmt = DateFormat('dd MMM yyyy • HH:mm', locale);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -156,7 +157,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                                           fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      '${l10n.fcfa} ${sale.items[i].unitPrice.toStringAsFixed(0)} / unit',
+                                      '${l10n.fcfa} ${sale.items[i].unitPrice.toStringAsFixed(0)} ${l10n.perUnit}',
                                       style: AppTextStyles.bodyS,
                                     ),
                                   ],

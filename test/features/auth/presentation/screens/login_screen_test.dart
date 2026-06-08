@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/login_screen.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 import '../../../../helpers/fake_providers.dart';
 
@@ -29,7 +30,11 @@ GoRouter _router() => GoRouter(
 Widget _buildTestApp(FakeAuthProvider auth) =>
     ChangeNotifierProvider<AuthProvider>.value(
       value: auth,
-      child: MaterialApp.router(routerConfig: _router()),
+      child: MaterialApp.router(
+        routerConfig: _router(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
     );
 
 void main() {

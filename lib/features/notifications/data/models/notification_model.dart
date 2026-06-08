@@ -29,7 +29,7 @@ class NotificationModel {
         type: _typeFromString(json['type'] as String? ?? ''),
         title: json['title'] as String,
         body: json['body'] as String,
-        isRead: json['read'] as bool? ?? false,
+        isRead: json['read'] as bool? ?? json['is_read'] as bool? ?? false,
         createdAt: DateTime.parse(json['created_at'] as String),
         relatedId: null,
       );
@@ -61,7 +61,7 @@ class NotificationModel {
         'type': type.toString().split('.').last,
         'title': title,
         'body': body,
-        'is_read': isRead,
+        'read': isRead,
         'created_at': createdAt.toIso8601String(),
         'related_id': relatedId,
       };

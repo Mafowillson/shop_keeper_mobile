@@ -1,8 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/widgets/app_button.dart';
+import 'package:shopkeeper/core/widgets/app_text_field.dart';
+import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
+import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
+import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
@@ -19,7 +28,9 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthProvider>().refreshShopInfo();
+      final auth = context.read<AuthProvider>();
+      auth.refreshShopInfo();
+      auth.fetchAllShops();
     });
   }
 
@@ -54,7 +65,44 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
               children: [
                 _StatsStrip(user: user),
                 const SizedBox(height: 24),
-                _SectionLabel(l10n.accountDetails),
+                _ShopsSection(
+                  onSwitch: (shop) => _switchShop(context, shop),
+                ),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(l10n.accountDetails,
+                            style: AppTextStyles.headingM),
+                      ),
+                      GestureDetector(
+                        onTap: () => _showEditShopSheet(context, user),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.ownerPrimary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.edit_outlined,
+                                  size: 13, color: AppColors.ownerPrimary),
+                              const SizedBox(width: 4),
+                              Text(l10n.edit,
+                                  style: AppTextStyles.labelL
+                                      .copyWith(color: AppColors.ownerPrimary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 10),
                 _InfoCard(rows: [
                   _InfoRow(
@@ -83,6 +131,13 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
                 _SectionLabel(l10n.quickActions),
                 const SizedBox(height: 10),
                 _ActionCard(tiles: [
+                  _ActionTileData(
+                    icon: Icons.add_business_outlined,
+                    label: l10n.createNewShop,
+                    subtitle: l10n.createNewShopSubtitle,
+                    color: AppColors.ownerPrimary,
+                    onTap: () => _showCreateShopSheet(context),
+                  ),
                   _ActionTileData(
                     icon: Icons.person_add_alt_1_outlined,
                     label: l10n.addStaffMember,
@@ -116,6 +171,66 @@ class _OwnerProfileScreenState extends State<OwnerProfileScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _switchShop(BuildContext context, ShopSummary shop) async {
+    // Capture providers + overlay before any async gap.
+    final auth = context.read<AuthProvider>();
+    final dashboard = context.read<DashboardProvider>();
+    final products = context.read<ProductProvider>();
+    final notifications = context.read<NotificationProvider>();
+    final l10n = AppLocalizations.of(context)!;
+    final overlayState = Overlay.of(context, rootOverlay: true);
+
+    final entry = OverlayEntry(
+      builder: (_) =>
+          _ShopSwitchOverlay(label: l10n.switchingToShop(shop.name)),
+    );
+    overlayState.insert(entry);
+
+    try {
+      await auth.switchShop(shop);
+      await Future.wait([
+        dashboard.invalidateCache(shopId: shop.id),
+        products.invalidateCache(),
+        notifications.invalidateCache(),
+      ]);
+      // Reload notifications in the background for the new shop so the
+      // badge count updates immediately without blocking the transition.
+      unawaited(notifications.loadNotifications(shopId: shop.id));
+      if (context.mounted) context.go('/owner/dashboard');
+    } finally {
+      entry.remove();
+    }
+  }
+
+  Future<void> _showEditShopSheet(BuildContext context, User? user) async {
+    final refreshed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditShopSheet(
+        initialName: user?.shopName ?? '',
+        initialDescription: user?.shopDescription ?? '',
+      ),
+    );
+    if (refreshed == true && context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      SnackBarHelper.showSuccess(context, l10n.shopUpdatedSuccessfully);
+    }
+  }
+
+  Future<void> _showCreateShopSheet(BuildContext context) async {
+    final created = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _CreateShopSheet(),
+    );
+    if (created == true && context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      SnackBarHelper.showSuccess(context, l10n.shopRegisteredSuccessfully);
+    }
   }
 
   Future<void> _confirmLogout(BuildContext context) async {
@@ -668,6 +783,454 @@ class _SignOutSheet extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Shop-switch loading overlay ───────────────────────────────────────────────
+
+class _ShopSwitchOverlay extends StatelessWidget {
+  final String label;
+
+  const _ShopSwitchOverlay({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.55),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 48),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(
+                color: AppColors.ownerPrimary,
+                strokeWidth: 3,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                label,
+                style: AppTextStyles.headingS,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Your shops section ────────────────────────────────────────────────────────
+
+class _ShopsSection extends StatelessWidget {
+  final void Function(ShopSummary shop) onSwitch;
+
+  const _ShopsSection({required this.onSwitch});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final auth = context.watch<AuthProvider>();
+    final shops = auth.shops;
+    final activeShopId = auth.currentUser?.shopId ?? '';
+
+    if (shops.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(l10n.yourShops, style: AppTextStyles.headingM),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < shops.length; i++) ...[
+                  _ShopRow(
+                    shop: shops[i],
+                    isActive: shops[i].id == activeShopId,
+                    onSwitch: onSwitch,
+                  ),
+                  if (i < shops.length - 1)
+                    const Divider(height: 1, indent: 56, endIndent: 0),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ShopRow extends StatelessWidget {
+  final ShopSummary shop;
+  final bool isActive;
+  final void Function(ShopSummary) onSwitch;
+
+  const _ShopRow({
+    required this.shop,
+    required this.isActive,
+    required this.onSwitch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? AppColors.ownerPrimary.withValues(alpha: 0.10)
+                  : AppColors.background,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.storefront_outlined,
+              size: 18,
+              color:
+                  isActive ? AppColors.ownerPrimary : AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  shop.name,
+                  style: AppTextStyles.bodyM.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isActive
+                        ? AppColors.ownerPrimary
+                        : AppColors.textPrimary,
+                  ),
+                ),
+                if (shop.description.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    shop.description,
+                    style: AppTextStyles.bodyS
+                        .copyWith(color: AppColors.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          if (isActive)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                l10n.active,
+                style: AppTextStyles.labelL.copyWith(color: AppColors.success),
+              ),
+            )
+          else
+            GestureDetector(
+              onTap: () => onSwitch(shop),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.ownerPrimary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  l10n.switchShop,
+                  style: AppTextStyles.labelL
+                      .copyWith(color: AppColors.ownerPrimary),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Edit shop bottom sheet ────────────────────────────────────────────────────
+
+class _EditShopSheet extends StatefulWidget {
+  final String initialName;
+  final String initialDescription;
+
+  const _EditShopSheet({
+    required this.initialName,
+    required this.initialDescription,
+  });
+
+  @override
+  State<_EditShopSheet> createState() => _EditShopSheetState();
+}
+
+class _EditShopSheetState extends State<_EditShopSheet> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _descController;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName);
+    _descController = TextEditingController(text: widget.initialDescription);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final auth = context.read<AuthProvider>();
+    final success = await auth.updateShop(
+      name: _nameController.text.trim(),
+      description: _descController.text.trim(),
+    );
+    if (!mounted) return;
+    if (success) {
+      Navigator.pop(context, true);
+    } else {
+      final l10n = AppLocalizations.of(context)!;
+      SnackBarHelper.showError(
+          context, auth.errorMessage ?? l10n.somethingWentWrong);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+            24, 12, 24, 24 + MediaQuery.of(context).padding.bottom),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(l10n.editShop, style: AppTextStyles.headingL),
+              const SizedBox(height: 4),
+              Text(
+                l10n.editShopSubtitle,
+                style: AppTextStyles.bodyS
+                    .copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              AppTextField(
+                label: l10n.shopName,
+                hintText: l10n.hintExShopName,
+                controller: _nameController,
+                prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                label: l10n.shopDescription,
+                hintText: l10n.hintExShopDescription,
+                controller: _descController,
+                prefixIcon: const Icon(Icons.description_outlined, size: 20),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 28),
+              Consumer<AuthProvider>(
+                builder: (_, auth, __) => AppButton.primary(
+                  label: l10n.save,
+                  isLoading: auth.isLoading,
+                  onPressed: _submit,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Create shop bottom sheet ──────────────────────────────────────────────────
+
+class _CreateShopSheet extends StatefulWidget {
+  const _CreateShopSheet();
+
+  @override
+  State<_CreateShopSheet> createState() => _CreateShopSheetState();
+}
+
+class _CreateShopSheetState extends State<_CreateShopSheet> {
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final auth = context.read<AuthProvider>();
+    await auth.registerShop(_nameController.text.trim());
+    if (!mounted) return;
+    if (auth.errorMessage != null) {
+      SnackBarHelper.showError(context, auth.errorMessage!);
+    } else {
+      // Set description after shop creation if provided
+      if (_descController.text.trim().isNotEmpty) {
+        await auth.updateShop(
+          name: _nameController.text.trim(),
+          description: _descController.text.trim(),
+        );
+      }
+      if (mounted) Navigator.pop(context, true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+            24, 12, 24, 24 + MediaQuery.of(context).padding.bottom),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.ownerPrimary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.add_business_outlined,
+                        color: AppColors.ownerPrimary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.createNewShop, style: AppTextStyles.headingL),
+                        Text(
+                          l10n.createNewShopSubtitle,
+                          style: AppTextStyles.bodyS
+                              .copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              AppTextField(
+                label: l10n.shopName,
+                hintText: l10n.hintExShopName,
+                controller: _nameController,
+                prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                label: l10n.shopDescription,
+                hintText: l10n.hintExShopDescription,
+                controller: _descController,
+                prefixIcon: const Icon(Icons.description_outlined, size: 20),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 28),
+              Consumer<AuthProvider>(
+                builder: (_, auth, __) => AppButton.primary(
+                  label: l10n.createNewShop,
+                  isLoading: auth.isLoading,
+                  onPressed: _submit,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

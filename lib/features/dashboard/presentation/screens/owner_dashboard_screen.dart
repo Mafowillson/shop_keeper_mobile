@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/utils/currency_formatter.dart' show formatFCFA;
 import 'package:shopkeeper/core/widgets/offline_banner.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
@@ -23,7 +24,8 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DashboardProvider>().loadStats();
+      final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
+      context.read<DashboardProvider>().loadStats(shopId);
     });
   }
 
@@ -31,15 +33,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final ownerName = context.select<AuthProvider, String>(
-      (p) => p.currentUser?.name ?? 'Owner',
+      (p) => p.currentUser?.name ?? l10n.ownerRole,
     );
+    final shopId = context.read<AuthProvider>().currentUser?.shopId ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Consumer<DashboardProvider>(
         builder: (context, provider, _) {
           return RefreshIndicator(
-            onRefresh: provider.loadStats,
+            onRefresh: () => provider.loadStats(shopId),
             color: AppColors.ownerPrimary,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -47,7 +50,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 const SliverToBoxAdapter(child: OfflineBanner()),
                 _DashboardHeader(
                   ownerName: ownerName,
-                  onRefresh: () => provider.loadStats(),
+                  onRefresh: () => provider.loadStats(shopId),
                   l10n: l10n,
                 ),
                 if (provider.isLoading && provider.stats == null)
@@ -87,7 +90,26 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                         const SizedBox(height: 10),
                         _QuickActionsGrid(l10n: l10n),
                         const SizedBox(height: 24),
-                        _SectionLabel(l10n.recentActivity),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _SectionLabel(l10n.recentActivity),
+                            TextButton(
+                              onPressed: () => context.push('/owner/sales'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                foregroundColor: AppColors.ownerPrimary,
+                                textStyle: AppTextStyles.labelM.copyWith(
+                                  color: AppColors.ownerPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              child: const Text(AppStrings.seeAll),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 10),
                         _ActivityList(
                           feed: provider.stats?.activityFeed ?? [],
@@ -115,7 +137,8 @@ class _DashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firstName = ownerName.split(' ').first;
-    final dateStr = DateFormat('EEEE, d MMMM').format(DateTime.now());
+    final locale = Localizations.localeOf(context).languageCode;
+    final dateStr = DateFormat('EEEE, d MMMM', locale).format(DateTime.now());
 
     return SliverAppBar(
       expandedHeight: 130,
@@ -380,7 +403,8 @@ class _WeeklyChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final days = _dayLabels();
+    final locale = Localizations.localeOf(context).languageCode;
+    final days = _dayLabels(locale);
     final maxVal = weekly.fold(0.0, (a, b) => a > b ? a : b);
     final total = weekly.fold(0.0, (a, b) => a + b);
 
@@ -462,10 +486,12 @@ class _WeeklyChartCard extends StatelessWidget {
     );
   }
 
-  List<String> _dayLabels() {
+  List<String> _dayLabels(String locale) {
     final today = DateTime.now();
-    return List.generate(7,
-        (i) => DateFormat('E').format(today.subtract(Duration(days: 6 - i))));
+    return List.generate(
+        7,
+        (i) => DateFormat('E', locale)
+            .format(today.subtract(Duration(days: 6 - i))));
   }
 }
 
@@ -477,6 +503,12 @@ class _QuickActionsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final actions = [
       _Action(
+        icon: Icons.point_of_sale_outlined,
+        label: l10n.newSale,
+        color: AppColors.accent,
+        route: '/owner/sale/new',
+      ),
+      _Action(
         icon: Icons.add_box_outlined,
         label: l10n.addProduct,
         color: AppColors.success,
@@ -485,8 +517,14 @@ class _QuickActionsGrid extends StatelessWidget {
       _Action(
         icon: Icons.bar_chart_rounded,
         label: l10n.viewSales,
-        color: AppColors.accent,
+        color: AppColors.ownerPrimary,
         route: '/owner/sales',
+      ),
+      _Action(
+        icon: Icons.price_check_outlined,
+        label: l10n.priceList,
+        color: AppColors.accent,
+        route: '/owner/prices',
       ),
       _Action(
         icon: Icons.people_outline,
@@ -497,7 +535,7 @@ class _QuickActionsGrid extends StatelessWidget {
       _Action(
         icon: Icons.auto_awesome_outlined,
         label: l10n.aiInsights,
-        color: AppColors.ownerPrimary,
+        color: AppColors.textSecondary,
         route: '/owner/chat',
       ),
     ];
@@ -582,7 +620,9 @@ class _ActivityList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (feed.isEmpty) {
+    final previewFeed = feed.length > 5 ? feed.sublist(0, 5) : feed;
+
+    if (previewFeed.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -608,9 +648,9 @@ class _ActivityList extends StatelessWidget {
         ],
       ),
       child: Column(
-        children: List.generate(feed.length, (i) {
-          final item = feed[i];
-          final isLast = i == feed.length - 1;
+        children: List.generate(previewFeed.length, (i) {
+          final item = previewFeed[i];
+          final isLast = i == previewFeed.length - 1;
           return Column(
             children: [
               Padding(
@@ -663,8 +703,8 @@ class _ActivityList extends StatelessWidget {
 
   String _timeAgo(DateTime dt) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 60) return l10n.timeAgoMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.timeAgoHours(diff.inHours);
+    return l10n.timeAgoDays(diff.inDays);
   }
 }

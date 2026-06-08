@@ -9,6 +9,7 @@ import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.da
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
+import 'package:shopkeeper/l10n/app_localizations_ext.dart';
 
 class _UnitEntry {
   final TextEditingController name;
@@ -61,13 +62,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   bool get _isNew => widget.productId == null;
 
-  String get _baseUnitName {
+  String _getBaseUnitName(AppLocalizations l10n) {
     for (final e in _units) {
       if (e.isBase && e.name.text.trim().isNotEmpty) {
         return e.name.text.trim();
       }
     }
-    return 'units';
+    return l10n.unitsFallback;
   }
 
   int get _computedStockTotal {
@@ -157,19 +158,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     final baseCount = _units.where((e) => e.isBase).length;
     if (baseCount == 0) {
-      SnackBarHelper.showError(
-          context, 'One unit must have quantity-in-base = 1 (the base unit).');
+      SnackBarHelper.showError(context, l10n.errorOneUnitMustBeBase);
       return;
     }
     if (baseCount > 1) {
-      SnackBarHelper.showError(
-          context, 'Only one unit can have quantity-in-base = 1.');
+      SnackBarHelper.showError(context, l10n.errorOnlyOneBase);
       return;
     }
 
     final names = _units.map((e) => e.name.text.trim().toLowerCase()).toList();
     if (names.toSet().length != names.length) {
-      SnackBarHelper.showError(context, 'Unit names must be unique.');
+      SnackBarHelper.showError(context, l10n.errorUnitNamesUnique);
       return;
     }
 
@@ -229,6 +228,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final baseUnitName = _getBaseUnitName(l10n);
     final title = _isNew ? l10n.addProduct : l10n.editProduct;
 
     return Scaffold(
@@ -257,7 +257,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   const SizedBox(height: 12),
                   AppTextField(
                     label: l10n.productName,
-                    hintText: 'e.g. Top Cube Sugar',
+                    hintText: l10n.hintExProductName,
                     controller: _nameController,
                     prefixIcon: const Icon(Icons.storefront_outlined, size: 20),
                     validator: (v) =>
@@ -269,6 +269,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     categories: _categories,
                     label: l10n.category,
                     onChanged: (v) => setState(() => _selectedCategory = v),
+                    l10n: l10n,
                   ),
                   const SizedBox(height: 24),
                   _SectionHeader(
@@ -308,14 +309,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     _SectionHeader(
                       icon: Icons.warehouse_outlined,
                       title: l10n.openingStock,
-                      subtitle:
-                          'Enter how much you have now — leave blank if starting at zero',
+                      subtitle: l10n.openingStockSubtitle,
                     ),
                     const SizedBox(height: 12),
                     _OpeningStockSection(
                       units: _units,
                       computedTotal: _computedStockTotal,
-                      baseUnitName: _baseUnitName,
+                      baseUnitName: baseUnitName,
                       onChanged: () => setState(() {}),
                       l10n: l10n,
                     ),
@@ -325,8 +325,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     _SectionHeader(
                       icon: Icons.inventory_2_outlined,
                       title: l10n.currentStock,
-                      subtitle:
-                          'Stock is updated automatically when sales are recorded',
+                      subtitle: l10n.currentStockSubtitle,
                     ),
                     const SizedBox(height: 12),
                     _CurrentStockSection(
@@ -338,13 +337,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   _SectionHeader(
                     icon: Icons.warning_amber_outlined,
                     title: l10n.lowStockAlert,
-                    subtitle:
-                        'Alert when stock falls below this many $_baseUnitName',
+                    subtitle: l10n.lowStockAlertSubtitle(baseUnitName),
                   ),
                   const SizedBox(height: 12),
                   AppTextField(
-                    label: 'Threshold (in $_baseUnitName)',
-                    hintText: 'e.g. 5',
+                    label: l10n.thresholdLabel(baseUnitName),
+                    hintText: l10n.hintExThreshold,
                     controller: _thresholdController,
                     keyboardType: TextInputType.number,
                     prefixIcon:
@@ -454,7 +452,7 @@ class _UnitCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Unit ${index + 1}',
+                  l10n.unitNumber(index + 1),
                   style: AppTextStyles.headingS
                       .copyWith(color: AppColors.textPrimary),
                 ),
@@ -468,7 +466,7 @@ class _UnitCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      'BASE',
+                      l10n.baseUnitBadge,
                       style: AppTextStyles.labelS.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -503,7 +501,7 @@ class _UnitCard extends StatelessWidget {
                       flex: 3,
                       child: AppTextField(
                         label: l10n.unitName,
-                        hintText: 'e.g. carton',
+                        hintText: l10n.hintExUnitName,
                         controller: entry.name,
                         onChanged: (_) => onChanged(),
                         validator: (v) => v == null || v.trim().isEmpty
@@ -516,7 +514,7 @@ class _UnitCard extends StatelessWidget {
                       flex: 2,
                       child: AppTextField(
                         label: l10n.qtyInBase,
-                        hintText: 'e.g. 25',
+                        hintText: l10n.hintExQtyInBase,
                         controller: entry.qty,
                         keyboardType: TextInputType.number,
                         onChanged: (_) => onChanged(),
@@ -532,7 +530,7 @@ class _UnitCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 AppTextField(
                   label: l10n.priceFCFA,
-                  hintText: 'e.g. 21000',
+                  hintText: l10n.hintExPrice,
                   controller: entry.price,
                   keyboardType: TextInputType.number,
                   prefixIcon: const Icon(Icons.sell_outlined, size: 18),
@@ -587,7 +585,8 @@ class _OpeningStockSection extends StatelessWidget {
         children: [
           ...units.asMap().entries.map((e) {
             final unitName = e.value.name.text.trim();
-            final label = unitName.isEmpty ? 'Unit ${e.key + 1}' : unitName;
+            final label =
+                unitName.isEmpty ? l10n.unitNumber(e.key + 1) : unitName;
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
@@ -624,7 +623,7 @@ class _OpeningStockSection extends StatelessWidget {
                     size: 16, color: AppColors.ownerPrimary),
                 const SizedBox(width: 6),
                 Text(
-                  'Total: $computedTotal $baseUnitName',
+                  l10n.stockTotal(computedTotal, baseUnitName),
                   style: AppTextStyles.labelL.copyWith(
                     color: AppColors.ownerPrimary,
                     fontWeight: FontWeight.w700,
@@ -759,12 +758,14 @@ class _CategoryDropdown extends StatelessWidget {
   final List<String> categories;
   final String label;
   final ValueChanged<String> onChanged;
+  final AppLocalizations l10n;
 
   const _CategoryDropdown({
     required this.selected,
     required this.categories,
     required this.label,
     required this.onChanged,
+    required this.l10n,
   });
 
   @override
@@ -788,7 +789,9 @@ class _CategoryDropdown extends StatelessWidget {
                 isExpanded: true,
                 items: categories
                     .map((c) => DropdownMenuItem(
-                        value: c, child: Text(c, style: AppTextStyles.bodyM)))
+                        value: c,
+                        child: Text(l10n.translateCategory(c),
+                            style: AppTextStyles.bodyM)))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) onChanged(v);

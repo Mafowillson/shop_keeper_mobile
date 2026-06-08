@@ -5,6 +5,7 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/app_text_field.dart';
+import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/debts/domain/entities/customer.dart';
 import 'package:shopkeeper/features/debts/presentation/providers/debt_provider.dart';
@@ -48,6 +49,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return entered > 0;
   }
 
+  bool get _isOwner =>
+      context.read<AuthProvider>().currentUser?.role == UserRole.owner;
+
   void _proceed(double total) {
     final entered = double.tryParse(_amountController.text) ?? 0;
     final paid = _isCredit ? 0.0 : entered;
@@ -57,7 +61,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           isCredit: _isCredit,
           customerId: _isCredit ? _selectedCustomer?.id : null,
         );
-    context.push('/staff/sale/confirm');
+    context.push(_isOwner ? '/owner/sale/confirm' : '/staff/sale/confirm');
   }
 
   void _openCustomerPicker() {
@@ -107,12 +111,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
             AppTextField(
                 controller: nameCtrl,
                 label: l10n.fullName,
-                hintText: 'e.g. Jean-Pierre Foka'),
+                hintText: l10n.hintExFullName),
             const SizedBox(height: 10),
             AppTextField(
               controller: phoneCtrl,
               label: l10n.phoneOptional,
-              hintText: 'e.g. 677001122',
+              hintText: l10n.hintExPhone,
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
@@ -145,7 +149,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           }
                         },
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.staffPrimary,
+                    backgroundColor: _isOwner
+                        ? AppColors.ownerPrimary
+                        : AppColors.staffPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   child: provider.isSaving
@@ -167,6 +173,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primaryColor =
+        _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
     return Consumer<CartProvider>(
       builder: (_, cart, __) {
         final total = cart.total;
@@ -178,7 +186,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           appBar: AppBar(
             title: Text(l10n.payment,
                 style: AppTextStyles.headingL.copyWith(color: Colors.white)),
-            backgroundColor: AppColors.staffPrimary,
+            backgroundColor: primaryColor,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -191,8 +199,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.staffPrimary, Color(0xFF1A5C48)],
+                    gradient: LinearGradient(
+                      colors: [primaryColor, const Color(0xFF1A5C48)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -212,7 +220,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
+                        l10n.itemCount(cart.itemCount),
                         style:
                             AppTextStyles.bodyS.copyWith(color: Colors.white60),
                       ),
@@ -268,8 +276,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                            color: AppColors.staffPrimary, width: 2),
+                        borderSide: BorderSide(color: primaryColor, width: 2),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 14),
@@ -314,7 +321,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _selectedCustomer != null
-                              ? AppColors.staffPrimary
+                              ? primaryColor
                               : AppColors.border,
                           width: _selectedCustomer != null ? 2 : 1,
                         ),
@@ -326,7 +333,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                 ? Icons.person
                                 : Icons.person_search,
                             color: _selectedCustomer != null
-                                ? AppColors.staffPrimary
+                                ? primaryColor
                                 : AppColors.textSecondary,
                             size: 22,
                           ),
@@ -340,7 +347,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       Text(_selectedCustomer!.name,
                                           style: AppTextStyles.bodyM.copyWith(
                                               fontWeight: FontWeight.w600,
-                                              color: AppColors.staffPrimary)),
+                                              color: primaryColor)),
                                       if (_selectedCustomer!.phone.isNotEmpty)
                                         Text(_selectedCustomer!.phone,
                                             style: AppTextStyles.bodyS.copyWith(

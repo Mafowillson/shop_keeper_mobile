@@ -7,11 +7,15 @@ class StaffRemoteDataSource {
 
   StaffRemoteDataSource(DioClient dioClient) : _dio = dioClient.client;
 
-  Future<List<StaffModel>> listStaff() async {
+  Future<List<StaffModel>> listStaff({String? shopId}) async {
     try {
       final res = await _dio.get(
         '/staff',
-        queryParameters: {'page': 1, 'page_size': 100},
+        queryParameters: {
+          'page': 1,
+          'page_size': 100,
+          if (shopId != null && shopId.isNotEmpty) 'shop_id': shopId,
+        },
       );
       final list = res.data['staff'] as List<dynamic>? ?? [];
       return list

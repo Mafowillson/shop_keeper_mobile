@@ -71,6 +71,10 @@ class _AppTextFieldState extends State<AppTextField> {
           },
           decoration: InputDecoration(
             hintText: widget.hintText,
+            hintStyle: const TextStyle(
+              color: AppColors.textHint,
+              fontWeight: FontWeight.w400,
+            ),
             filled: true,
             fillColor: const Color(0xFFFAFAFA),
             prefixIcon: widget.prefixIcon,

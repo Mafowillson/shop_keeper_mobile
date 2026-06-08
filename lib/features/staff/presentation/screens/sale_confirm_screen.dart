@@ -5,7 +5,9 @@ import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
 import 'package:shopkeeper/core/widgets/app_button.dart';
 import 'package:shopkeeper/core/widgets/snack_bar_helper.dart';
+import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
+import 'package:shopkeeper/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:shopkeeper/features/sales/domain/entities/sale.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
@@ -49,6 +51,9 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
 
     if (sale != null) {
       cart.clear();
+      if (_isOwner) {
+        context.read<DashboardProvider>().loadStats(shopId);
+      }
       setState(() {
         _completedSale = sale;
         _isSubmitting = false;
@@ -60,15 +65,20 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
     }
   }
 
+  bool get _isOwner =>
+      context.read<AuthProvider>().currentUser?.role == UserRole.owner;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primaryColor =
+        _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
 
     if (_isSubmitting) {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.staffPrimary,
+          backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           title: Text(l10n.processingEllipsis,
               style: AppTextStyles.headingL.copyWith(color: Colors.white)),
@@ -77,7 +87,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(color: AppColors.staffPrimary),
+              CircularProgressIndicator(color: primaryColor),
               const SizedBox(height: 16),
               Text(l10n.recordingEllipsis),
             ],
@@ -90,7 +100,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.staffPrimary,
+          backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           title: Text(l10n.sales,
               style: AppTextStyles.headingL.copyWith(color: Colors.white)),
@@ -128,7 +138,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
         automaticallyImplyLeading: false,
         title: Text(l10n.saleRecorded,
             style: AppTextStyles.headingL.copyWith(color: Colors.white)),
-        backgroundColor: AppColors.staffPrimary,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -155,7 +165,7 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
                           .copyWith(color: AppColors.success)),
                   const SizedBox(height: 4),
                   Text(
-                    'Sale #${sale.id.substring(0, 8).toUpperCase()}',
+                    l10n.saleRef(sale.id.substring(0, 8).toUpperCase()),
                     style: AppTextStyles.bodyM
                         .copyWith(color: AppColors.textSecondary),
                   ),
@@ -225,7 +235,8 @@ class _SaleConfirmScreenState extends State<SaleConfirmScreen> {
             const SizedBox(height: 24),
             AppButton.primary(
               label: l10n.newSale,
-              onPressed: () => context.go('/staff/home'),
+              onPressed: () =>
+                  context.go(_isOwner ? '/owner/dashboard' : '/staff/home'),
             ),
           ],
         ),

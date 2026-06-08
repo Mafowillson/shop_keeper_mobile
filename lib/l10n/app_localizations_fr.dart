@@ -135,6 +135,42 @@ class AppLocalizationsFr extends AppLocalizations {
       'Entrez un numéro de téléphone valide (min 9 chiffres)';
 
   @override
+  String get hintEmail => 'votre@email.com';
+
+  @override
+  String get hintExEmail => 'ex. votre@email.com';
+
+  @override
+  String get hintExFullName => 'ex. Jean-Paul Mbassi';
+
+  @override
+  String get hintExPhone => 'ex. 677 000 000';
+
+  @override
+  String get hintExPhoneIntl => 'ex. 237612345678';
+
+  @override
+  String get hintExShopName => 'ex. Boutique Wilson';
+
+  @override
+  String get hintExShopLocation => 'ex. Bamenda, Cameroun';
+
+  @override
+  String get hintExProductName => 'ex. Sucre en morceaux';
+
+  @override
+  String get hintExUnitName => 'ex. carton';
+
+  @override
+  String get hintExThreshold => 'ex. 5';
+
+  @override
+  String get hintExQtyInBase => 'ex. 25';
+
+  @override
+  String get hintExPrice => 'ex. 21 000';
+
+  @override
   String get welcomeBack => 'Bienvenue';
 
   @override
@@ -350,6 +386,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noRecentActivity => 'Aucune activité récente';
 
   @override
+  String timeAgoMinutes(int count) {
+    return 'il y a $count min';
+  }
+
+  @override
+  String timeAgoHours(int count) {
+    return 'il y a $count h';
+  }
+
+  @override
+  String timeAgoDays(int count) {
+    return 'il y a $count j';
+  }
+
+  @override
   String get stockOk => 'Stock OK';
 
   @override
@@ -386,6 +437,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get category => 'Catégorie';
 
   @override
+  String get categoryBeverages => 'Boissons';
+
+  @override
+  String get categorySnacksSweets => 'Snacks & Sucreries';
+
+  @override
+  String get categoryGrainsStaples => 'Céréales & Féculents';
+
+  @override
+  String get categoryDairyEggs => 'Produits laitiers & Œufs';
+
+  @override
+  String get categoryCleaningHygiene => 'Nettoyage & Hygiène';
+
+  @override
+  String get categoryHousehold => 'Maison';
+
+  @override
+  String get categoryToiletries => 'Articles de toilette';
+
+  @override
+  String get categoryOther => 'Autre';
+
+  @override
   String get productInfo => 'Info produit';
 
   @override
@@ -402,6 +477,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get priceFCFA => 'Prix (FCFA)';
+
+  @override
+  String get perUnit => '/ unité';
 
   @override
   String get addAnotherUnit => 'Ajouter une autre unité';
@@ -456,6 +534,51 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String deactivateProductConfirm(String name) {
     return 'Ceci désactivera « $name » de votre inventaire.';
+  }
+
+  @override
+  String get unitsFallback => 'unités';
+
+  @override
+  String get baseUnitBadge => 'BASE';
+
+  @override
+  String get openingStockSubtitle =>
+      'Entrez ce que vous avez maintenant — laissez vide pour démarrer à zéro';
+
+  @override
+  String get currentStockSubtitle =>
+      'Le stock est mis à jour automatiquement lors de l\'enregistrement des ventes';
+
+  @override
+  String get errorOneUnitMustBeBase =>
+      'Une unité doit avoir une quantité en base = 1 (l\'unité de base).';
+
+  @override
+  String get errorOnlyOneBase =>
+      'Une seule unité peut avoir une quantité en base = 1.';
+
+  @override
+  String get errorUnitNamesUnique => 'Les noms d\'unités doivent être uniques.';
+
+  @override
+  String unitNumber(int number) {
+    return 'Unité $number';
+  }
+
+  @override
+  String stockTotal(int count, String unit) {
+    return 'Total : $count $unit';
+  }
+
+  @override
+  String lowStockAlertSubtitle(String unit) {
+    return 'Alerte quand le stock descend en dessous de ce seuil ($unit)';
+  }
+
+  @override
+  String thresholdLabel(String unit) {
+    return 'Seuil (en $unit)';
   }
 
   @override
@@ -515,6 +638,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get proceedToPayment => 'Procéder au paiement';
 
   @override
+  String get all => 'Tout';
+
+  @override
   String get clearAll => 'Tout effacer';
 
   @override
@@ -525,6 +651,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noSalesFound => 'Aucune vente trouvée';
+
+  @override
+  String saleRef(String ref) {
+    return 'Vente #$ref';
+  }
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count articles',
+      one: '1 article',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get saleRecorded => 'Vente enregistrée';
@@ -1384,4 +1526,43 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get manageAppPreferences => 'Gérer les préférences de l\'application';
+
+  @override
+  String get editShopDetails => 'Modifier les détails de la boutique';
+
+  @override
+  String get editShopSubtitle =>
+      'Mettre à jour le nom et la description de la boutique';
+
+  @override
+  String get editShop => 'Modifier la boutique';
+
+  @override
+  String get shopUpdatedSuccessfully => 'Boutique mise à jour avec succès';
+
+  @override
+  String get createNewShop => 'Créer une nouvelle boutique';
+
+  @override
+  String get createNewShopSubtitle =>
+      'Enregistrer une boutique supplémentaire pour votre compte';
+
+  @override
+  String get hintExShopDescription => 'ex. Votre épicerie du quotidien';
+
+  @override
+  String get yourShops => 'Vos boutiques';
+
+  @override
+  String get switchShop => 'Changer';
+
+  @override
+  String switchedToShop(String name) {
+    return 'Basculé sur $name';
+  }
+
+  @override
+  String switchingToShop(String name) {
+    return 'Changement vers $name';
+  }
 }
