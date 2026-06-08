@@ -344,6 +344,78 @@ abstract class AppLocalizations {
   /// **'Enter a valid phone number (min 9 digits)'**
   String get enterValidPhone;
 
+  /// No description provided for @hintEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'your@email.com'**
+  String get hintEmail;
+
+  /// No description provided for @hintExEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. your@email.com'**
+  String get hintExEmail;
+
+  /// No description provided for @hintExFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Jean-Paul Mbassi'**
+  String get hintExFullName;
+
+  /// No description provided for @hintExPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 677 000 000'**
+  String get hintExPhone;
+
+  /// No description provided for @hintExPhoneIntl.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 237612345678'**
+  String get hintExPhoneIntl;
+
+  /// No description provided for @hintExShopName.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Willson\'s Boutique'**
+  String get hintExShopName;
+
+  /// No description provided for @hintExShopLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Bamenda, Cameroon'**
+  String get hintExShopLocation;
+
+  /// No description provided for @hintExProductName.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Top Cube Sugar'**
+  String get hintExProductName;
+
+  /// No description provided for @hintExUnitName.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. carton'**
+  String get hintExUnitName;
+
+  /// No description provided for @hintExThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 5'**
+  String get hintExThreshold;
+
+  /// No description provided for @hintExQtyInBase.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 25'**
+  String get hintExQtyInBase;
+
+  /// No description provided for @hintExPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 21 000'**
+  String get hintExPrice;
+
   /// No description provided for @welcomeBack.
   ///
   /// In en, this message translates to:
@@ -752,6 +824,24 @@ abstract class AppLocalizations {
   /// **'No recent activity'**
   String get noRecentActivity;
 
+  /// No description provided for @timeAgoMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m ago'**
+  String timeAgoMinutes(int count);
+
+  /// No description provided for @timeAgoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h ago'**
+  String timeAgoHours(int count);
+
+  /// No description provided for @timeAgoDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d ago'**
+  String timeAgoDays(int count);
+
   /// No description provided for @stockOk.
   ///
   /// In en, this message translates to:
@@ -824,6 +914,54 @@ abstract class AppLocalizations {
   /// **'Category'**
   String get category;
 
+  /// No description provided for @categoryBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages'**
+  String get categoryBeverages;
+
+  /// No description provided for @categorySnacksSweets.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks & Sweets'**
+  String get categorySnacksSweets;
+
+  /// No description provided for @categoryGrainsStaples.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains & Staples'**
+  String get categoryGrainsStaples;
+
+  /// No description provided for @categoryDairyEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy & Eggs'**
+  String get categoryDairyEggs;
+
+  /// No description provided for @categoryCleaningHygiene.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleaning & Hygiene'**
+  String get categoryCleaningHygiene;
+
+  /// No description provided for @categoryHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household'**
+  String get categoryHousehold;
+
+  /// No description provided for @categoryToiletries.
+  ///
+  /// In en, this message translates to:
+  /// **'Toiletries'**
+  String get categoryToiletries;
+
+  /// No description provided for @categoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get categoryOther;
+
   /// No description provided for @productInfo.
   ///
   /// In en, this message translates to:
@@ -859,6 +997,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price (FCFA)'**
   String get priceFCFA;
+
+  /// No description provided for @perUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'/ unit'**
+  String get perUnit;
 
   /// No description provided for @addAnotherUnit.
   ///
@@ -955,6 +1099,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This will deactivate \"{name}\" from your inventory.'**
   String deactivateProductConfirm(String name);
+
+  /// No description provided for @unitsFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get unitsFallback;
+
+  /// No description provided for @baseUnitBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'BASE'**
+  String get baseUnitBadge;
+
+  /// No description provided for @openingStockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter how much you have now — leave blank if starting at zero'**
+  String get openingStockSubtitle;
+
+  /// No description provided for @currentStockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock is updated automatically when sales are recorded'**
+  String get currentStockSubtitle;
+
+  /// No description provided for @errorOneUnitMustBeBase.
+  ///
+  /// In en, this message translates to:
+  /// **'One unit must have quantity-in-base = 1 (the base unit).'**
+  String get errorOneUnitMustBeBase;
+
+  /// No description provided for @errorOnlyOneBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one unit can have quantity-in-base = 1.'**
+  String get errorOnlyOneBase;
+
+  /// No description provided for @errorUnitNamesUnique.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit names must be unique.'**
+  String get errorUnitNamesUnique;
+
+  /// No description provided for @unitNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit {number}'**
+  String unitNumber(int number);
+
+  /// No description provided for @stockTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {count} {unit}'**
+  String stockTotal(int count, String unit);
+
+  /// No description provided for @lowStockAlertSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert when stock falls below this many {unit}'**
+  String lowStockAlertSubtitle(String unit);
+
+  /// No description provided for @thresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold (in {unit})'**
+  String thresholdLabel(String unit);
 
   /// No description provided for @newSale.
   ///
@@ -1064,6 +1274,12 @@ abstract class AppLocalizations {
   /// **'Proceed to Payment'**
   String get proceedToPayment;
 
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
   /// No description provided for @clearAll.
   ///
   /// In en, this message translates to:
@@ -1087,6 +1303,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No sales found'**
   String get noSalesFound;
+
+  /// No description provided for @saleRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale #{ref}'**
+  String saleRef(String ref);
+
+  /// No description provided for @itemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String itemCount(int count);
 
   /// No description provided for @saleRecorded.
   ///
@@ -2641,6 +2869,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage app preferences'**
   String get manageAppPreferences;
+
+  /// No description provided for @editShopDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Shop Details'**
+  String get editShopDetails;
+
+  /// No description provided for @editShopSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update shop name and description'**
+  String get editShopSubtitle;
+
+  /// No description provided for @editShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Shop'**
+  String get editShop;
+
+  /// No description provided for @shopUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop updated successfully'**
+  String get shopUpdatedSuccessfully;
+
+  /// No description provided for @createNewShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Shop'**
+  String get createNewShop;
+
+  /// No description provided for @createNewShopSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register an additional shop for your account'**
+  String get createNewShopSubtitle;
+
+  /// No description provided for @hintExShopDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Your everyday essentials store'**
+  String get hintExShopDescription;
+
+  /// No description provided for @yourShops.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Shops'**
+  String get yourShops;
+
+  /// No description provided for @switchShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get switchShop;
+
+  /// No description provided for @switchedToShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched to {name}'**
+  String switchedToShop(String name);
+
+  /// No description provided for @switchingToShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to {name}'**
+  String switchingToShop(String name);
 }
 
 class _AppLocalizationsDelegate

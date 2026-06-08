@@ -10,5 +10,6 @@ class GetDashboardStatsUseCase {
 
   const GetDashboardStatsUseCase(this._repository);
 
-  TaskEither<Failure, DashboardStats> call() => _repository.getStats();
+  TaskEither<Failure, DashboardStats> call({required String shopId}) =>
+      _repository.getStats(shopId);
 }

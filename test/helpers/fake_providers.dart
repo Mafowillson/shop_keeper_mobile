@@ -4,8 +4,10 @@ import 'package:shopkeeper/core/cache/cache_status.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/errors/failures.dart';
 import 'package:shopkeeper/core/offline/connectivity_service.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/fetch_all_shops_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/get_shop_info_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/login_usecase.dart';
@@ -15,6 +17,8 @@ import 'package:shopkeeper/features/auth/domain/usecases/register_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/resend_verification_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/switch_active_shop_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/update_shop_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/data/datasources/product_local_datasource.dart';
@@ -65,6 +69,19 @@ class _StubAuthRepo implements IAuthRepository {
       throw UnimplementedError();
   @override
   TaskEither<Failure, User> fetchShopInfo() => throw UnimplementedError();
+  @override
+  TaskEither<Failure, User> updateShop(
+          {required String name, required String description}) =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, List<ShopSummary>> fetchAllShops() =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, User> setActiveShop(
+          {required String shopId,
+          required String shopName,
+          required String shopDescription}) =>
+      throw UnimplementedError();
 }
 
 class _StubProductRepo implements IProductRepository {
@@ -158,6 +175,9 @@ class FakeAuthProvider extends AuthProvider {
           VerifyEmailUseCase(_StubAuthRepo()),
           ResendVerificationUseCase(_StubAuthRepo()),
           GetShopInfoUseCase(_StubAuthRepo()),
+          UpdateShopUseCase(_StubAuthRepo()),
+          FetchAllShopsUseCase(_StubAuthRepo()),
+          SwitchActiveShopUseCase(_StubAuthRepo()),
         );
 
   @override

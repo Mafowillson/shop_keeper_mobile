@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 import 'package:shopkeeper/core/constants/app_text_styles.dart';
+import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/di/injection.dart';
+import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/staff/data/datasources/staff_remote_datasource.dart';
 import 'package:shopkeeper/features/staff/data/models/staff_model.dart';
-import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
 
 class ManageStaffScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class ManageStaffScreen extends StatefulWidget {
 
 class _ManageStaffScreenState extends State<ManageStaffScreen> {
   late final StaffRemoteDataSource _ds;
+  late final String _shopId;
   List<StaffModel> _staff = [];
   bool _loading = true;
   String? _error;
@@ -25,6 +28,9 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
   void initState() {
     super.initState();
     _ds = StaffRemoteDataSource(getIt<DioClient>());
+    _shopId =
+        Provider.of<AuthProvider>(context, listen: false).currentUser?.shopId ??
+            '';
     _load();
   }
 
@@ -34,7 +40,7 @@ class _ManageStaffScreenState extends State<ManageStaffScreen> {
       _error = null;
     });
     try {
-      final list = await _ds.listStaff();
+      final list = await _ds.listStaff(shopId: _shopId);
       if (mounted) {
         setState(() {
           _staff = list;

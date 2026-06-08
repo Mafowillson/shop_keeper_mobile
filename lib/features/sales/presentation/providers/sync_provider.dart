@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/enums/sync_state.dart';
+import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/offline/connectivity_service.dart';
 import 'package:shopkeeper/core/offline/hive_boxes.dart';
@@ -32,6 +33,7 @@ class SyncProvider extends ChangeNotifier {
   SyncState _state = SyncState.synced;
   bool _isSyncing = false;
   String? _shopId;
+  UserRole _role = UserRole.owner;
   StreamSubscription<BoxEvent>? _syncLogSub;
   Timer? _backgroundRefreshTimer;
 
@@ -57,8 +59,9 @@ class SyncProvider extends ChangeNotifier {
     _watchSyncLog();
   }
 
-  void initialize(String shopId) {
+  void initialize(String shopId, {UserRole role = UserRole.owner}) {
     _shopId = shopId;
+    _role = role;
     if (_hasPendingEntries()) {
       _state = SyncState.pending;
     } else if (_hasConflictEntries()) {
@@ -259,7 +262,9 @@ class SyncProvider extends ChangeNotifier {
 
     if (pull.contains(HiveBoxes.notifications)) {
       try {
-        final res = await dio.get('/notifications');
+        final notifPath =
+            _role == UserRole.staff ? '/staff/notifications' : '/notifications';
+        final res = await dio.get(notifPath);
         final list = (res.data['notifications'] as List? ?? [])
             .cast<Map<String, dynamic>>()
             .map(NotificationModel.fromJson)

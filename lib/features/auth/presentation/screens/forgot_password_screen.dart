@@ -161,7 +161,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             const SizedBox(height: 28),
             AppTextField(
               label: l10n.emailAddress,
-              hintText: 'e.g. yourname@shopkeeper.cm',
+              hintText: l10n.hintExEmail,
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               validator: (v) {

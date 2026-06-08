@@ -4,6 +4,7 @@ import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/errors/failures.dart';
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_local_datasource.dart';
 import 'package:shopkeeper/features/auth/data/datasources/i_auth_remote_datasource.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
 import 'package:shopkeeper/features/auth/domain/entities/user.dart';
 import 'package:shopkeeper/features/auth/domain/repositories/i_auth_repository.dart';
 
@@ -105,10 +106,11 @@ class AuthRepositoryImpl implements IAuthRepository {
           // demand when the next API call goes out.
           try {
             final refreshed = await _remote.refreshSession();
+            // Preserve the last-active shop selection from cache; the backend
+            // always returns the primary shop, so we respect the user's choice.
             final merged = refreshed.copyWith(
-              shopId: refreshed.shopId.isNotEmpty
-                  ? refreshed.shopId
-                  : cached.shopId,
+              shopId:
+                  cached.shopId.isNotEmpty ? cached.shopId : refreshed.shopId,
               shopName: cached.shopName.isNotEmpty
                   ? cached.shopName
                   : refreshed.shopName,
@@ -145,13 +147,41 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
 
   @override
+  TaskEither<Failure, User> updateShop({
+    required String name,
+    required String description,
+  }) =>
+      TaskEither.tryCatch(
+        () async {
+          final cached = await _local.getCachedUser();
+          if (cached == null) throw Exception('No authenticated user found');
+          await _remote.updateShop(
+            shopId: cached.shopId,
+            name: name,
+            description: description,
+          );
+          final updated =
+              cached.copyWith(shopName: name, shopDescription: description);
+          await _local.cacheUser(updated);
+          return updated.toEntity();
+        },
+        (e, _) => AuthFailure('Failed to update shop: $e'),
+      );
+
+  @override
   TaskEither<Failure, User> fetchShopInfo() => TaskEither.tryCatch(
         () async {
           final cached = await _local.getCachedUser();
           if (cached == null) throw Exception('No authenticated user found');
-          final info = cached.role == UserRole.staff
-              ? await _remote.fetchStaffShopInfo()
-              : await _remote.fetchShopInfo();
+          final ({String name, String description}) info;
+          if (cached.role == UserRole.staff) {
+            info = await _remote.fetchStaffShopInfo();
+          } else if (cached.shopId.isNotEmpty) {
+            // Fetch the currently-active shop by ID so switching persists.
+            info = await _remote.fetchShopById(cached.shopId);
+          } else {
+            info = await _remote.fetchShopInfo();
+          }
           final updated = cached.copyWith(
             shopName: info.name,
             shopDescription: info.description,
@@ -160,5 +190,32 @@ class AuthRepositoryImpl implements IAuthRepository {
           return updated.toEntity();
         },
         (e, _) => AuthFailure('Failed to load shop info: $e'),
+      );
+
+  @override
+  TaskEither<Failure, List<ShopSummary>> fetchAllShops() => TaskEither.tryCatch(
+        () => _remote.fetchAllShops(),
+        (e, _) => AuthFailure('Failed to fetch shops: $e'),
+      );
+
+  @override
+  TaskEither<Failure, User> setActiveShop({
+    required String shopId,
+    required String shopName,
+    required String shopDescription,
+  }) =>
+      TaskEither.tryCatch(
+        () async {
+          final cached = await _local.getCachedUser();
+          if (cached == null) throw Exception('No authenticated user found');
+          final updated = cached.copyWith(
+            shopId: shopId,
+            shopName: shopName,
+            shopDescription: shopDescription,
+          );
+          await _local.cacheUser(updated);
+          return updated.toEntity();
+        },
+        (e, _) => AuthFailure('Failed to switch shop: $e'),
       );
 }

@@ -11,7 +11,11 @@ import 'package:shopkeeper/features/auth/domain/usecases/reset_password_usecase.
 import 'package:shopkeeper/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/verify_email_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/resend_verification_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/fetch_all_shops_usecase.dart';
 import 'package:shopkeeper/features/auth/domain/usecases/get_shop_info_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/switch_active_shop_usecase.dart';
+import 'package:shopkeeper/features/auth/domain/usecases/update_shop_usecase.dart';
 
 @injectable
 class AuthProvider extends ChangeNotifier {
@@ -25,8 +29,12 @@ class AuthProvider extends ChangeNotifier {
   final VerifyEmailUseCase _verifyEmail;
   final ResendVerificationUseCase _resendVerification;
   final GetShopInfoUseCase _getShopInfo;
+  final UpdateShopUseCase _updateShop;
+  final FetchAllShopsUseCase _fetchAllShops;
+  final SwitchActiveShopUseCase _switchActiveShop;
 
   User? _currentUser;
+  List<ShopSummary> _shops = [];
   bool _isLoading = false;
   String? _errorMessage;
   bool _disposed = false;
@@ -42,9 +50,13 @@ class AuthProvider extends ChangeNotifier {
     this._verifyEmail,
     this._resendVerification,
     this._getShopInfo,
+    this._updateShop,
+    this._fetchAllShops,
+    this._switchActiveShop,
   );
 
   User? get currentUser => _currentUser;
+  List<ShopSummary> get shops => _shops;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -260,6 +272,78 @@ class AuthProvider extends ChangeNotifier {
       );
     } catch (_) {}
     _notify();
+  }
+
+  Future<void> fetchAllShops() async {
+    if (_currentUser == null) return;
+
+    // Seed immediately from the cached user so the UI renders without waiting
+    // for the network. The server response below will replace this with the
+    // full list (which may include additional shops).
+    if (_shops.isEmpty && _currentUser!.shopId.isNotEmpty) {
+      _shops = [
+        ShopSummary(
+          id: _currentUser!.shopId,
+          name: _currentUser!.shopName,
+          description: _currentUser!.shopDescription,
+          isActive: true,
+        ),
+      ];
+      _notify();
+    }
+
+    try {
+      final result = await _fetchAllShops().run();
+      result.fold(
+        (_) {},
+        (list) => _shops = list,
+      );
+    } catch (_) {}
+    _notify();
+  }
+
+  Future<void> switchShop(ShopSummary shop) async {
+    if (_currentUser == null) return;
+    try {
+      final result = await _switchActiveShop(
+        shopId: shop.id,
+        shopName: shop.name,
+        shopDescription: shop.description,
+      ).run();
+      result.fold(
+        (_) {},
+        (u) => _currentUser = u,
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] switchShop uncaught: $e\n$st');
+    }
+    _notify();
+  }
+
+  Future<bool> updateShop({
+    required String name,
+    required String description,
+  }) async {
+    _setLoading(true);
+    _errorMessage = null;
+    bool success = false;
+    try {
+      final result =
+          await _updateShop(name: name, description: description).run();
+      result.fold(
+        (f) => _errorMessage = f.message,
+        (u) {
+          _currentUser = u;
+          success = true;
+        },
+      );
+    } catch (e, st) {
+      debugPrint('[Auth] updateShop uncaught: $e\n$st');
+      _errorMessage = 'Failed to update shop: $e';
+    } finally {
+      _setLoading(false);
+    }
+    return success;
   }
 
   void resetAuth() {

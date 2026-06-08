@@ -1,13 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopkeeper/core/config/app_config.dart';
+import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
 
 class DioClient {
   late final Dio _dio;
   final TokenStorage _tokenStorage;
+  final SharedPreferences _prefs;
 
-  DioClient(this._tokenStorage) {
+  DioClient(this._tokenStorage, this._prefs) {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConfig.baseUrl,
@@ -16,7 +19,7 @@ class DioClient {
         headers: {'Content-Type': 'application/json'},
       ),
     );
-    _dio.interceptors.add(_AuthInterceptor(_tokenStorage, _dio));
+    _dio.interceptors.add(_AuthInterceptor(_tokenStorage, _dio, _prefs));
   }
 
   Dio get client => _dio;
@@ -25,17 +28,19 @@ class DioClient {
 class _AuthInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
   final Dio _dio;
+  final SharedPreferences _prefs;
   bool _isRefreshing = false;
 
-  _AuthInterceptor(this._tokenStorage, this._dio);
+  _AuthInterceptor(this._tokenStorage, this._dio, this._prefs);
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Attach Accept-Language so the Go backend responds in the device language.
-    final langCode =
+    // Explicit in-app language preference overrides the device locale so the
+    // backend responds in whatever language the user chose in settings.
+    final langCode = _prefs.getString(AppStrings.languagePreferenceKey) ??
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     options.headers['Accept-Language'] = langCode;
 

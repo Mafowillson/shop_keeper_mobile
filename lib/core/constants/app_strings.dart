@@ -54,6 +54,9 @@ class AppStrings {
   // Chat
   static const String aiChat = 'AI Chat';
 
+  // Preferences keys (SharedPreferences)
+  static const String languagePreferenceKey = 'settings_language';
+
   // Common
   static const String save = 'Save';
   static const String cancel = 'Cancel';

@@ -1,15 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shopkeeper/core/config/app_config.dart';
+import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
 
 /// Centralised HTTP client that attaches Accept-Language and Authorization
-/// headers to every request based on the current device locale and stored JWT.
+/// headers to every request based on the user's language preference and stored JWT.
 class ApiClient {
   late final Dio _dio;
   final TokenStorage _tokenStorage;
+  final SharedPreferences _prefs;
 
-  ApiClient(this._tokenStorage) {
+  ApiClient(this._tokenStorage, this._prefs) {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConfig.baseUrl,
@@ -18,7 +21,7 @@ class ApiClient {
         headers: {'Content-Type': 'application/json'},
       ),
     );
-    _dio.interceptors.add(_LangAuthInterceptor(_tokenStorage));
+    _dio.interceptors.add(_LangAuthInterceptor(_tokenStorage, _prefs));
   }
 
   Future<Response<T>> get<T>(
@@ -67,20 +70,19 @@ class ApiClient {
 
 class _LangAuthInterceptor extends Interceptor {
   final TokenStorage _tokenStorage;
+  final SharedPreferences _prefs;
 
-  _LangAuthInterceptor(this._tokenStorage);
+  _LangAuthInterceptor(this._tokenStorage, this._prefs);
 
   @override
   Future<void> onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Attach Accept-Language so the backend responds in the device language.
-    final langCode =
+    final langCode = _prefs.getString(AppStrings.languagePreferenceKey) ??
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     options.headers['Accept-Language'] = langCode;
 
-    // Attach JWT when available.
     final token = await _tokenStorage.getAccessToken();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';

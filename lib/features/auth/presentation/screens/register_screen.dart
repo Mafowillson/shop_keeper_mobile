@@ -154,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 24),
                         AppTextField(
                           label: l10n.fullName,
-                          hintText: 'e.g. John Doe',
+                          hintText: l10n.hintExFullName,
                           controller: _nameController,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
@@ -168,7 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 20),
                         AppTextField(
                           label: l10n.emailAddress,
-                          hintText: 'e.g. john@example.com',
+                          hintText: l10n.hintExEmail,
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {

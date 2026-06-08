@@ -13,10 +13,11 @@ class NotificationRepositoryImpl implements INotificationRepository {
 
   @override
   TaskEither<Failure, List<AppNotification>> getNotifications(
-          {bool isStaff = false}) =>
+          {bool isStaff = false, String? shopId}) =>
       TaskEither.tryCatch(
         () async {
-          final models = await _remote.getNotifications(isStaff: isStaff);
+          final models =
+              await _remote.getNotifications(isStaff: isStaff, shopId: shopId);
           return models.map((m) => m.toEntity()).toList();
         },
         (e, _) => ServerFailure(e.toString()),
@@ -33,10 +34,11 @@ class NotificationRepositoryImpl implements INotificationRepository {
       );
 
   @override
-  TaskEither<Failure, Unit> markAllAsRead({bool isStaff = false}) =>
+  TaskEither<Failure, Unit> markAllAsRead(
+          {bool isStaff = false, String? shopId}) =>
       TaskEither.tryCatch(
         () async {
-          await _remote.markAllAsRead(isStaff: isStaff);
+          await _remote.markAllAsRead(isStaff: isStaff, shopId: shopId);
           return unit;
         },
         (e, _) => ServerFailure(e.toString()),

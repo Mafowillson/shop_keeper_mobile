@@ -134,7 +134,7 @@ class ProductProvider extends ChangeNotifier {
         } else {
           _products = [p, ..._products];
         }
-        _metadata.saveTimestamp(HiveBoxes.products);
+        // Timestamp is written by the repository's local datasource on success.
       },
     );
 
@@ -154,7 +154,6 @@ class ProductProvider extends ChangeNotifier {
       },
       (_) {
         _products = _products.where((p) => p.id != id).toList();
-        _metadata.saveTimestamp(HiveBoxes.products);
         notifyListeners();
         return true;
       },
@@ -163,6 +162,12 @@ class ProductProvider extends ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  Future<void> invalidateCache() async {
+    await _local.invalidate();
+    _products = [];
     notifyListeners();
   }
 }

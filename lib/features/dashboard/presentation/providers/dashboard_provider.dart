@@ -34,10 +34,10 @@ class DashboardProvider extends ChangeNotifier {
 
   // ── Stale-while-revalidate load ───────────────────────────────────────────
 
-  Future<void> loadStats() async {
+  Future<void> loadStats(String shopId) async {
     _errorMessage = null;
 
-    final cached = _local.getStats();
+    final cached = _local.getStats(shopId);
     if (cached != null) {
       _stats = cached.toEntity();
       _isLoading = false;
@@ -50,35 +50,44 @@ class DashboardProvider extends ChangeNotifier {
     if (_connectivity.isOnline) {
       _isRefreshing = cached != null;
       if (_isRefreshing) notifyListeners();
-      final result = await _getStats().run();
+      final result = await _getStats(shopId: shopId).run();
       result.fold(
         (f) {
           if (_stats == null) _errorMessage = f.message;
         },
         (fresh) {
           _stats = fresh;
-          _local.saveStats(DashboardStatsModel(
-            todaySales: fresh.todaySales,
-            transactionCount: fresh.transactionCount,
-            lowStockCount: fresh.lowStockCount,
-            totalDebts: fresh.totalDebts,
-            weeklyRevenue: fresh.weeklyRevenue,
-            activityFeed: fresh.activityFeed
-                .map((a) => ActivityFeedModel(
-                      id: a.id,
-                      title: a.title,
-                      subtitle: a.subtitle,
-                      timestamp: a.timestamp,
-                      type: a.type,
-                    ))
-                .toList(),
-          ));
+          _local.saveStats(
+            DashboardStatsModel(
+              todaySales: fresh.todaySales,
+              transactionCount: fresh.transactionCount,
+              lowStockCount: fresh.lowStockCount,
+              totalDebts: fresh.totalDebts,
+              weeklyRevenue: fresh.weeklyRevenue,
+              activityFeed: fresh.activityFeed
+                  .map((a) => ActivityFeedModel(
+                        id: a.id,
+                        title: a.title,
+                        subtitle: a.subtitle,
+                        timestamp: a.timestamp,
+                        type: a.type,
+                      ))
+                  .toList(),
+            ),
+            shopId,
+          );
         },
       );
       _isRefreshing = false;
     }
 
     _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> invalidateCache({String? shopId}) async {
+    await _local.invalidate(shopId: shopId);
+    _stats = null;
     notifyListeners();
   }
 }

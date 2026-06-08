@@ -1,5 +1,6 @@
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/data/models/user_model.dart';
+import 'package:shopkeeper/features/auth/domain/entities/shop_summary.dart';
 
 abstract class IAuthRemoteDataSource {
   Future<UserModel> login(String email, String password, UserRole role);
@@ -31,4 +32,17 @@ abstract class IAuthRemoteDataSource {
 
   /// Fetches the shop info for the currently authenticated staff member.
   Future<({String name, String description})> fetchStaffShopInfo();
+
+  /// Updates the shop identified by [shopId] with new [name] and [description].
+  Future<void> updateShop({
+    required String shopId,
+    required String name,
+    required String description,
+  });
+
+  /// Fetches a single shop by [shopId].
+  Future<({String name, String description})> fetchShopById(String shopId);
+
+  /// Fetches all shops owned by the authenticated user.
+  Future<List<ShopSummary>> fetchAllShops();
 }

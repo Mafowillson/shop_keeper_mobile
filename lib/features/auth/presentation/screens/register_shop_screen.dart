@@ -146,7 +146,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                         const SizedBox(height: 28),
                         AppTextField(
                           label: l10n.shopName,
-                          hintText: 'e.g. Willson\'s Boutique',
+                          hintText: l10n.hintExShopName,
                           controller: _shopNameController,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) {
@@ -160,7 +160,7 @@ class _RegisterShopScreenState extends State<RegisterShopScreen> {
                         const SizedBox(height: 20),
                         AppTextField(
                           label: l10n.shopLocation,
-                          hintText: 'e.g. Bamenda, Cameroon',
+                          hintText: l10n.hintExShopLocation,
                           controller: _locationController,
                           prefixIcon:
                               const Icon(Icons.location_on_outlined, size: 22),

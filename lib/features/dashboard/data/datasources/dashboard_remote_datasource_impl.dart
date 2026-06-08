@@ -11,9 +11,11 @@ class DashboardRemoteDataSourceImpl implements IDashboardRemoteDataSource {
   DashboardRemoteDataSourceImpl(DioClient dioClient) : _dio = dioClient.client;
 
   @override
-  Future<DashboardStatsModel> getStats() async {
+  Future<DashboardStatsModel> getStats(String shopId) async {
     try {
-      final res = await _dio.get('/dashboard');
+      final queryParameters = shopId.isNotEmpty ? {'shop_id': shopId} : null;
+      final res =
+          await _dio.get('/dashboard', queryParameters: queryParameters);
       return DashboardStatsModel.fromJson(res.data as Map<String, dynamic>);
     } on DioException catch (e) {
       final d = e.response?.data;
