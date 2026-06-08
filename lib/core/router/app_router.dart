@@ -226,6 +226,10 @@ class AppRouter {
             builder: (context, state) => const PriceListScreen(),
           ),
           GoRoute(
+            path: '/owner/prices',
+            builder: (context, state) => const PriceListScreen(),
+          ),
+          GoRoute(
             path: '/staff/sale/new',
             pageBuilder: (context, state) => const MaterialPage(
               fullscreenDialog: true,
@@ -241,6 +245,27 @@ class AppRouter {
           ),
           GoRoute(
             path: '/staff/sale/confirm',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: SaleConfirmScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/owner/sale/new',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: NewSaleScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/owner/sale/payment',
+            pageBuilder: (context, state) => const MaterialPage(
+              fullscreenDialog: true,
+              child: PaymentScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/owner/sale/confirm',
             pageBuilder: (context, state) => const MaterialPage(
               fullscreenDialog: true,
               child: SaleConfirmScreen(),

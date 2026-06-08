@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shopkeeper/core/constants/app_strings.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 
 // ── Notification preferences model ────────────────────────────────────────────
@@ -57,13 +58,14 @@ class NotificationPrefs {
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 class SettingsProvider extends ChangeNotifier {
-  static const _keyLanguage = 'settings_language';
+  static const _keyLanguage = AppStrings.languagePreferenceKey;
 
   final Dio _dio;
 
   // ── Local settings ─────────────────────────────────────────────────────────
   bool _initialized = false;
-  String _language = 'en'; // 'en' | 'fr'
+  String?
+      _language; // null = follow device locale; 'en' | 'fr' = explicit choice
 
   // ── Owner notification preferences ────────────────────────────────────────
   NotificationPrefs _notifPrefs = const NotificationPrefs();
@@ -76,7 +78,7 @@ class SettingsProvider extends ChangeNotifier {
   // ── Getters ────────────────────────────────────────────────────────────────
 
   bool get initialized => _initialized;
-  String get language => _language;
+  String? get language => _language;
   bool get isFrench => _language == 'fr';
   NotificationPrefs get notifPrefs => _notifPrefs;
   bool get isLoadingPrefs => _isLoadingPrefs;
@@ -88,7 +90,7 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> init() async {
     if (_initialized) return;
     final prefs = await SharedPreferences.getInstance();
-    _language = prefs.getString(_keyLanguage) ?? 'en';
+    _language = prefs.getString(_keyLanguage); // null when user never chose
     _initialized = true;
     notifyListeners();
   }

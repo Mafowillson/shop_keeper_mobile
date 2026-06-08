@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shopkeeper/core/cache/cache_metadata_service.dart';
 import 'package:shopkeeper/core/cache/cache_service.dart';
@@ -59,7 +60,7 @@ void configureDependencies() {
     ),
   );
   getIt.registerLazySingleton<DioClient>(
-    () => DioClient(getIt<TokenStorage>()),
+    () => DioClient(getIt<TokenStorage>(), getIt<SharedPreferences>()),
   );
   getIt.registerLazySingleton<FcmService>(
     () => FcmService(getIt<DioClient>()),

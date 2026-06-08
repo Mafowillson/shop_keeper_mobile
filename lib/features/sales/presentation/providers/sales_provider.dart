@@ -78,14 +78,16 @@ class SalesProvider extends ChangeNotifier {
   }
 
   Future<void> loadSaleDetail(String id) async {
-    _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
 
+    // Serve cache immediately — no spinner if we already have the data.
     final cachedModel = _local.getSaleById(id);
     if (cachedModel != null) {
       _currentSale = cachedModel.toEntity();
       _isLoading = false;
+      notifyListeners();
+    } else {
+      _isLoading = true;
       notifyListeners();
     }
 
@@ -129,7 +131,7 @@ class SalesProvider extends ChangeNotifier {
         created = sale;
         _currentSale = sale;
         _sales = [sale, ..._sales];
-        _metadata.saveTimestamp(HiveBoxes.sales);
+        // Timestamp is written by the repository's local datasource on success.
       },
     );
 

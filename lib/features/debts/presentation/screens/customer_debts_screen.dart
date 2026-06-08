@@ -99,13 +99,13 @@ class _CustomerDebtsScreenState extends State<CustomerDebtsScreen> {
             AppTextField(
               controller: nameCtrl,
               label: l10n.fullName,
-              hintText: 'e.g. Jean-Pierre Foka',
+              hintText: l10n.hintExFullName,
             ),
             const SizedBox(height: 12),
             AppTextField(
               controller: phoneCtrl,
               label: l10n.phoneOptional,
-              hintText: 'e.g. 677001122',
+              hintText: l10n.hintExPhone,
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),

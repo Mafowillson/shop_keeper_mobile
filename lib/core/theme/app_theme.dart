@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
 
 class AppTheme {
+  static const _hintStyle = TextStyle(
+    color: AppColors.textHint,
+    fontWeight: FontWeight.w400,
+  );
+
   static ThemeData ownerTheme() {
     return ThemeData(
       useMaterial3: true,
@@ -21,6 +26,9 @@ class AppTheme {
         backgroundColor: AppColors.accent,
         foregroundColor: AppColors.textPrimary,
       ),
+      inputDecorationTheme: const InputDecorationTheme(
+        hintStyle: _hintStyle,
+      ),
     );
   }
 
@@ -38,6 +46,9 @@ class AppTheme {
         backgroundColor: Colors.white,
         selectedItemColor: AppColors.staffPrimary,
         unselectedItemColor: AppColors.textSecondary,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        hintStyle: _hintStyle,
       ),
     );
   }

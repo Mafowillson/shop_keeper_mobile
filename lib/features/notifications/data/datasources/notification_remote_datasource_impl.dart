@@ -14,10 +14,16 @@ class NotificationRemoteDataSourceImpl
 
   @override
   Future<List<NotificationModel>> getNotifications(
-      {bool isStaff = false}) async {
+      {bool isStaff = false, String? shopId}) async {
     try {
       final endpoint = isStaff ? '/staff/notifications' : '/notifications';
-      final res = await _dio.get(endpoint);
+      final res = await _dio.get(
+        endpoint,
+        queryParameters: {
+          if (!isStaff && shopId != null && shopId.isNotEmpty)
+            'shop_id': shopId,
+        },
+      );
       final list = res.data['notifications'] as List<dynamic>? ?? [];
       return list
           .cast<Map<String, dynamic>>()
@@ -39,10 +45,16 @@ class NotificationRemoteDataSourceImpl
   }
 
   @override
-  Future<void> markAllAsRead({bool isStaff = false}) async {
+  Future<void> markAllAsRead({bool isStaff = false, String? shopId}) async {
     try {
       final base = isStaff ? '/staff/notifications' : '/notifications';
-      await _dio.patch('$base/read-all');
+      await _dio.patch(
+        '$base/read-all',
+        queryParameters: {
+          if (!isStaff && shopId != null && shopId.isNotEmpty)
+            'shop_id': shopId,
+        },
+      );
     } on DioException catch (e) {
       throw Exception(_msg(e));
     }

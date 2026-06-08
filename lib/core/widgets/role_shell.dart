@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shopkeeper/core/constants/app_colors.dart';
+import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/notifications/presentation/providers/notification_provider.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
 
@@ -25,7 +26,10 @@ class _OwnerShellState extends State<OwnerShell> {
     super.initState();
     _selectedIndex = _getSelectedIndex(widget.location);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().loadNotifications(isStaff: false);
+      final shopId = context.read<AuthProvider>().currentUser?.shopId;
+      context
+          .read<NotificationProvider>()
+          .loadNotifications(isStaff: false, shopId: shopId);
     });
   }
 

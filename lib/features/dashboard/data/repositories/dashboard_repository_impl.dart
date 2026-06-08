@@ -12,8 +12,9 @@ class DashboardRepositoryImpl implements IDashboardRepository {
   const DashboardRepositoryImpl(this._remote);
 
   @override
-  TaskEither<Failure, DashboardStats> getStats() => TaskEither.tryCatch(
-        () async => (await _remote.getStats()).toEntity(),
+  TaskEither<Failure, DashboardStats> getStats(String shopId) =>
+      TaskEither.tryCatch(
+        () async => (await _remote.getStats(shopId)).toEntity(),
         (e, _) => ServerFailure('Failed to load dashboard: $e'),
       );
 }

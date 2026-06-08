@@ -8,7 +8,9 @@ import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 import 'package:shopkeeper/features/sales/domain/entities/cart_item.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
+import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
+import 'package:shopkeeper/l10n/app_localizations_ext.dart';
 
 class NewSaleScreen extends StatefulWidget {
   const NewSaleScreen({super.key});
@@ -54,16 +56,21 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
     return ['All', ...cats];
   }
 
-  void _showCart(CartProvider cart, AppLocalizations l10n) {
+  bool get _isOwner =>
+      context.read<AuthProvider>().currentUser?.role == UserRole.owner;
+
+  void _showCart(CartProvider cart, AppLocalizations l10n, Color primaryColor) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _CartSheet(
         l10n: l10n,
+        primaryColor: primaryColor,
         onCheckout: () {
           Navigator.pop(context);
-          context.push('/staff/sale/payment');
+          context
+              .push(_isOwner ? '/owner/sale/payment' : '/staff/sale/payment');
         },
       ),
     );
@@ -72,10 +79,12 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final primaryColor =
+        _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.staffPrimary,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Text(l10n.newSale,
@@ -87,7 +96,9 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: cart.isEmpty ? null : () => _showCart(cart, l10n),
+                  onPressed: cart.isEmpty
+                      ? null
+                      : () => _showCart(cart, l10n, primaryColor),
                 ),
                 if (cart.itemCount > 0)
                   Positioned(
@@ -116,7 +127,7 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: Container(
-            color: AppColors.staffPrimary,
+            color: primaryColor,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
             child: TextField(
               controller: _searchController,
@@ -143,9 +154,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
       body: Consumer<ProductProvider>(
         builder: (context, pp, _) {
           if (pp.isLoading && pp.products.isEmpty) {
-            return const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.staffPrimary));
+            return Center(
+                child: CircularProgressIndicator(color: primaryColor));
           }
 
           final categories = _categories(pp.products);
@@ -157,6 +167,8 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
                 categories: categories,
                 selected: _selectedCategory,
                 onSelect: (c) => setState(() => _selectedCategory = c),
+                l10n: l10n,
+                primaryColor: primaryColor,
               ),
               Expanded(
                 child: products.isEmpty
@@ -192,7 +204,10 @@ class _NewSaleScreenState extends State<NewSaleScreen> {
         builder: (_, cart, __) {
           if (cart.isEmpty) return const SizedBox.shrink();
           return _CheckoutBar(
-              cart: cart, l10n: l10n, onTap: () => _showCart(cart, l10n));
+              cart: cart,
+              l10n: l10n,
+              primaryColor: primaryColor,
+              onTap: () => _showCart(cart, l10n, primaryColor));
         },
       ),
     );
@@ -203,11 +218,15 @@ class _CategoryBar extends StatelessWidget {
   final List<String> categories;
   final String selected;
   final ValueChanged<String> onSelect;
+  final AppLocalizations l10n;
+  final Color primaryColor;
 
   const _CategoryBar({
     required this.categories,
     required this.selected,
     required this.onSelect,
+    required this.l10n,
+    required this.primaryColor,
   });
 
   @override
@@ -221,6 +240,8 @@ class _CategoryBar extends StatelessWidget {
           itemBuilder: (_, i) {
             final cat = categories[i];
             final isSelected = cat == selected;
+            final displayText =
+                cat == 'All' ? l10n.all : l10n.translateCategory(cat);
             return Padding(
               padding: const EdgeInsets.only(right: 8),
               child: GestureDetector(
@@ -230,18 +251,14 @@ class _CategoryBar extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.staffPrimary
-                        : Colors.grey.shade100,
+                    color: isSelected ? primaryColor : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected
-                          ? AppColors.staffPrimary
-                          : Colors.grey.shade300,
+                      color: isSelected ? primaryColor : Colors.grey.shade300,
                     ),
                   ),
                   child: Text(
-                    cat,
+                    displayText,
                     style: AppTextStyles.labelL.copyWith(
                       color:
                           isSelected ? Colors.white : AppColors.textSecondary,
@@ -540,9 +557,13 @@ class _StockChip extends StatelessWidget {
 class _CheckoutBar extends StatelessWidget {
   final CartProvider cart;
   final AppLocalizations l10n;
+  final Color primaryColor;
   final VoidCallback onTap;
   const _CheckoutBar(
-      {required this.cart, required this.l10n, required this.onTap});
+      {required this.cart,
+      required this.l10n,
+      required this.primaryColor,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -551,7 +572,7 @@ class _CheckoutBar extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(
               16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
           decoration: BoxDecoration(
-            color: AppColors.staffPrimary,
+            color: primaryColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
@@ -576,7 +597,7 @@ class _CheckoutBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text('${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'}',
+              Text(l10n.itemCount(cart.itemCount),
                   style: AppTextStyles.bodyM.copyWith(color: Colors.white70)),
               const Spacer(),
               Text('${l10n.fcfa} ${cart.total.toStringAsFixed(0)}',
@@ -609,7 +630,11 @@ class _CheckoutBar extends StatelessWidget {
 class _CartSheet extends StatelessWidget {
   final VoidCallback onCheckout;
   final AppLocalizations l10n;
-  const _CartSheet({required this.onCheckout, required this.l10n});
+  final Color primaryColor;
+  const _CartSheet(
+      {required this.onCheckout,
+      required this.l10n,
+      required this.primaryColor});
 
   @override
   Widget build(BuildContext context) {
@@ -687,7 +712,7 @@ class _CartSheet extends StatelessWidget {
                       Text(l10n.total, style: AppTextStyles.headingM),
                       Text('${l10n.fcfa} ${cart.total.toStringAsFixed(0)}',
                           style: AppTextStyles.headingM
-                              .copyWith(color: AppColors.staffPrimary)),
+                              .copyWith(color: primaryColor)),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -696,7 +721,7 @@ class _CartSheet extends StatelessWidget {
                     child: FilledButton(
                       onPressed: cart.isEmpty ? null : onCheckout,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.staffPrimary,
+                        backgroundColor: primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
@@ -760,7 +785,7 @@ class _CartLineItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${l10n.fcfa} ${item.unitPrice.toStringAsFixed(0)} each',
+                      '${l10n.fcfa} ${item.unitPrice.toStringAsFixed(0)} ${l10n.perUnit}',
                       style: AppTextStyles.bodyS,
                     ),
                   ],

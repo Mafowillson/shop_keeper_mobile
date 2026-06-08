@@ -32,6 +32,7 @@ class NotificationProvider extends ChangeNotifier {
   bool _isRefreshing = false;
   String? _errorMessage;
   bool _isStaff = false;
+  String? _shopId;
 
   List<AppNotification> get notifications => _notifications;
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
@@ -42,8 +43,9 @@ class NotificationProvider extends ChangeNotifier {
 
   // ── Stale-while-revalidate load ───────────────────────────────────────────
 
-  Future<void> loadNotifications({bool isStaff = false}) async {
+  Future<void> loadNotifications({bool isStaff = false, String? shopId}) async {
     _isStaff = isStaff;
+    _shopId = shopId;
     _errorMessage = null;
 
     final cached = _local.getNotifications();
@@ -59,7 +61,8 @@ class NotificationProvider extends ChangeNotifier {
     if (_connectivity.isOnline) {
       _isRefreshing = cached.isNotEmpty;
       if (_isRefreshing) notifyListeners();
-      final result = await _getNotifications(isStaff: isStaff).run();
+      final result =
+          await _getNotifications(isStaff: isStaff, shopId: shopId).run();
       result.fold(
         (f) {
           if (_notifications.isEmpty) _errorMessage = f.message;
@@ -78,7 +81,6 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<void> markAsRead(String id) async {
-    // Optimistic local update.
     _notifications = _notifications
         .map((n) => n.id == id ? n.copyWith(isRead: true) : n)
         .toList();
@@ -98,8 +100,15 @@ class NotificationProvider extends ChangeNotifier {
     await _local.markAllRead();
 
     if (_connectivity.isOnline) {
-      final result = await _markAllRead(isStaff: _isStaff).run();
+      final result =
+          await _markAllRead(isStaff: _isStaff, shopId: _shopId).run();
       result.fold((f) => _errorMessage = f.message, (_) {});
     }
+  }
+
+  Future<void> invalidateCache() async {
+    await _local.invalidate();
+    _notifications = [];
+    notifyListeners();
   }
 }

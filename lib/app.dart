@@ -57,6 +57,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
     _onboardingProvider = getIt<OnboardingProvider>();
     _notificationProvider = getIt<NotificationProvider>();
     _productProvider = getIt<ProductProvider>();
+    getIt<SettingsProvider>().init();
 
     _syncProvider = SyncProvider(
       connectivity: getIt<ConnectivityService>(),
@@ -80,7 +81,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       final user = _authProvider.currentUser;
       if (user != null) {
         fcm.uploadTokenForRole(user.role);
-        _syncProvider.initialize(user.shopId);
+        _syncProvider.initialize(user.shopId, role: user.role);
       } else {
         _syncProvider.stop();
         // Clear all cached data for security when the user logs out.
@@ -94,7 +95,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       final user = _authProvider.currentUser;
       if (user != null) {
         fcm.uploadTokenForRole(user.role);
-        _syncProvider.initialize(user.shopId);
+        _syncProvider.initialize(user.shopId, role: user.role);
       }
     });
 
@@ -121,7 +122,10 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       // Refresh staff notification inbox badge for product events.
       if (isStaff) _notificationProvider.loadNotifications(isStaff: true);
     } else {
-      _notificationProvider.loadNotifications(isStaff: isStaff);
+      _notificationProvider.loadNotifications(
+        isStaff: isStaff,
+        shopId: isStaff ? null : user?.shopId,
+      );
     }
   }
 
@@ -172,22 +176,25 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
           ),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'ShopKeeper',
-        theme: AppTheme.ownerTheme(),
-        routerConfig: _router,
-        debugShowCheckedModeBanner: false,
-        restorationScopeId: 'app',
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('fr'),
-          Locale('en'),
-        ],
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, _) => MaterialApp.router(
+          title: 'ShopKeeper',
+          theme: AppTheme.ownerTheme(),
+          routerConfig: _router,
+          debugShowCheckedModeBanner: false,
+          restorationScopeId: 'app',
+          locale: settings.language != null ? Locale(settings.language!) : null,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('fr'),
+            Locale('en'),
+          ],
+        ),
       ),
     );
   }

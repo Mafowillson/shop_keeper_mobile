@@ -7,6 +7,7 @@ import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/cart_provider.dart';
 import 'package:shopkeeper/features/staff/presentation/screens/new_sale_screen.dart';
+import 'package:shopkeeper/l10n/app_localizations.dart';
 
 import '../../../../helpers/fake_providers.dart';
 
@@ -37,7 +38,11 @@ Widget _buildTestApp({
           value: products ?? FakeProductProvider()),
       ChangeNotifierProvider<CartProvider>.value(value: cart ?? CartProvider()),
     ],
-    child: MaterialApp.router(routerConfig: _router()),
+    child: MaterialApp.router(
+      routerConfig: _router(),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+    ),
   );
 }
 

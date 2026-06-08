@@ -10,6 +10,7 @@ class GetNotificationsUseCase {
 
   const GetNotificationsUseCase(this._repository);
 
-  TaskEither<Failure, List<AppNotification>> call({bool isStaff = false}) =>
-      _repository.getNotifications(isStaff: isStaff);
+  TaskEither<Failure, List<AppNotification>> call(
+          {bool isStaff = false, String? shopId}) =>
+      _repository.getNotifications(isStaff: isStaff, shopId: shopId);
 }

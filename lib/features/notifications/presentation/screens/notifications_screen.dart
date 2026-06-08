@@ -29,11 +29,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   bool get _isStaff => !_isOwner;
 
+  String? get _shopId =>
+      _isOwner ? context.read<AuthProvider>().currentUser?.shopId : null;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<NotificationProvider>().loadNotifications(isStaff: _isStaff);
+      context
+          .read<NotificationProvider>()
+          .loadNotifications(isStaff: _isStaff, shopId: _shopId);
     });
   }
 
@@ -130,7 +135,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Scaffold(
           backgroundColor: AppColors.background,
           body: RefreshIndicator(
-            onRefresh: () => provider.loadNotifications(isStaff: _isStaff),
+            onRefresh: () =>
+                provider.loadNotifications(isStaff: _isStaff, shopId: _shopId),
             color: primaryColor,
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
