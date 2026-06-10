@@ -71,7 +71,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     return l10n.unitsFallback;
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -645,8 +644,8 @@ class _OpeningStockSectionState extends State<_OpeningStockSection> {
                   onTap: () => _selectUnit(i),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 7),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.ownerPrimary
@@ -661,7 +660,8 @@ class _OpeningStockSectionState extends State<_OpeningStockSection> {
                     child: Text(
                       name,
                       style: AppTextStyles.labelM.copyWith(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color:
+                            isSelected ? Colors.white : AppColors.textPrimary,
                         fontWeight:
                             isSelected ? FontWeight.w700 : FontWeight.w500,
                       ),

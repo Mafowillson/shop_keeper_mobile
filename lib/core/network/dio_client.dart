@@ -83,8 +83,7 @@ class _AuthInterceptor extends Interceptor {
     }
 
     // The token that was on this request when it was sent.
-    final staleHeader =
-        err.requestOptions.headers['Authorization'] as String?;
+    final staleHeader = err.requestOptions.headers['Authorization'] as String?;
 
     try {
       // Fast path: another in-flight request already refreshed the token.

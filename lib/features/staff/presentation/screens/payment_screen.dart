@@ -65,7 +65,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _openCustomerPicker() {
-    final primaryColor = _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
+    final primaryColor =
+        _isOwner ? AppColors.ownerPrimary : AppColors.staffPrimary;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -325,8 +326,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 if ((_isCredit || change < 0) && _selectedCustomer == null) ...[
                   const SizedBox(height: 6),
                   Text(l10n.customerRequiredForCredit,
-                      style:
-                          AppTextStyles.bodyS.copyWith(color: AppColors.danger)),
+                      style: AppTextStyles.bodyS
+                          .copyWith(color: AppColors.danger)),
                 ],
                 const SizedBox(height: 24),
                 if (!_isCredit) ...[
@@ -447,7 +448,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     Expanded(
                       child: AppButton.primary(
                         label: l10n.confirm,
-                        onPressed: _canProceed(total) ? () => _proceed(total) : null,
+                        onPressed:
+                            _canProceed(total) ? () => _proceed(total) : null,
                       ),
                     ),
                   ],
@@ -574,8 +576,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
     final q = _query.toLowerCase();
     if (q.isEmpty) return all;
     return all
-        .where((c) =>
-            c.name.toLowerCase().contains(q) || c.phone.contains(q))
+        .where((c) => c.name.toLowerCase().contains(q) || c.phone.contains(q))
         .toList();
   }
 
@@ -676,8 +677,8 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                                 children: [
                                   Text(
                                     l10n.walkInCustomer,
-                                    style: AppTextStyles.bodyM.copyWith(
-                                        fontWeight: FontWeight.w600),
+                                    style: AppTextStyles.bodyM
+                                        .copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
@@ -723,8 +724,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                         ),
                         const SizedBox(width: 10),
                         const Expanded(
-                            child: Divider(
-                                height: 1, color: AppColors.border)),
+                            child: Divider(height: 1, color: AppColors.border)),
                       ],
                     ),
                   ),
@@ -755,18 +755,16 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                       contentPadding: EdgeInsets.zero,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.border),
+                        borderSide: const BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide:
-                            const BorderSide(color: AppColors.border),
+                        borderSide: const BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                            color: widget.primaryColor, width: 1.5),
+                        borderSide:
+                            BorderSide(color: widget.primaryColor, width: 1.5),
                       ),
                     ),
                   ),
@@ -785,8 +783,7 @@ class _CustomerPickerSheetState extends State<_CustomerPickerSheet> {
                             )
                           : ListView.builder(
                               controller: scrollController,
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                               itemCount: customers.length,
                               itemBuilder: (_, i) => _CustomerTile(
                                 customer: customers[i],
@@ -830,8 +827,7 @@ class _CustomerTile extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(14),
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -850,8 +846,7 @@ class _CustomerTile extends StatelessWidget {
                   child: Center(
                     child: Text(
                       customer.initials,
-                      style: AppTextStyles.headingS
-                          .copyWith(color: debtColor),
+                      style: AppTextStyles.headingS.copyWith(color: debtColor),
                     ),
                   ),
                 ),
@@ -871,13 +866,12 @@ class _CustomerTile extends StatelessWidget {
                         Row(
                           children: [
                             const Icon(Icons.phone_outlined,
-                                size: 12,
-                                color: AppColors.textSecondary),
+                                size: 12, color: AppColors.textSecondary),
                             const SizedBox(width: 4),
                             Text(
                               customer.phone,
-                              style: AppTextStyles.labelS.copyWith(
-                                  color: AppColors.textSecondary),
+                              style: AppTextStyles.labelS
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -888,13 +882,13 @@ class _CustomerTile extends StatelessWidget {
                 // Debt badge or arrow
                 if (customer.totalDebt > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: debtColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: debtColor.withValues(alpha: 0.3)),
+                      border:
+                          Border.all(color: debtColor.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '${l10n.fcfa} ${customer.totalDebt.toStringAsFixed(0)}',
@@ -966,8 +960,8 @@ class _PickerEmptyState extends StatelessWidget {
               isSearching
                   ? 'Try a different name or phone number.'
                   : 'Add a customer to link sales and track debts.',
-              style: AppTextStyles.bodyS
-                  .copyWith(color: AppColors.textSecondary),
+              style:
+                  AppTextStyles.bodyS.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             if (!isSearching) ...[
@@ -977,8 +971,8 @@ class _PickerEmptyState extends StatelessWidget {
                 icon: const Icon(Icons.person_add_outlined, size: 18),
                 label: Text(l10n.createNewCustomer),
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),

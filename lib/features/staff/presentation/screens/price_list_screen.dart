@@ -409,8 +409,7 @@ class _PriceCard extends StatelessWidget {
                       width: 4,
                       height: 36,
                       decoration: BoxDecoration(
-                        color:
-                            isOut ? Colors.grey.shade300 : primaryColor,
+                        color: isOut ? Colors.grey.shade300 : primaryColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -481,8 +480,7 @@ class _UnitPriceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isBase = unit.quantityInBase == 1;
     final color = isBase ? primaryColor : AppColors.accent;
-    final label =
-        isBase ? unit.name : '${unit.name} ×${unit.quantityInBase}';
+    final label = isBase ? unit.name : '${unit.name} ×${unit.quantityInBase}';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 9),
