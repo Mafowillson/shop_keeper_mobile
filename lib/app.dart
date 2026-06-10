@@ -74,6 +74,13 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
       onboardingProvider: _onboardingProvider,
     );
 
+    // When the refresh token is gone or rejected the interceptor clears all
+    // tokens and fires this callback so the user is sent back to the login
+    // screen instead of staying "logged in" with every request failing.
+    getIt<DioClient>().onSessionExpired = () {
+      _authProvider.logout();
+    };
+
     final fcm = getIt<FcmService>();
 
     // Upload FCM token on every auth state change (login, token refresh, etc.).
