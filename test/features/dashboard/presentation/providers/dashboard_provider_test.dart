@@ -8,7 +8,7 @@ import '../../../../helpers/fake_providers.dart';
 
 // ── Test repositories ─────────────────────────────────────────────────────────
 
-final _testStats = DashboardStats(
+const _testStats = DashboardStats(
   todaySales: 15000,
   transactionCount: 12,
   lowStockCount: 3,

@@ -395,9 +395,9 @@ class FakeProductProvider extends ProductProvider {
 
 class FakeDebtProvider extends DebtProvider {
   List<Customer> _fakeCustomers;
-  bool _fakeLoading;
-  bool _fakeSaving;
-  Customer? _customerToCreate;
+  final bool _fakeLoading;
+  final bool _fakeSaving;
+  final Customer? _customerToCreate;
 
   FakeDebtProvider({
     List<Customer> customers = const [],
@@ -446,8 +446,8 @@ class FakeDebtProvider extends DebtProvider {
 // ── FakeSalesProvider ─────────────────────────────────────────────────────────
 
 class FakeSalesProvider extends SalesProvider {
-  Sale? _saleToReturn;
-  String? _fakeError;
+  final Sale? _saleToReturn;
+  final String? _fakeError;
 
   FakeSalesProvider({
     Sale? saleToReturn,
