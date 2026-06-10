@@ -623,6 +623,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullAmountAsDebt => 'Full amount will be recorded as debt.';
 
   @override
+  String get partialPaymentNote =>
+      'Shortfall will be recorded as a debt for this customer.';
+
+  @override
   String get checkout => 'Checkout';
 
   @override
@@ -667,6 +671,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receipt => 'Receipt';
+
+  @override
+  String get shareReceipt => 'Share Receipt';
+
+  @override
+  String get pdfReceipt => 'PDF Receipt';
 
   @override
   String get owedCredit => 'Owed (credit)';
@@ -751,6 +761,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectCustomer => 'Select Customer';
+
+  @override
+  String get walkInCustomer => 'Walk-in Customer';
 
   @override
   String get newButton => 'New';

@@ -632,6 +632,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le montant total sera enregistré comme dette.';
 
   @override
+  String get partialPaymentNote =>
+      'Le solde restant sera enregistré comme dette pour ce client.';
+
+  @override
   String get checkout => 'Valider';
 
   @override
@@ -676,6 +680,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get receipt => 'Reçu';
+
+  @override
+  String get shareReceipt => 'Partager le reçu';
+
+  @override
+  String get pdfReceipt => 'Reçu PDF';
 
   @override
   String get owedCredit => 'Dû (crédit)';
@@ -760,6 +770,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectCustomer => 'Sélectionner un client';
+
+  @override
+  String get walkInCustomer => 'Client de passage';
 
   @override
   String get newButton => 'Nouveau';

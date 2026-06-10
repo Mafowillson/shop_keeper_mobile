@@ -71,15 +71,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     return l10n.unitsFallback;
   }
 
-  int get _computedStockTotal {
-    int total = 0;
-    for (final e in _units) {
-      final qty = int.tryParse(e.stock.text.trim()) ?? 0;
-      final qib = int.tryParse(e.qty.text.trim()) ?? 0;
-      total += qty * qib;
-    }
-    return total;
-  }
 
   @override
   void initState() {
@@ -314,7 +305,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     const SizedBox(height: 12),
                     _OpeningStockSection(
                       units: _units,
-                      computedTotal: _computedStockTotal,
                       baseUnitName: baseUnitName,
                       onChanged: () => setState(() {}),
                       l10n: l10n,
@@ -556,23 +546,82 @@ class _UnitCard extends StatelessWidget {
   }
 }
 
-class _OpeningStockSection extends StatelessWidget {
+class _OpeningStockSection extends StatefulWidget {
   final List<_UnitEntry> units;
-  final int computedTotal;
   final String baseUnitName;
   final VoidCallback onChanged;
   final AppLocalizations l10n;
 
   const _OpeningStockSection({
     required this.units,
-    required this.computedTotal,
     required this.baseUnitName,
     required this.onChanged,
     required this.l10n,
   });
 
   @override
+  State<_OpeningStockSection> createState() => _OpeningStockSectionState();
+}
+
+class _OpeningStockSectionState extends State<_OpeningStockSection> {
+  int _selectedIdx = 0;
+  bool _userSelected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIdx = _highestUnitIdx(widget.units);
+  }
+
+  @override
+  void didUpdateWidget(_OpeningStockSection old) {
+    super.didUpdateWidget(old);
+    if (_selectedIdx >= widget.units.length) {
+      _selectedIdx = _highestUnitIdx(widget.units);
+      _userSelected = false;
+    } else if (!_userSelected) {
+      _selectedIdx = _highestUnitIdx(widget.units);
+    }
+  }
+
+  int _highestUnitIdx(List<_UnitEntry> entries) {
+    if (entries.isEmpty) return 0;
+    int best = 0;
+    int bestQty = int.tryParse(entries[0].qty.text.trim()) ?? 0;
+    for (int i = 1; i < entries.length; i++) {
+      final q = int.tryParse(entries[i].qty.text.trim()) ?? 0;
+      if (q > bestQty) {
+        bestQty = q;
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  void _selectUnit(int idx) {
+    if (idx == _selectedIdx) return;
+    widget.units[_selectedIdx].stock.text = '';
+    setState(() {
+      _selectedIdx = idx;
+      _userSelected = true;
+    });
+    widget.onChanged();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final units = widget.units;
+    if (units.isEmpty) return const SizedBox.shrink();
+
+    final idx = _selectedIdx.clamp(0, units.length - 1);
+    final selected = units[idx];
+    final unitName = selected.name.text.trim().isEmpty
+        ? widget.l10n.unitNumber(idx + 1)
+        : selected.name.text.trim();
+    final stockQty = int.tryParse(selected.stock.text.trim()) ?? 0;
+    final qib = int.tryParse(selected.qty.text.trim()) ?? 1;
+    final totalBase = stockQty * qib;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -583,47 +632,65 @@ class _OpeningStockSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...units.asMap().entries.map((e) {
-            final unitName = e.value.name.text.trim();
-            final label =
-                unitName.isEmpty ? l10n.unitNumber(e.key + 1) : unitName;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 90,
+          if (units.length > 1) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: List.generate(units.length, (i) {
+                final name = units[i].name.text.trim().isEmpty
+                    ? widget.l10n.unitNumber(i + 1)
+                    : units[i].name.text.trim();
+                final isSelected = i == idx;
+                return GestureDetector(
+                  onTap: () => _selectUnit(i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.ownerPrimary
+                          : AppColors.ownerPrimary.withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.ownerPrimary
+                            : AppColors.border,
+                      ),
+                    ),
                     child: Text(
-                      label,
-                      style: AppTextStyles.labelL.copyWith(
-                        color: AppColors.textPrimary,
+                      name,
+                      style: AppTextStyles.labelM.copyWith(
+                        color: isSelected ? Colors.white : AppColors.textPrimary,
                         fontWeight:
-                            e.value.isBase ? FontWeight.w700 : FontWeight.w500,
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: AppTextField(
-                      label: '',
-                      hintText: '0',
-                      controller: e.value.stock,
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => onChanged(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-          if (computedTotal > 0) ...[
-            const Divider(height: 16, color: AppColors.border),
+                );
+              }),
+            ),
+            const SizedBox(height: 14),
+          ],
+          AppTextField(
+            label: unitName,
+            hintText: '0',
+            controller: selected.stock,
+            keyboardType: TextInputType.number,
+            onChanged: (_) {
+              setState(() {});
+              widget.onChanged();
+            },
+          ),
+          if (totalBase > 0) ...[
+            const SizedBox(height: 10),
             Row(
               children: [
                 const Icon(Icons.calculate_outlined,
                     size: 16, color: AppColors.ownerPrimary),
                 const SizedBox(width: 6),
                 Text(
-                  l10n.stockTotal(computedTotal, baseUnitName),
+                  widget.l10n.stockTotal(totalBase, widget.baseUnitName),
                   style: AppTextStyles.labelL.copyWith(
                     color: AppColors.ownerPrimary,
                     fontWeight: FontWeight.w700,

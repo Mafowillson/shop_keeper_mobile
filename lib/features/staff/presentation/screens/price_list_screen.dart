@@ -6,6 +6,7 @@ import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
+import 'package:shopkeeper/features/staff/presentation/screens/product_detail_screen.dart';
 import 'package:shopkeeper/l10n/app_localizations.dart';
 import 'package:shopkeeper/l10n/app_localizations_ext.dart';
 
@@ -369,156 +370,185 @@ class _PriceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isOut = product.isOutOfStock;
-
     final sortedUnits = [...product.units]
       ..sort((a, b) => a.quantityInBase.compareTo(b.quantityInBase));
 
-    final priceCells = <Widget>[];
-    for (int i = 0; i < sortedUnits.length; i++) {
-      if (i > 0) {
-        priceCells.add(const VerticalDivider(
-            width: 1, thickness: 1, color: AppColors.border));
-      }
-      final unit = sortedUnits[i];
-      final isBase = unit.quantityInBase == 1;
-      priceCells.add(Expanded(
-        child: _PriceCell(
-          icon: isBase ? Icons.sell_outlined : Icons.inventory_2_outlined,
-          label: isBase ? unit.name : '${unit.name} ×${unit.quantityInBase}',
-          value: '${l10n.fcfa} ${unit.price.toStringAsFixed(0)}',
-          valueColor: isBase ? primaryColor : AppColors.accent,
-        ),
-      ));
-    }
-    priceCells.add(
-        const VerticalDivider(width: 1, thickness: 1, color: AppColors.border));
-    priceCells.add(Expanded(
-      child: _PriceCell(
-        icon: Icons.layers_outlined,
-        label: l10n.inStock,
-        value: '${product.stockQty} ${product.baseUnit}',
-        valueColor: product.isOutOfStock
-            ? AppColors.danger
-            : product.isLowStock
-                ? AppColors.warning
-                : AppColors.textPrimary,
-      ),
-    ));
-
     return Opacity(
       opacity: isOut ? 0.5 : 1.0,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(
+              product: product,
+              primaryColor: primaryColor,
             ),
-          ],
+          ),
         ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: isOut ? Colors.grey.shade300 : primaryColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          style: AppTextStyles.headingS,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.translateCategory(product.category),
-                          style: AppTextStyles.bodyS
-                              .copyWith(color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _StockPill(product, l10n: l10n),
-                ],
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-            ),
-            const Divider(height: 1, color: AppColors.border),
-            IntrinsicHeight(
-              child: Row(children: priceCells),
-            ),
-            if (!isOut) _StockBar(product: product),
-          ],
+            ],
+          ),
+          child: Column(
+            children: [
+              // ── Header: name + category + status ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color:
+                            isOut ? Colors.grey.shade300 : primaryColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            style: AppTextStyles.headingS,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.translateCategory(product.category),
+                            style: AppTextStyles.bodyS
+                                .copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _StockPill(product, l10n: l10n),
+                  ],
+                ),
+              ),
+              const Divider(height: 1, color: AppColors.border),
+              // ── Unit price rows ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+                child: Column(
+                  children: [
+                    for (int i = 0; i < sortedUnits.length; i++) ...[
+                      _UnitPriceRow(
+                        unit: sortedUnits[i],
+                        l10n: l10n,
+                        primaryColor: primaryColor,
+                      ),
+                      const Divider(height: 1, color: AppColors.border),
+                    ],
+                    // ── Stock row ──
+                    _StockCountRow(product: product, l10n: l10n),
+                  ],
+                ),
+              ),
+              // ── Stock progress bar ──
+              if (!isOut) _StockBar(product: product),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// ── Price cell ────────────────────────────────────────────────────────────────
+// ── Unit price row ────────────────────────────────────────────────────────────
 
-class _PriceCell extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color valueColor;
-
-  const _PriceCell({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.valueColor,
-  });
+class _UnitPriceRow extends StatelessWidget {
+  final UnitDefinition unit;
+  final AppLocalizations l10n;
+  final Color primaryColor;
+  const _UnitPriceRow(
+      {required this.unit, required this.l10n, required this.primaryColor});
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 12, color: AppColors.textSecondary),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.labelM
-                        .copyWith(color: AppColors.textSecondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+  Widget build(BuildContext context) {
+    final isBase = unit.quantityInBase == 1;
+    final color = isBase ? primaryColor : AppColors.accent;
+    final label =
+        isBase ? unit.name : '${unit.name} ×${unit.quantityInBase}';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      child: Row(
+        children: [
+          Icon(
+            isBase ? Icons.sell_outlined : Icons.inventory_2_outlined,
+            size: 14,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style:
+                  AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: AppTextStyles.headingS
-                  .copyWith(color: valueColor, fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            '${l10n.fcfa} ${unit.price.toStringAsFixed(0)}',
+            style: AppTextStyles.headingS.copyWith(color: color, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Stock count row ───────────────────────────────────────────────────────────
+
+class _StockCountRow extends StatelessWidget {
+  final Product product;
+  final AppLocalizations l10n;
+  const _StockCountRow({required this.product, required this.l10n});
+
+  @override
+  Widget build(BuildContext context) {
+    final stockColor = product.isOutOfStock
+        ? AppColors.danger
+        : product.isLowStock
+            ? AppColors.warning
+            : AppColors.textPrimary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      child: Row(
+        children: [
+          const Icon(Icons.layers_outlined,
+              size: 14, color: AppColors.textSecondary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              l10n.inStock,
+              style:
+                  AppTextStyles.bodyM.copyWith(color: AppColors.textSecondary),
             ),
-          ],
-        ),
-      );
+          ),
+          Text(
+            '${product.stockQty} ${product.baseUnit}',
+            style: AppTextStyles.headingS
+                .copyWith(color: stockColor, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // ── Stock bar ─────────────────────────────────────────────────────────────────
