@@ -570,7 +570,7 @@ class _CheckoutBar extends StatelessWidget {
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.fromLTRB(
-              16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
+              16, 12, 16, 12 + MediaQuery.of(context).viewPadding.bottom),
           decoration: BoxDecoration(
             color: primaryColor,
             boxShadow: [

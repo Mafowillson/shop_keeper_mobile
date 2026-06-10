@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shopkeeper/core/config/app_config.dart';
 import 'package:shopkeeper/core/enums/user_role.dart';
 import 'package:shopkeeper/core/network/dio_client.dart';
 import 'package:shopkeeper/core/network/token_storage.dart';
@@ -68,9 +69,17 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
     try {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken == null) throw Exception('No refresh token stored');
-      final res = await _dio
-          .post('/auth/refresh', data: {'refresh_token': refreshToken});
+
+      // Use a plain Dio — the intercepted client would attach the (possibly
+      // expired) access token and could trigger a recursive refresh loop.
+      final plainDio = Dio(BaseOptions(baseUrl: AppConfig.baseUrl));
+      final role = await _tokenStorage.getRole() ?? 'owner';
+      final endpoint =
+          role == 'staff' ? '/auth/staff/refresh' : '/auth/refresh';
+      final res =
+          await plainDio.post(endpoint, data: {'refresh_token': refreshToken});
       await _saveTokens(res.data);
+      await _tokenStorage.saveRole(role);
       return UserModel.fromOwnerLoginResponse(res.data);
     } on DioException catch (e) {
       throw _toException(e);

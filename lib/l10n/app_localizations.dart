@@ -1262,6 +1262,12 @@ abstract class AppLocalizations {
   /// **'Full amount will be recorded as debt.'**
   String get fullAmountAsDebt;
 
+  /// No description provided for @partialPaymentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortfall will be recorded as a debt for this customer.'**
+  String get partialPaymentNote;
+
   /// No description provided for @checkout.
   ///
   /// In en, this message translates to:
@@ -1333,6 +1339,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Receipt'**
   String get receipt;
+
+  /// No description provided for @shareReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Receipt'**
+  String get shareReceipt;
+
+  /// No description provided for @pdfReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Receipt'**
+  String get pdfReceipt;
 
   /// No description provided for @owedCredit.
   ///
@@ -1501,6 +1519,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select Customer'**
   String get selectCustomer;
+
+  /// No description provided for @walkInCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Walk-in Customer'**
+  String get walkInCustomer;
 
   /// No description provided for @newButton.
   ///
