@@ -13,8 +13,8 @@ final _testStats = DashboardStats(
   transactionCount: 12,
   lowStockCount: 3,
   totalDebts: 8500,
-  weeklyRevenue: const [1000, 2000, 3000, 4000, 5000, 6000, 7000],
-  activityFeed: const [],
+  weeklyRevenue: [1000, 2000, 3000, 4000, 5000, 6000, 7000],
+  activityFeed: [],
 );
 
 class _SuccessDashboardRepo implements IDashboardRepository {
