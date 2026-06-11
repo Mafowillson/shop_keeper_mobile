@@ -47,6 +47,7 @@ import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/domain/repositories/i_product_repository.dart';
 import 'package:shopkeeper/features/products/domain/usecases/deactivate_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/get_products_usecase.dart';
+import 'package:shopkeeper/features/products/domain/usecases/restock_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/save_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/search_products_usecase.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
@@ -156,6 +157,9 @@ class _StubProductRepo implements IProductRepository {
       throw UnimplementedError();
   @override
   TaskEither<Failure, Unit> decrementStock(String productId, int qty) =>
+      throw UnimplementedError();
+  @override
+  TaskEither<Failure, Unit> restockProduct(String productId, int newQty) =>
       throw UnimplementedError();
 }
 
@@ -367,6 +371,7 @@ class FakeProductProvider extends ProductProvider {
           SaveProductUseCase(_StubProductRepo()),
           DeactivateProductUseCase(_StubProductRepo()),
           SearchProductsUseCase(_StubProductRepo()),
+          RestockProductUseCase(_StubProductRepo()),
           _StubProductLocalDS(),
           _StubCacheMetadataService(),
           ConnectivityService.stub(),
@@ -554,6 +559,7 @@ ProductProvider buildProductProvider(
       SaveProductUseCase(repo),
       DeactivateProductUseCase(repo),
       SearchProductsUseCase(repo),
+      RestockProductUseCase(repo),
       _StubProductLocalDS(),
       _StubCacheMetadataService(),
       ConnectivityService.stub(isOnline: online),

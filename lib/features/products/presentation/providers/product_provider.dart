@@ -6,6 +6,7 @@ import 'package:shopkeeper/features/products/data/datasources/product_local_data
 import 'package:shopkeeper/features/products/domain/entities/product.dart';
 import 'package:shopkeeper/features/products/domain/usecases/deactivate_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/get_products_usecase.dart';
+import 'package:shopkeeper/features/products/domain/usecases/restock_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/save_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/search_products_usecase.dart';
 
@@ -15,6 +16,7 @@ class ProductProvider extends ChangeNotifier {
   final SaveProductUseCase _saveProduct;
   final DeactivateProductUseCase _deactivateProduct;
   final SearchProductsUseCase _searchProducts;
+  final RestockProductUseCase _restockProduct;
   final ProductLocalDataSource _local;
   final CacheMetadataService _metadata;
   final ConnectivityService _connectivity;
@@ -24,6 +26,7 @@ class ProductProvider extends ChangeNotifier {
     this._saveProduct,
     this._deactivateProduct,
     this._searchProducts,
+    this._restockProduct,
     this._local,
     this._metadata,
     this._connectivity,
@@ -141,6 +144,29 @@ class ProductProvider extends ChangeNotifier {
     _isSaving = false;
     notifyListeners();
     return saved;
+  }
+
+  Future<bool> restockProduct(String productId, int newQty) async {
+    _isSaving = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    bool ok = false;
+    final result = await _restockProduct(productId, newQty).run();
+    result.fold(
+      (f) => _errorMessage = f.message,
+      (_) {
+        ok = true;
+        final idx = _products.indexWhere((p) => p.id == productId);
+        if (idx >= 0) {
+          _products[idx] = _products[idx].copyWith(stockQty: newQty);
+        }
+      },
+    );
+
+    _isSaving = false;
+    notifyListeners();
+    return ok;
   }
 
   Future<bool> deactivateProduct(String id) async {
