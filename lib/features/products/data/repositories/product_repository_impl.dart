@@ -172,6 +172,44 @@ class ProductRepositoryImpl implements IProductRepository {
   TaskEither<Failure, Unit> decrementStock(String productId, int qty) =>
       TaskEither.right(unit);
 
+  @override
+  TaskEither<Failure, Unit> restockProduct(String productId, int newQty) =>
+      TaskEither.tryCatch(
+        () async {
+          if (_connectivity.isOnline) {
+            await _remote.restockProduct(productId, newQty);
+          } else {
+            await _writeSyncLogEntry(SyncLogEntry(
+              id: 'sync_restock_${productId}_${DateTime.now().millisecondsSinceEpoch}',
+              deviceId: AppConfig.deviceId,
+              entityType: SyncEntityType.product,
+              operationType: SyncOperationType.update,
+              payload: {'product_id': productId, 'stock_qty': newQty},
+              status: SyncEntryStatus.pending,
+              timestamp: DateTime.now(),
+            ));
+          }
+          // Optimistically update local cache regardless of what the backend
+          // response contains — ensures UI reflects the intended new stock.
+          final cached = _local.getProductById(productId);
+          if (cached != null) {
+            await _local.saveProduct(ProductModel(
+              id: cached.id,
+              shopId: cached.shopId,
+              name: cached.name,
+              category: cached.category,
+              baseUnit: cached.baseUnit,
+              units: cached.units,
+              stockQty: newQty,
+              lowStockThreshold: cached.lowStockThreshold,
+              isActive: cached.isActive,
+            ));
+          }
+          return unit;
+        },
+        (e, _) => ServerFailure('$e'),
+      );
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   List<ProductModel> _filterLocal(

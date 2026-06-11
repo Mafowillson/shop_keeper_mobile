@@ -80,6 +80,15 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> restockProduct(String id, int newQty) async {
+    try {
+      await _dio.put('/products/$id', data: {'stock_qty': newQty});
+    } on DioException catch (e) {
+      throw Exception(_errorMessage(e));
+    }
+  }
+
   String _errorMessage(DioException e) {
     final data = e.response?.data;
     if (data is Map) {

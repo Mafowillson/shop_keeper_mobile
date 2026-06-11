@@ -12,4 +12,5 @@ abstract class IProductRemoteDataSource {
   Future<ProductModel> createProduct(ProductModel model);
   Future<ProductModel> updateProduct(String id, ProductModel model);
   Future<void> deactivateProduct(String id);
+  Future<void> restockProduct(String id, int newQty);
 }

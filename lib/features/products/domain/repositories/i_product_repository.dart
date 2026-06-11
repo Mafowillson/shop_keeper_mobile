@@ -11,4 +11,5 @@ abstract class IProductRepository {
   TaskEither<Failure, List<Product>> searchProducts(String query,
       {required String shopId});
   TaskEither<Failure, Unit> decrementStock(String productId, int qty);
+  TaskEither<Failure, Unit> restockProduct(String productId, int newQty);
 }

@@ -44,6 +44,10 @@ class NotificationModel {
         return NotificationType.debtPayment;
       case 'staff_login':
         return NotificationType.staffLogin;
+      case 'weekly_insight':
+        return NotificationType.weeklyInsight;
+      case 'anomaly':
+        return NotificationType.anomaly;
       case 'product_added':
         return NotificationType.productAdded;
       case 'product_updated':
@@ -55,10 +59,33 @@ class NotificationModel {
     }
   }
 
+  static String _typeToString(NotificationType t) {
+    switch (t) {
+      case NotificationType.lowStock:
+        return 'low_stock';
+      case NotificationType.largeSale:
+        return 'large_sale';
+      case NotificationType.debtPayment:
+        return 'debt_payment';
+      case NotificationType.staffLogin:
+        return 'staff_login';
+      case NotificationType.weeklyInsight:
+        return 'weekly_insight';
+      case NotificationType.anomaly:
+        return 'anomaly';
+      case NotificationType.productAdded:
+        return 'product_added';
+      case NotificationType.productUpdated:
+        return 'product_updated';
+      case NotificationType.productDeleted:
+        return 'product_deleted';
+    }
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'shop_id': shopId,
-        'type': type.toString().split('.').last,
+        'type': _typeToString(type),
         'title': title,
         'body': body,
         'read': isRead,

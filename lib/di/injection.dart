@@ -32,6 +32,7 @@ import 'package:shopkeeper/features/products/data/repositories/product_repositor
 import 'package:shopkeeper/features/products/domain/repositories/i_product_repository.dart';
 import 'package:shopkeeper/features/products/domain/usecases/deactivate_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/get_products_usecase.dart';
+import 'package:shopkeeper/features/products/domain/usecases/restock_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/save_product_usecase.dart';
 import 'package:shopkeeper/features/products/domain/usecases/search_products_usecase.dart';
 import 'package:shopkeeper/features/products/presentation/providers/product_provider.dart';
@@ -132,6 +133,7 @@ void configureDependencies() {
       getIt<SaveProductUseCase>(),
       getIt<DeactivateProductUseCase>(),
       getIt<SearchProductsUseCase>(),
+      getIt<RestockProductUseCase>(),
       getIt<ProductLocalDataSource>(),
       getIt<CacheMetadataService>(),
       getIt<ConnectivityService>(),
