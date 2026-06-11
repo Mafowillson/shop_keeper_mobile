@@ -37,6 +37,10 @@ class _SuccessProductRepo implements IProductRepository {
   @override
   TaskEither<Failure, Unit> decrementStock(String productId, int qty) =>
       TaskEither.right(unit);
+
+  @override
+  TaskEither<Failure, Unit> restockProduct(String productId, int newQty) =>
+      TaskEither.right(unit);
 }
 
 class _FailingProductRepo implements IProductRepository {
@@ -67,6 +71,10 @@ class _FailingProductRepo implements IProductRepository {
 
   @override
   TaskEither<Failure, Unit> decrementStock(String productId, int qty) =>
+      TaskEither.left(ServerFailure(message));
+
+  @override
+  TaskEither<Failure, Unit> restockProduct(String productId, int newQty) =>
       TaskEither.left(ServerFailure(message));
 }
 

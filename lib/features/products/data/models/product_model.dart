@@ -81,6 +81,7 @@ class ProductModel {
                   'price': u.price,
                 })
             .toList(),
+        'stock_qty': stockQty,
         'low_stock_threshold': lowStockThreshold,
       };
 
