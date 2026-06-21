@@ -59,22 +59,20 @@ class _FraudAlertsScreenState extends State<FraudAlertsScreen>
               children: [
                 Text(
                   'Fraud Alerts',
-                  style: AppTextStyles.headingM
-                      .copyWith(color: Colors.white),
+                  style: AppTextStyles.headingM.copyWith(color: Colors.white),
                 ),
                 if (openCount > 0) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.danger,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '$openCount',
-                      style: AppTextStyles.labelM
-                          .copyWith(color: Colors.white),
+                      style: AppTextStyles.labelM.copyWith(color: Colors.white),
                     ),
                   ),
                 ],
@@ -292,8 +290,7 @@ class _AlertCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: chipColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border:
-                        Border.all(color: chipColor.withValues(alpha: 0.3)),
+                    border: Border.all(color: chipColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     alert.triggerLabel,
@@ -303,8 +300,8 @@ class _AlertCard extends StatelessWidget {
                 const Spacer(),
                 if (!alert.isOpen)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppColors.successLight,
                       borderRadius: BorderRadius.circular(12),
@@ -321,8 +318,7 @@ class _AlertCard extends StatelessWidget {
             // Details
             Text(
               alert.details,
-              style:
-                  AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
+              style: AppTextStyles.bodyM.copyWith(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             // Sale ID + time
@@ -330,14 +326,14 @@ class _AlertCard extends StatelessWidget {
               children: [
                 Text(
                   'Sale: $shortSaleId',
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.textHint),
+                  style:
+                      AppTextStyles.bodyS.copyWith(color: AppColors.textHint),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   timeAgo,
-                  style: AppTextStyles.bodyS
-                      .copyWith(color: AppColors.textHint),
+                  style:
+                      AppTextStyles.bodyS.copyWith(color: AppColors.textHint),
                 ),
               ],
             ),
@@ -354,8 +350,8 @@ class _AlertCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                   onPressed: onAcknowledge,
-                  icon: const Icon(Icons.check_circle_outline_rounded,
-                      size: 16),
+                  icon:
+                      const Icon(Icons.check_circle_outline_rounded, size: 16),
                   label: Text('Acknowledge',
                       style: AppTextStyles.labelL.copyWith(color: chipColor)),
                 ),

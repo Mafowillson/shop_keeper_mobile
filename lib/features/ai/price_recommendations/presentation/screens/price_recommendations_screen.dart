@@ -32,7 +32,8 @@ class _PriceRecommendationsScreenState
       appBar: AppBar(
         backgroundColor: AppColors.ownerPrimary,
         foregroundColor: Colors.white,
-        title: Text('Price Recommendations', style: AppTextStyles.headingM.copyWith(color: Colors.white)),
+        title: Text('Price Recommendations',
+            style: AppTextStyles.headingM.copyWith(color: Colors.white)),
         elevation: 0,
       ),
       body: Consumer<PriceRecommendationProvider>(
@@ -221,7 +222,8 @@ class _RecommendationCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: badgeColor.withValues(alpha: 0.4)),
+                    border:
+                        Border.all(color: badgeColor.withValues(alpha: 0.4)),
                   ),
                   child: Text(
                     badgeLabel,
@@ -367,8 +369,7 @@ class _PriceTable extends StatelessWidget {
             final current = currentPrices[unit] ?? 0;
             final suggested = suggestedPrices[unit] ?? 0;
             return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Row(
                 children: [
                   Expanded(

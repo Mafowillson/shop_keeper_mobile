@@ -49,8 +49,7 @@ class PriceRecommendationModel {
       shopId: json['shop_id'] as String,
       productId: json['product_id'] as String,
       productName: json['product_name'] as String? ?? '',
-      sellThroughRate:
-          (json['sell_through_rate'] as num?)?.toDouble() ?? 0.0,
+      sellThroughRate: (json['sell_through_rate'] as num?)?.toDouble() ?? 0.0,
       unitsSold30d: json['units_sold_30d'] as int? ?? 0,
       avgStock: (json['avg_stock'] as num?)?.toDouble() ?? 0.0,
       action: json['action'] as String? ?? '',

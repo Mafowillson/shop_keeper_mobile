@@ -9,7 +9,8 @@ class PriceRecommendation {
   final double sellThroughRate;
   final int unitsSold30d;
   final double avgStock;
-  final String action; // "increase_5", "increase_3", "decrease_5", "decrease_10"
+  final String
+      action; // "increase_5", "increase_3", "decrease_5", "decrease_10"
   final double changePercent;
   final String reason;
   final Map<String, double> currentPrices;

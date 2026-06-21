@@ -184,8 +184,7 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         ChangeNotifierProvider(
             create: (_) => getIt<PriceRecommendationProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<FraudAlertProvider>()),
-        ChangeNotifierProvider(
-            create: (_) => getIt<WeeklyInsightProvider>()),
+        ChangeNotifierProvider(create: (_) => getIt<WeeklyInsightProvider>()),
         ChangeNotifierProvider.value(value: _syncProvider),
         ChangeNotifierProvider.value(value: getIt<ConnectivityService>()),
         ChangeNotifierProvider(

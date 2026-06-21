@@ -19,8 +19,18 @@ class WeeklyInsight {
   String get weekLabel {
     final day = weekStart.day;
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return 'Week of $day ${months[weekStart.month - 1]} ${weekStart.year}';
   }

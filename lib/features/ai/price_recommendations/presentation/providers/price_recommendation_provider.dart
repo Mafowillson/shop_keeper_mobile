@@ -35,9 +35,7 @@ class PriceRecommendationProvider extends ChangeNotifier {
   Future<void> accept(String id) async {
     try {
       await _dataSource.accept(id);
-      _recommendations = _recommendations
-          .where((r) => r.id != id)
-          .toList();
+      _recommendations = _recommendations.where((r) => r.id != id).toList();
       notifyListeners();
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');
@@ -49,9 +47,7 @@ class PriceRecommendationProvider extends ChangeNotifier {
   Future<void> dismiss(String id) async {
     try {
       await _dataSource.dismiss(id);
-      _recommendations = _recommendations
-          .where((r) => r.id != id)
-          .toList();
+      _recommendations = _recommendations.where((r) => r.id != id).toList();
       notifyListeners();
     } catch (e) {
       _error = e.toString().replaceFirst('Exception: ', '');

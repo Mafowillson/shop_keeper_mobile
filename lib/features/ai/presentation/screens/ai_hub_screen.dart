@@ -217,8 +217,7 @@ class _FeatureCard extends StatelessWidget {
                   ),
                   child: Text(
                     '${feature.badge}',
-                    style:
-                        AppTextStyles.labelM.copyWith(color: Colors.white),
+                    style: AppTextStyles.labelM.copyWith(color: Colors.white),
                   ),
                 ),
               ],

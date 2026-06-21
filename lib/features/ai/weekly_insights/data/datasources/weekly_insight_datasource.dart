@@ -7,8 +7,7 @@ class WeeklyInsightDataSource {
 
   WeeklyInsightDataSource(DioClient dioClient) : _dio = dioClient.client;
 
-  Future<List<WeeklyInsightModel>> fetch(String shopId,
-      {int limit = 4}) async {
+  Future<List<WeeklyInsightModel>> fetch(String shopId, {int limit = 4}) async {
     try {
       final res = await _dio.get(
         '/ai/weekly-insights',
