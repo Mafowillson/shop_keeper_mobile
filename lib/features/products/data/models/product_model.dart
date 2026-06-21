@@ -12,6 +12,10 @@ class ProductModel {
   final bool isActive;
   final Map<String, int>? initialStock;
 
+  /// Backend-computed fields — never sent to the API.
+  final double? daysUntilStockout;
+  final int? reorderQty;
+
   const ProductModel({
     required this.id,
     required this.shopId,
@@ -23,6 +27,8 @@ class ProductModel {
     required this.lowStockThreshold,
     required this.isActive,
     this.initialStock,
+    this.daysUntilStockout,
+    this.reorderQty,
   });
 
   // ── API response → model ──────────────────────────────────────────────────
@@ -49,6 +55,8 @@ class ProductModel {
       stockQty: json['stock_qty'] as int? ?? 0,
       lowStockThreshold: json['low_stock_threshold'] as int? ?? 0,
       isActive: json['is_active'] as bool? ?? true,
+      daysUntilStockout: (json['days_until_stockout'] as num?)?.toDouble(),
+      reorderQty: json['reorder_qty'] as int?,
     );
   }
 
@@ -118,6 +126,8 @@ class ProductModel {
         lowStockThreshold: entity.lowStockThreshold,
         isActive: entity.isActive,
         initialStock: entity.initialStock,
+        daysUntilStockout: entity.daysUntilStockout,
+        reorderQty: entity.reorderQty,
       );
 
   Product toEntity() => Product(
@@ -130,5 +140,7 @@ class ProductModel {
         stockQty: stockQty,
         lowStockThreshold: lowStockThreshold,
         isActive: isActive,
+        daysUntilStockout: daysUntilStockout,
+        reorderQty: reorderQty,
       );
 }
