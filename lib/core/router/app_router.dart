@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shopkeeper/features/ai_chat/presentation/screens/ai_chat_screen.dart';
+import 'package:shopkeeper/features/ai/presentation/screens/ai_hub_screen.dart';
+import 'package:shopkeeper/features/ai/price_recommendations/presentation/screens/price_recommendations_screen.dart';
+import 'package:shopkeeper/features/ai/fraud_alerts/presentation/screens/fraud_alerts_screen.dart';
+import 'package:shopkeeper/features/ai/weekly_insights/presentation/screens/weekly_insights_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/login_screen.dart';
 import 'package:shopkeeper/features/auth/presentation/screens/register_screen.dart';
@@ -196,6 +200,22 @@ class AppRouter {
           GoRoute(
             path: '/owner/chat',
             builder: (context, state) => const AiChatScreen(),
+          ),
+          GoRoute(
+            path: '/owner/ai',
+            builder: (_, __) => const AiHubScreen(),
+          ),
+          GoRoute(
+            path: '/owner/ai/price-recommendations',
+            builder: (_, __) => const PriceRecommendationsScreen(),
+          ),
+          GoRoute(
+            path: '/owner/ai/fraud-alerts',
+            builder: (_, __) => const FraudAlertsScreen(),
+          ),
+          GoRoute(
+            path: '/owner/ai/weekly-insights',
+            builder: (_, __) => const WeeklyInsightsScreen(),
           ),
           GoRoute(
             path: '/owner/staff/create',

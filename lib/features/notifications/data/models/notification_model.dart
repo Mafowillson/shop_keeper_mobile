@@ -44,10 +44,14 @@ class NotificationModel {
         return NotificationType.debtPayment;
       case 'staff_login':
         return NotificationType.staffLogin;
+      case 'stockout_forecast':
+        return NotificationType.stockoutForecast;
       case 'weekly_insight':
+      case 'weekly_insights':
         return NotificationType.weeklyInsight;
+      case 'fraud_alert':
       case 'anomaly':
-        return NotificationType.anomaly;
+        return NotificationType.fraudAlert;
       case 'product_added':
         return NotificationType.productAdded;
       case 'product_updated':
@@ -69,10 +73,12 @@ class NotificationModel {
         return 'debt_payment';
       case NotificationType.staffLogin:
         return 'staff_login';
+      case NotificationType.stockoutForecast:
+        return 'stockout_forecast';
       case NotificationType.weeklyInsight:
-        return 'weekly_insight';
-      case NotificationType.anomaly:
-        return 'anomaly';
+        return 'weekly_insights';
+      case NotificationType.fraudAlert:
+        return 'fraud_alert';
       case NotificationType.productAdded:
         return 'product_added';
       case NotificationType.productUpdated:

@@ -28,6 +28,10 @@ class Product {
   /// Only populated when creating a product — never stored or returned by API.
   final Map<String, int>? initialStock;
 
+  /// Backend-computed fields (null if not included in response).
+  final double? daysUntilStockout;
+  final int? reorderQty;
+
   const Product({
     required this.id,
     required this.shopId,
@@ -39,6 +43,8 @@ class Product {
     required this.lowStockThreshold,
     required this.isActive,
     this.initialStock,
+    this.daysUntilStockout,
+    this.reorderQty,
   });
 
   // ── Backward-compatible getters (used by staff price-list, sale screens) ──
@@ -62,6 +68,10 @@ class Product {
   bool get isLowStock => stockQty > 0 && stockQty <= lowStockThreshold;
   bool get isOutOfStock => stockQty == 0;
 
+  /// True when the backend predicts a stockout within 7 days.
+  bool get hasStockoutWarning =>
+      daysUntilStockout != null && daysUntilStockout! <= 7;
+
   Product copyWith({
     String? name,
     String? category,
@@ -71,6 +81,8 @@ class Product {
     int? lowStockThreshold,
     bool? isActive,
     Map<String, int>? initialStock,
+    double? daysUntilStockout,
+    int? reorderQty,
   }) =>
       Product(
         id: id,
@@ -83,5 +95,7 @@ class Product {
         lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
         isActive: isActive ?? this.isActive,
         initialStock: initialStock ?? this.initialStock,
+        daysUntilStockout: daysUntilStockout ?? this.daysUntilStockout,
+        reorderQty: reorderQty ?? this.reorderQty,
       );
 }
