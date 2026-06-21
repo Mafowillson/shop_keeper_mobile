@@ -10,6 +10,10 @@ class Customer {
   final double totalDebt;
   final DateTime createdAt;
 
+  /// Backend-computed AI risk fields (null if not included in response).
+  final String? riskLevel; // "low", "medium", "high", "insufficient_history"
+  final int? riskScore;
+
   const Customer({
     required this.id,
     required this.shopId,
@@ -17,6 +21,8 @@ class Customer {
     required this.phone,
     required this.totalDebt,
     required this.createdAt,
+    this.riskLevel,
+    this.riskScore,
   });
 
   /// Computed from totalDebt — no backend field needed.
@@ -42,6 +48,8 @@ class Customer {
     String? phone,
     double? totalDebt,
     DateTime? createdAt,
+    String? riskLevel,
+    int? riskScore,
   }) =>
       Customer(
         id: id ?? this.id,
@@ -50,5 +58,7 @@ class Customer {
         phone: phone ?? this.phone,
         totalDebt: totalDebt ?? this.totalDebt,
         createdAt: createdAt ?? this.createdAt,
+        riskLevel: riskLevel ?? this.riskLevel,
+        riskScore: riskScore ?? this.riskScore,
       );
 }

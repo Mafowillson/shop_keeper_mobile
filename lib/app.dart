@@ -34,6 +34,9 @@ import 'package:shopkeeper/features/staff/domain/usecases/create_staff_usecase.d
 import 'package:shopkeeper/features/staff/presentation/providers/staff_dashboard_provider.dart';
 import 'package:shopkeeper/features/settings/presentation/providers/settings_provider.dart';
 import 'package:shopkeeper/features/staff/presentation/providers/staff_provider.dart';
+import 'package:shopkeeper/features/ai/price_recommendations/presentation/providers/price_recommendation_provider.dart';
+import 'package:shopkeeper/features/ai/fraud_alerts/presentation/providers/fraud_alert_provider.dart';
+import 'package:shopkeeper/features/ai/weekly_insights/presentation/providers/weekly_insight_provider.dart';
 
 class ShopKeeperApp extends StatefulWidget {
   const ShopKeeperApp({super.key});
@@ -144,6 +147,13 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         return NotificationType.productUpdated;
       case 'product_deleted':
         return NotificationType.productDeleted;
+      case 'stockout_forecast':
+        return NotificationType.stockoutForecast;
+      case 'fraud_alert':
+        return NotificationType.fraudAlert;
+      case 'weekly_insights':
+      case 'weekly_insight':
+        return NotificationType.weeklyInsight;
       default:
         return NotificationType.lowStock;
     }
@@ -171,6 +181,11 @@ class _ShopKeeperAppState extends State<ShopKeeperApp> {
         ChangeNotifierProvider(create: (_) => getIt<StaffDashboardProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<ChatProvider>()),
         ChangeNotifierProvider(create: (_) => getIt<SettingsProvider>()),
+        ChangeNotifierProvider(
+            create: (_) => getIt<PriceRecommendationProvider>()),
+        ChangeNotifierProvider(create: (_) => getIt<FraudAlertProvider>()),
+        ChangeNotifierProvider(
+            create: (_) => getIt<WeeklyInsightProvider>()),
         ChangeNotifierProvider.value(value: _syncProvider),
         ChangeNotifierProvider.value(value: getIt<ConnectivityService>()),
         ChangeNotifierProvider(

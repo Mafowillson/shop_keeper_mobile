@@ -8,6 +8,10 @@ class CustomerModel {
   final double totalDebt;
   final DateTime createdAt;
 
+  /// Backend-computed AI risk fields — never sent to the API.
+  final String? riskLevel;
+  final int? riskScore;
+
   const CustomerModel({
     required this.id,
     required this.shopId,
@@ -15,6 +19,8 @@ class CustomerModel {
     required this.phone,
     required this.totalDebt,
     required this.createdAt,
+    this.riskLevel,
+    this.riskScore,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) => CustomerModel(
@@ -24,6 +30,8 @@ class CustomerModel {
         phone: json['phone'] as String? ?? '',
         totalDebt: (json['total_debt'] as num?)?.toDouble() ?? 0,
         createdAt: DateTime.parse(json['created_at'] as String),
+        riskLevel: json['risk_level'] as String?,
+        riskScore: json['risk_score'] as int?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,5 +50,7 @@ class CustomerModel {
         phone: phone,
         totalDebt: totalDebt,
         createdAt: createdAt,
+        riskLevel: riskLevel,
+        riskScore: riskScore,
       );
 }

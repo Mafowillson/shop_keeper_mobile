@@ -45,6 +45,12 @@ import 'package:shopkeeper/features/sales/domain/usecases/get_sales_usecase.dart
 import 'package:shopkeeper/features/sales/domain/usecases/record_sale_usecase.dart';
 import 'package:shopkeeper/features/sales/presentation/providers/sales_provider.dart';
 import 'package:shopkeeper/features/settings/presentation/providers/settings_provider.dart';
+import 'package:shopkeeper/features/ai/price_recommendations/data/datasources/price_recommendation_datasource.dart';
+import 'package:shopkeeper/features/ai/price_recommendations/presentation/providers/price_recommendation_provider.dart';
+import 'package:shopkeeper/features/ai/fraud_alerts/data/datasources/fraud_alert_datasource.dart';
+import 'package:shopkeeper/features/ai/fraud_alerts/presentation/providers/fraud_alert_provider.dart';
+import 'package:shopkeeper/features/ai/weekly_insights/data/datasources/weekly_insight_datasource.dart';
+import 'package:shopkeeper/features/ai/weekly_insights/presentation/providers/weekly_insight_provider.dart';
 
 import 'injection.config.dart';
 
@@ -178,6 +184,26 @@ void configureDependencies() {
       getIt<CacheMetadataService>(),
       getIt<ConnectivityService>(),
     ),
+  );
+
+  // ── AI features ──────────────────────────────────────────────────────────
+  getIt.registerLazySingleton(
+    () => PriceRecommendationDataSource(getIt<DioClient>()),
+  );
+  getIt.registerFactory(
+    () => PriceRecommendationProvider(getIt<PriceRecommendationDataSource>()),
+  );
+  getIt.registerLazySingleton(
+    () => FraudAlertDataSource(getIt<DioClient>()),
+  );
+  getIt.registerFactory(
+    () => FraudAlertProvider(getIt<FraudAlertDataSource>()),
+  );
+  getIt.registerLazySingleton(
+    () => WeeklyInsightDataSource(getIt<DioClient>()),
+  );
+  getIt.registerFactory(
+    () => WeeklyInsightProvider(getIt<WeeklyInsightDataSource>()),
   );
 
   // ── Injectable-generated registrations (use cases, datasources, etc.) ────

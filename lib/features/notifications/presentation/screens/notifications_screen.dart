@@ -86,9 +86,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return Icons.check_circle_outline;
       case NotificationType.staffLogin:
         return Icons.person_outline;
+      case NotificationType.stockoutForecast:
+        return Icons.timeline_outlined;
       case NotificationType.weeklyInsight:
         return Icons.insights_outlined;
-      case NotificationType.anomaly:
+      case NotificationType.fraudAlert:
         return Icons.warning_amber_outlined;
       case NotificationType.productAdded:
         return Icons.add_box_outlined;
@@ -109,9 +111,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return AppColors.success;
       case NotificationType.staffLogin:
         return AppColors.accent;
+      case NotificationType.stockoutForecast:
+        return AppColors.warning;
       case NotificationType.weeklyInsight:
         return AppColors.accent;
-      case NotificationType.anomaly:
+      case NotificationType.fraudAlert:
         return AppColors.danger;
       case NotificationType.productAdded:
         return AppColors.accent;
